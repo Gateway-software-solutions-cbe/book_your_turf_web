@@ -1,5 +1,5 @@
 // src/pages/admin/NotificationsPage.tsx
-import React, { useEffect, useState, useMemo, type FormEvent } from 'react';
+import React, { useEffect, useState, useMemo, type FormEvent, useCallback } from 'react';
 import { getNotificationHistory, sendNotification } from '../../api/notifications';
 import { listPartners } from '../../api/partners';
 import { listUsers } from '../../api/users';
@@ -9,6 +9,7 @@ import type { User } from '../../types/user';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const HISTORY_PAGE_SIZE = 20;
+const RECIPIENT_PAGE_SIZE = 20;
 
 const FILTER_TYPES: { value: FilterType; label: string; icon: string }[] = [
   { value: 'all_users', label: 'All Users', icon: 'bi-people' },
@@ -40,48 +41,116 @@ const RecipientPicker: React.FC<{
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [recipientSearch, setRecipientSearch] = useState('');
+  const [userPage, setUserPage] = useState(1);
+  const [partnerPage, setPartnerPage] = useState(1);
+  const [userTotalCount, setUserTotalCount] = useState(0);
+  const [partnerTotalCount, setPartnerTotalCount] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
   const isSpecificPartners = filterType === 'specific_partners';
   const isSpecificUsers = filterType === 'specific_users';
 
-  useEffect(() => {
-    if (isSpecificPartners) {
-      setIsLoading(true);
-      listPartners()
-        .then(setPartners)
-        .finally(() => setIsLoading(false));
-    }
+  // Fetch Users with pagination
+  const fetchUsers = useCallback(async (page: number, search: string = '') => {
     if (isSpecificUsers) {
       setIsLoading(true);
-      listUsers({ page_size: 100 })
-        .then((data) => setUsers(data.results || []))
-        .finally(() => setIsLoading(false));
+      try {
+        const params: any = { page, page_size: RECIPIENT_PAGE_SIZE };
+        if (search) params.search = search;
+        const data = await listUsers(params);
+        setUsers(prev => page === 1 ? data.results || [] : [...prev, ...(data.results || [])]);
+        setUserTotalCount(data.count || 0);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
-  }, [isSpecificPartners, isSpecificUsers]);
+  }, [isSpecificUsers]);
+
+  // Fetch Partners with pagination
+  const fetchPartners = useCallback(async (page: number, search: string = '') => {
+    if (isSpecificPartners) {
+      setIsLoading(true);
+      try {
+        // If listPartners doesn't support pagination, we need to filter client-side
+        const allPartners = await listPartners();
+        setPartners(allPartners);
+        setPartnerTotalCount(allPartners.length);
+      } catch (error) {
+        console.error('Error fetching partners:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  }, [isSpecificPartners]);
+
+  // Initial fetch
+  useEffect(() => {
+    if (isSpecificUsers) {
+      fetchUsers(1, recipientSearch);
+    }
+    if (isSpecificPartners) {
+      fetchPartners(1, recipientSearch);
+    }
+  }, [isSpecificUsers, isSpecificPartners, fetchUsers, fetchPartners]);
+
+  // Handle search with debounce
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (isSpecificUsers) {
+        setUserPage(1);
+        fetchUsers(1, recipientSearch);
+      }
+      if (isSpecificPartners) {
+        setPartnerPage(1);
+        fetchPartners(1, recipientSearch);
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [recipientSearch, isSpecificUsers, isSpecificPartners, fetchUsers, fetchPartners]);
 
   if (!isSpecificPartners && !isSpecificUsers) return null;
 
   const q = recipientSearch.toLowerCase();
 
+  // For Partners - client-side filtering
+  const filteredPartners = isSpecificPartners
+    ? partners.filter(
+        (p) =>
+          !q ||
+          p.name.toLowerCase().includes(q) ||
+          p.email.toLowerCase().includes(q) ||
+          p.number?.includes(q)
+      )
+    : [];
+
+  // For Users - client-side filtering (since we already have them loaded)
+  const filteredUsers = isSpecificUsers
+    ? users.filter(
+        (u) =>
+          !q ||
+          u.name.toLowerCase().includes(q) ||
+          u.email.toLowerCase().includes(q) ||
+          u.number?.includes(q)
+      )
+    : [];
+
   const items: { id: number; primary: string; secondary: string }[] = isSpecificPartners
-    ? partners
-        .filter(
-          (p) =>
-            !q ||
-            p.name.toLowerCase().includes(q) ||
-            p.email.toLowerCase().includes(q) ||
-            p.number?.includes(q)
-        )
-        .map((p) => ({ id: p.id, primary: p.name, secondary: p.email }))
-    : users
-        .filter(
-          (u) =>
-            !q ||
-            u.name.toLowerCase().includes(q) ||
-            u.email.toLowerCase().includes(q) ||
-            u.number?.includes(q)
-        )
-        .map((u) => ({ id: u.id, primary: u.name, secondary: u.email }));
+    ? filteredPartners.map((p) => ({ id: p.id, primary: p.name, secondary: p.email }))
+    : filteredUsers.map((u) => ({ id: u.id, primary: u.name, secondary: u.email }));
+
+  const totalCount = isSpecificPartners ? partnerTotalCount : userTotalCount;
+  const hasMore = isSpecificUsers && items.length < totalCount && !isLoading;
+
+  // Load more users (infinite scroll)
+  const loadMore = () => {
+    if (isSpecificUsers && !isLoading && hasMore) {
+      const nextPage = userPage + 1;
+      setUserPage(nextPage);
+      fetchUsers(nextPage, recipientSearch);
+    }
+  };
 
   return (
     <div className="border rounded-3 p-3 bg-white shadow-sm">
@@ -90,6 +159,11 @@ const RecipientPicker: React.FC<{
           Select {isSpecificPartners ? 'Partners' : 'Users'}
           {selectedIds.length > 0 && (
             <span className="badge bg-success ms-2 rounded-pill">{selectedIds.length} selected</span>
+          )}
+          {!isLoading && (
+            <span className="badge bg-light text-dark ms-2 rounded-pill">
+              {totalCount} total
+            </span>
           )}
         </span>
         {selectedIds.length > 0 && (
@@ -121,10 +195,10 @@ const RecipientPicker: React.FC<{
       )}
       {!isLoading && items.length === 0 && (
         <p className="text-muted small mb-0 py-2 text-center">
-          {recipientSearch ? 'No results match your search.' : 'No items found.'}
+          {recipientSearch ? 'No results match your search.' : `No ${isSpecificPartners ? 'partners' : 'users'} found.`}
         </p>
       )}
-      <div className="mt-2" style={{ maxHeight: '200px', overflowY: 'auto' }}>
+      <div className="mt-2" style={{ maxHeight: '250px', overflowY: 'auto' }}>
         {items.map((item) => (
           <label
             key={item.id}
@@ -145,7 +219,33 @@ const RecipientPicker: React.FC<{
             </div>
           </label>
         ))}
+        {isSpecificUsers && hasMore && (
+          <div className="text-center py-2">
+            <button
+              className="btn btn-sm btn-outline-success rounded-pill px-3"
+              onClick={loadMore}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-1"></span>
+                  Loading...
+                </>
+              ) : (
+                <>
+                  <i className="bi bi-chevron-down me-1"></i>
+                  Load More
+                </>
+              )}
+            </button>
+          </div>
+        )}
       </div>
+      {!isLoading && items.length > 0 && (
+        <div className="text-secondary small mt-2 text-center border-top pt-2">
+          Showing {items.length} of {totalCount} {isSpecificPartners ? 'partners' : 'users'}
+        </div>
+      )}
     </div>
   );
 };

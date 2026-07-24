@@ -184,12 +184,6 @@ const NAV: NavItem[] = [
   },
   {
     type: 'leaf',
-    label: 'App Version',
-    path: '/admin/appversion',
-    icon: Icon.AppVersion,
-  },
-  {
-    type: 'leaf',
     label: 'Settings',
     path: '/admin/settings',
     icon: Icon.Settings,

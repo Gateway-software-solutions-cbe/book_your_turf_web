@@ -430,8 +430,8 @@
 }
 
 .byt-turf-card:nth-child(1) { top: 0; }
-.byt-turf-card:nth-child(2) { top: 70px; }
-.byt-turf-card:nth-child(3) { top: 140px; }
+.byt-turf-card:nth-child(2) { top: 120px; }
+.byt-turf-card:nth-child(3) { top: 240px; }
 
 .byt-turf-card__top {
   display: flex;

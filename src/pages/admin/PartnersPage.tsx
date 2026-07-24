@@ -6,6 +6,9 @@ import type { Partner, PartnerFilterStatus } from '../../types/partner';
 import { usePermission, PERMISSIONS } from '../../hooks/usePermission';
 import { exportData, sanitizeForExport, formatDateForExport } from '../../utils/exportUtils';
 
+// ─── Constants ─────────────────────────────────────────────────────────────────
+const PAGE_SIZE = 20;
+
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
 const filterPartners = (partners: Partner[], status: PartnerFilterStatus, query: string) => {
@@ -51,6 +54,59 @@ const StatusBadge: React.FC<{ active: boolean; verified: boolean }> = ({ active,
   </div>
 );
 
+// ─── Pagination Component ──────────────────────────────────────────────────────
+
+const Pagination: React.FC<{
+  page: number;
+  total: number;
+  pageSize: number;
+  onChange: (p: number) => void;
+}> = ({ page, total, pageSize, onChange }) => {
+  const totalPages = Math.ceil(total / pageSize);
+  if (totalPages <= 1) return null;
+
+  const pages: (number | '…')[] = [];
+  if (totalPages <= 7) {
+    for (let i = 1; i <= totalPages; i++) pages.push(i);
+  } else {
+    pages.push(1);
+    if (page > 3) pages.push('…');
+    for (let i = Math.max(2, page - 1); i <= Math.min(totalPages - 1, page + 1); i++) pages.push(i);
+    if (page < totalPages - 2) pages.push('…');
+    pages.push(totalPages);
+  }
+
+  return (
+    <nav aria-label="Partners pagination">
+      <ul className="pagination pagination-sm mb-0 flex-wrap">
+        <li className={`page-item ${page === 1 ? 'disabled' : ''}`}>
+          <button className="page-link rounded-start" disabled={page === 1} onClick={() => onChange(page - 1)}>
+            <i className="bi bi-chevron-left"></i> Prev
+          </button>
+        </li>
+        {pages.map((p, i) =>
+          p === '…' ? (
+            <li key={`e${i}`} className="page-item disabled">
+              <span className="page-link">…</span>
+            </li>
+          ) : (
+            <li key={p} className={`page-item ${page === p ? 'active' : ''}`}>
+              <button className="page-link" onClick={() => onChange(p as number)}>
+                {p}
+              </button>
+            </li>
+          )
+        )}
+        <li className={`page-item ${page === totalPages ? 'disabled' : ''}`}>
+          <button className="page-link rounded-end" disabled={page === totalPages} onClick={() => onChange(page + 1)}>
+            Next <i className="bi bi-chevron-right"></i>
+          </button>
+        </li>
+      </ul>
+    </nav>
+  );
+};
+
 // ─── PartnersPage ──────────────────────────────────────────────────────────────
 
 const PartnersPage: React.FC = () => {
@@ -58,13 +114,14 @@ const PartnersPage: React.FC = () => {
   const canCreate = usePermission(PERMISSIONS.PARTNERS_CREATE);
   const canEdit = usePermission(PERMISSIONS.PARTNERS_EDIT);
 
-  const [partners, setPartners] = useState<Partner[]>([]);
+  const [allPartners, setAllPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<PartnerFilterStatus>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [togglingId, setTogglingId] = useState<number | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+  const [page, setPage] = useState(1);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchPartners = useCallback(async () => {
@@ -73,16 +130,17 @@ const PartnersPage: React.FC = () => {
     try {
       const data = await listPartners();
       if (Array.isArray(data)) {
-        setPartners(data);
+        setAllPartners(data);
+        console.log(`✅ Loaded ${data.length} partners`);
       } else {
-        setPartners([]);
+        setAllPartners([]);
         setError('Received invalid data format from server.');
       }
     } catch (err: any) {
       console.error('Error fetching partners:', err);
       const errorMessage = err?.response?.data?.message || err?.message || 'Failed to load channel partners. Please try again.';
       setError(errorMessage);
-      setPartners([]);
+      setAllPartners([]);
     } finally {
       setIsLoading(false);
     }
@@ -92,6 +150,11 @@ const PartnersPage: React.FC = () => {
     fetchPartners();
   }, [fetchPartners]);
 
+  // Reset page when filters change
+  useEffect(() => {
+    setPage(1);
+  }, [filterStatus, searchQuery]);
+
   // ── Toggle Active ──────────────────────────────────────────────────────────
   const handleToggleActive = async (partner: Partner) => {
     setTogglingId(partner.id);
@@ -100,7 +163,7 @@ const PartnersPage: React.FC = () => {
         is_active: !partner.is_active,
         ...(!partner.is_active ? { deactivation_reason: undefined } : {}),
       });
-      setPartners((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
+      setAllPartners((prev) => prev.map((p) => (p.id === updated.id ? updated : p)));
     } catch {
       alert('Failed to update partner status.');
     } finally {
@@ -110,7 +173,7 @@ const PartnersPage: React.FC = () => {
 
   // ── Export Data ──────────────────────────────────────────────────────────────
   const handleExport = () => {
-    if (partners.length === 0) {
+    if (allPartners.length === 0) {
       alert('No partners to export.');
       return;
     }
@@ -118,7 +181,7 @@ const PartnersPage: React.FC = () => {
     setIsExporting(true);
     try {
       const exportDataArray = sanitizeForExport(
-        partners.map(partner => ({
+        allPartners.map(partner => ({
           'Partner ID': partner.id,
           'Name': partner.name,
           'Email': partner.email,
@@ -144,8 +207,15 @@ const PartnersPage: React.FC = () => {
     }
   };
 
-  // ── Derived data ───────────────────────────────────────────────────────────
-  const filtered = filterPartners(partners, filterStatus, searchQuery);
+  // ── Filter and Paginate ──────────────────────────────────────────────────────
+  const filtered = filterPartners(allPartners, filterStatus, searchQuery);
+  
+  const totalCount = filtered.length;
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+  const start = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const end = Math.min(page * PAGE_SIZE, totalCount);
+  
+  const paginatedPartners = filtered.slice(start - 1, end);
 
   // ─── Render ────────────────────────────────────────────────────────────────
   return (
@@ -157,14 +227,14 @@ const PartnersPage: React.FC = () => {
             <i className="bi bi-people-fill text-success me-2"></i>Channel Partners
           </h1>
           <p className="text-secondary mb-0 small">
-            {isLoading ? 'Loading…' : `${partners.length} partner${partners.length !== 1 ? 's' : ''} total`}
+            {isLoading ? 'Loading…' : `${allPartners.length} partner${allPartners.length !== 1 ? 's' : ''} total`}
           </p>
         </div>
         <div className="d-flex gap-2 animate__animated animate__fadeInUp">
           <button
             className="btn btn-outline-success rounded-pill px-3"
             onClick={handleExport}
-            disabled={isLoading || partners.length === 0 || isExporting}
+            disabled={isLoading || allPartners.length === 0 || isExporting}
             style={{ fontWeight: 500 }}
           >
             {isExporting ? (
@@ -216,6 +286,14 @@ const PartnersPage: React.FC = () => {
                   style={{ fontWeight: 500 }}
                 >
                   {s.charAt(0).toUpperCase() + s.slice(1)}
+                  <span className="badge bg-light text-dark ms-1 rounded-pill">
+                    {s === 'all' ? allPartners.length : allPartners.filter(p => 
+                      s === 'active' ? p.is_active :
+                      s === 'inactive' ? !p.is_active :
+                      s === 'verified' ? p.is_verified :
+                      !p.is_verified
+                    ).length}
+                  </span>
                 </button>
               ))}
             </div>
@@ -264,7 +342,7 @@ const PartnersPage: React.FC = () => {
       )}
 
       {/* ── Table ────────────────────────────────────────────────────────────── */}
-      {!isLoading && !error && filtered.length > 0 && (
+      {!isLoading && !error && paginatedPartners.length > 0 && (
         <>
           <div className="card border-0 shadow-sm animate__animated animate__fadeInUp" style={{ borderRadius: '16px', overflow: 'hidden' }}>
             <div className="table-responsive">
@@ -279,7 +357,7 @@ const PartnersPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((partner) => (
+                  {paginatedPartners.map((partner) => (
                     <tr
                       key={partner.id}
                       className="table-row-hover"
@@ -371,6 +449,22 @@ const PartnersPage: React.FC = () => {
               </table>
             </div>
           </div>
+
+          {/* ── Pagination ───────────────────────────────────────────────────── */}
+          {totalPages > 1 && (
+            <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mt-4 animate__animated animate__fadeInUp">
+              <span className="small text-secondary">
+                <i className="bi bi-info-circle me-1"></i>
+                Showing <strong>{start}</strong>–<strong>{end}</strong> of <strong>{totalCount.toLocaleString()}</strong> partners
+              </span>
+              <Pagination
+                page={page}
+                total={totalCount}
+                pageSize={PAGE_SIZE}
+                onChange={setPage}
+              />
+            </div>
+          )}
         </>
       )}
 
@@ -426,6 +520,17 @@ const PartnersPage: React.FC = () => {
         }
         .badge:hover {
           transform: scale(1.05);
+        }
+        .page-item .page-link {
+          transition: all 0.2s ease;
+        }
+        .page-item.active .page-link {
+          background-color: #198754;
+          border-color: #198754;
+        }
+        .page-item:not(.active) .page-link:hover {
+          color: #198754;
+          transform: translateY(-1px);
         }
       `}</style>
     </div>

@@ -50,25 +50,25 @@ const STEPS = [
 ];
 
 const STATS = [
-  { label: "Turfs listed", value: 120, suffix: "+" },
-  { label: "Cities live in", value: 8, suffix: "" },
+  { label: "Turfs listed", value: 416, suffix: "+" },
+  { label: "Cities live in", value: 5, suffix: "" },
   { label: "Matches booked", value: 15400, suffix: "+" },
   { label: "Avg. booking time", value: 45, suffix: "s" },
 ];
 
 const CARDS = [
   {
-    name: "Greenfield Arena",
+    name: "FF Turf",
     city: "Chennai",
-    time: "6:00 – 7:00 PM",
-    price: "₹800/hr",
-    rating: "4.8",
+    time: "6:00 AM – 6:00 AM",
+    price: "₹650/hr",
+    rating: "4.6",
   },
   {
-    name: "Turf 22",
+    name: "Dusa Pickleball",
     city: "Madurai",
-    time: "7:30 – 8:30 PM",
-    price: "₹650/hr",
+    time: "6:00 AM – 11:00 PM",
+    price: "₹600/hr",
     rating: "4.6",
   },
   {
@@ -356,8 +356,8 @@ const Landing = () => {
             >
               <MagneticButton
                 as="a"
-                href="/register"
-                onClick={() => navigate("/register")}
+                href=""
+                onClick={() => setRoleMenuOpen((open) => !open)}
                 className="byt-btn byt-btn--accent byt-btn--lg"
               >
                 Find a turf near you
