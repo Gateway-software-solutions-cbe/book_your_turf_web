@@ -1,0 +1,630 @@
+/* src/pages/user/auth/auth.css */
+
+/* ─── Container ────────────────────────────────────────────────────────── */
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+  background: #0a1a12;
+}
+
+/* ─── Background ───────────────────────────────────────────────────────── */
+.login-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: radial-gradient(ellipse at 50% 80%, #0d2a1a 0%, #06120c 100%);
+}
+
+.turf-texture {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 38px,
+      rgba(31, 164, 99, 0.04) 38px,
+      rgba(31, 164, 99, 0.04) 39px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 38px,
+      rgba(31, 164, 99, 0.04) 38px,
+      rgba(31, 164, 99, 0.04) 39px
+    );
+}
+
+.field-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.02);
+  pointer-events: none;
+}
+
+.field-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.015);
+}
+
+/* ─── Stadium Lights ──────────────────────────────────────────────────── */
+.stadium-lights {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.light {
+  position: absolute;
+  top: -30%;
+  width: 6px;
+  height: 140%;
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    transparent 100%
+  );
+  animation: lightSway 10s ease-in-out infinite;
+}
+
+.light.left {
+  left: 12%;
+  transform: rotate(4deg);
+  animation-delay: 0s;
+}
+
+.light.right {
+  right: 12%;
+  transform: rotate(-4deg);
+  animation-delay: 5s;
+}
+
+.light.center {
+  left: 50%;
+  transform: translateX(-50%) rotate(0deg);
+  width: 10px;
+  height: 100%;
+  animation-delay: 2.5s;
+}
+
+@keyframes lightSway {
+  0%, 100% { transform: rotate(2deg); opacity: 0.5; }
+  50% { transform: rotate(-2deg); opacity: 0.9; }
+}
+
+/* ─── Goalposts ───────────────────────────────────────────────────────── */
+.goalpost {
+  position: absolute;
+  bottom: 0;
+  width: 50px;
+  height: 100px;
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  pointer-events: none;
+}
+
+.goalpost.left {
+  left: 8%;
+  height: 80px;
+}
+
+.goalpost.right {
+  right: 8%;
+  height: 80px;
+}
+
+.goalpost::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 25px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* ─── Card ────────────────────────────────────────────────────────────── */
+.login-card-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+}
+
+.glass-card {
+  background: rgba(10, 26, 18, 0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 24px;
+  padding: 32px 28px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 80px rgba(31, 164, 99, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 24px;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(31, 164, 99, 0.15),
+    rgba(255, 182, 39, 0.04),
+    rgba(31, 164, 99, 0.10)
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ─── Logo ────────────────────────────────────────────────────────────── */
+.logo-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1fa463, #0f6e42);
+  color: #fff;
+  font-size: 24px;
+  margin-bottom: 6px;
+  box-shadow: 0 4px 20px rgba(31, 164, 99, 0.25);
+}
+
+.login-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.login-subtitle {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 12px;
+  margin: 2px 0 0;
+}
+
+/* ─── Tabs (Only used in Login page) ────────────────────────────────── */
+.login-tabs {
+  display: flex;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  padding: 3px;
+  margin: 16px 0 20px;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 500;
+  font-size: 13px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.tab-btn i {
+  margin-right: 6px;
+}
+
+.tab-btn.active {
+  background: rgba(31, 164, 99, 0.2);
+  color: #fff;
+  box-shadow: 0 2px 12px rgba(31, 164, 99, 0.08);
+}
+
+.tab-btn:hover:not(.active):not(:disabled) {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tab-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ─── Form Floating ──────────────────────────────────────────────────── */
+.form-floating {
+  position: relative;
+}
+
+.form-floating > .form-control {
+  height: 50px;
+  background: rgba(255, 255, 255, 0.04) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  border-radius: 12px !important;
+  color: #fff !important;
+  padding: 14px 14px 0 14px !important;
+  transition: all 0.3s ease;
+}
+
+.form-floating > .form-control::placeholder {
+  color: transparent !important;
+}
+
+.form-floating > .form-control:focus {
+  border-color: rgba(31, 164, 99, 0.3) !important;
+  box-shadow: 0 0 0 3px rgba(31, 164, 99, 0.06) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.form-floating > .form-control.is-invalid {
+  border-color: rgba(220, 53, 69, 0.3) !important;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.06) !important;
+}
+
+.form-floating > .form-control.is-invalid:focus {
+  border-color: rgba(220, 53, 69, 0.4) !important;
+}
+
+.form-floating > label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  padding: 14px 14px 0 14px;
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 400;
+  font-size: 13px;
+  transition: all 0.2s ease;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  transform: scale(0.85) translateY(-6px);
+  color: rgba(31, 164, 99, 0.6);
+}
+
+.form-floating > .form-control.is-invalid ~ label {
+  color: rgba(220, 53, 69, 0.6);
+}
+
+.form-floating .invalid-feedback {
+  font-size: 11px;
+  color: #ff6b6b;
+  margin-top: 3px;
+}
+
+/* ─── Method Toggle (Email/Phone) ────────────────────────────────────── */
+.method-toggle {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.method-btn {
+  flex: 1;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.method-btn i {
+  margin-right: 5px;
+}
+
+.method-btn.active {
+  background: rgba(31, 164, 99, 0.12);
+  border-color: rgba(31, 164, 99, 0.15);
+  color: #fff;
+}
+
+.method-btn:hover:not(.active) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+/* ─── Buttons ─────────────────────────────────────────────────────────── */
+.login-btn {
+  height: 48px;
+  border-radius: 12px !important;
+  font-weight: 600;
+  font-size: 14px;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-btn.btn-primary {
+  background: linear-gradient(135deg, #1fa463, #0f6e42) !important;
+  color: #fff !important;
+}
+
+.login-btn.btn-success {
+  background: linear-gradient(135deg, #1fa463, #0f6e42) !important;
+  color: #fff !important;
+}
+
+.login-btn.btn-outline {
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.7) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.login-btn.btn-outline:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(31, 164, 99, 0.25) !important;
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ─── Switch Text ──────────────────────────────────────────────────────── */
+.switch-text {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+}
+
+.switch-link {
+  color: #1fa463 !important;
+  font-weight: 500;
+  font-size: 13px;
+  transition: color 0.2s ease;
+  text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.switch-link:hover {
+  color: #26b972 !important;
+  text-decoration: underline !important;
+}
+
+/* ─── Forgot Link ────────────────────────────────────────────────────── */
+.forgot-link {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 12px;
+  text-decoration: none;
+  background: none;
+  border: none;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.forgot-link:hover {
+  color: rgba(31, 164, 99, 0.6);
+}
+
+/* ─── Alerts ──────────────────────────────────────────────────────────── */
+.alert {
+  border-radius: 12px !important;
+  border: none !important;
+  font-size: 13px;
+  padding: 10px 14px !important;
+  margin-bottom: 16px;
+}
+
+.alert-success {
+  background: rgba(31, 164, 99, 0.12) !important;
+  color: #5ddb8a !important;
+}
+
+.alert-danger {
+  background: rgba(220, 53, 69, 0.12) !important;
+  color: #ff6b6b !important;
+}
+
+/* ─── Success Screen ──────────────────────────────────────────────────── */
+.success-container {
+  padding: 30px 0;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-content {
+  text-align: center;
+  width: 100%;
+  max-width: 280px;
+}
+
+.success-icon-wrapper {
+  margin-bottom: 20px;
+  animation: successPulse 1.5s ease-in-out infinite;
+}
+
+.success-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1fa463, #0f6e42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  box-shadow: 0 4px 30px rgba(31, 164, 99, 0.4);
+}
+
+.success-circle i {
+  font-size: 36px;
+  color: #fff;
+}
+
+.success-text h3 {
+  color: #fff;
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.success-text p {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  margin: 0;
+}
+
+@keyframes successPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+/* ─── Footer ──────────────────────────────────────────────────────────── */
+.login-footer {
+  margin-top: 14px;
+  text-align: center;
+}
+
+.login-footer p {
+  color: rgba(255, 255, 255, 0.15);
+  font-size: 11px;
+  margin: 0;
+}
+
+/* ─── Animations ──────────────────────────────────────────────────────── */
+.fade-in {
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Responsive ──────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .glass-card {
+    padding: 24px 16px;
+    border-radius: 20px;
+  }
+
+  .login-title {
+    font-size: 20px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .tab-btn {
+    font-size: 12px;
+    padding: 7px 10px;
+  }
+
+  .form-floating > .form-control {
+    height: 46px;
+    font-size: 13px;
+  }
+
+  .form-floating > label {
+    font-size: 12px;
+    padding: 12px 12px 0 12px;
+  }
+
+  .login-btn {
+    height: 44px;
+    font-size: 13px;
+  }
+
+  .switch-text {
+    font-size: 12px;
+  }
+
+  .switch-link {
+    font-size: 12px;
+  }
+
+  .success-circle {
+    width: 60px;
+    height: 60px;
+  }
+
+  .success-circle i {
+    font-size: 28px;
+  }
+
+  .success-text h3 {
+    font-size: 18px;
+  }
+
+  .goalpost {
+    display: none;
+  }
+
+  .light {
+    width: 4px;
+  }
+
+  .field-circle {
+    width: 200px;
+    height: 200px;
+  }
+}
+
+@media (max-width: 360px) {
+  .glass-card {
+    padding: 16px 12px;
+    border-radius: 16px;
+  }
+
+  .login-tabs {
+    flex-direction: column;
+    gap: 4px;
+    background: transparent;
+    padding: 0;
+  }
+
+  .tab-btn {
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .tab-btn.active {
+    background: rgba(31, 164, 99, 0.15);
+  }
+
+  .method-toggle {
+    flex-direction: column;
+  }
+}

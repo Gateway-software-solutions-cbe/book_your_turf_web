@@ -1,9 +1,9 @@
 // src/pages/admin/DashboardPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getDashboardStats } from '../../api/dashboard';
+import { getDashboardStats } from '../../api/admin/dashboard';
 import { useAuth } from '../../context/AuthContext';
-import type { DashboardStats } from '../../types/dashboard';
+import type { DashboardStats } from '../../types/admin/dashboard';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 

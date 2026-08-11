@@ -1,6 +1,6 @@
 // src/api/notifications.ts
 import apiClient from './client';
-import type { NotificationHistoryResponse, SendNotificationRequest } from '../types/notification';
+import type { NotificationHistoryResponse, SendNotificationRequest } from '../../types/admin/notification';
 
 export const getNotificationHistory = async (): Promise<NotificationHistoryResponse> => {
   const res = await apiClient.get<NotificationHistoryResponse>('/api/admin/notifications/history/');

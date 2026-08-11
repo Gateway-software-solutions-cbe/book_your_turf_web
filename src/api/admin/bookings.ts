@@ -1,7 +1,7 @@
 import apiClient from './client';
 import type {
   Booking, BookingsPaginatedResponse, ListBookingsParams,
-} from '../types/booking';
+} from '../../types/admin/booking';
 
 // ─── Unwrap helper (same pattern as users) ─────────────────────────────────────
 const unwrap = (body: unknown): BookingsPaginatedResponse => {
@@ -30,6 +30,26 @@ export const listBookings = async (
  */
 export const getBooking = async (id: number): Promise<Booking> => {
   const res = await apiClient.get(`/api/admin/bookings/${id}/`);
+  const b = res.data as Record<string, unknown>;
+  return (b?.data ?? b) as Booking;
+};
+
+/**
+ * PATCH /api/admin/bookings/{id}/
+ * Cancel a booking
+ * @param id - Booking ID
+ * @param isCancelled - Set to true to cancel the booking
+ * @param refundToWallet - Optional: true to refund the actual amount paid to wallet
+ */
+export const cancelBooking = async (
+  id: number,
+  isCancelled: boolean = true,
+  refundToWallet: boolean = false
+): Promise<Booking> => {
+  const res = await apiClient.patch(`/api/admin/bookings/${id}/`, {
+    is_cancelled: isCancelled,
+    refund_to_wallet: refundToWallet,
+  });
   const b = res.data as Record<string, unknown>;
   return (b?.data ?? b) as Booking;
 };

@@ -1,8 +1,8 @@
 // src/pages/admin/BookingsPage.tsx
 import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listBookings } from '../../api/bookings';
-import type { Booking, BookingType, PaymentStatus, ListBookingsParams } from '../../types/booking';
+import { listBookings } from '../../api/admin/bookings';
+import type { Booking, BookingType, PaymentStatus, ListBookingsParams } from '../../types/admin/booking';
 import { exportData, sanitizeForExport, formatDateForExport, formatCurrencyForExport } from '../../utils/exportUtils';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -216,9 +216,54 @@ const BookingsPage: React.FC = () => {
     () => bookings.reduce((s, b) => s + parseFloat(b.pending_amount || '0'), 0),
     [bookings]
   );
+  const totalDiscounts = useMemo(
+    () => bookings.reduce((s, b) => s + parseFloat(b.total_discount_amount || '0'), 0),
+    [bookings]
+  );
+
+  // ─── Fetch ALL bookings for export ──────────────────────────────────────────
+  const fetchAllBookingsForExport = useCallback(async (): Promise<Booking[]> => {
+    let allBookings: Booking[] = [];
+    let currentPage = 1;
+    let hasMore = true;
+    const exportPageSize = 100; // Max page size
+
+    // Build params with current filters
+    const baseParams: ListBookingsParams = {
+      page_size: exportPageSize,
+    };
+    if (debSearch) baseParams.search = debSearch;
+    if (bookingType) baseParams.booking_type = bookingType;
+    if (paymentStatus) baseParams.payment_status = paymentStatus;
+    if (isCancelled) baseParams.is_cancelled = isCancelled === 'true';
+    if (activeTab === 'today') baseParams.slot_date = TODAY;
+    else if (dateFilter) baseParams.slot_date = dateFilter;
+
+    while (hasMore) {
+      try {
+        const params = { ...baseParams, page: currentPage };
+        const data = await listBookings(params);
+        
+        if (data.results && data.results.length > 0) {
+          allBookings = [...allBookings, ...data.results];
+        }
+        
+        hasMore = data.next !== null && data.results && data.results.length > 0;
+        currentPage++;
+        
+        // Safety check to prevent infinite loops
+        if (currentPage > 100) break;
+      } catch (error) {
+        console.error('Error fetching bookings for export:', error);
+        break;
+      }
+    }
+
+    return allBookings;
+  }, [debSearch, bookingType, paymentStatus, isCancelled, activeTab, dateFilter]);
 
   // ── Export Data ──────────────────────────────────────────────────────────────
-  const handleExport = () => {
+  const handleExport = async () => {
     if (bookings.length === 0) {
       alert('No bookings to export.');
       return;
@@ -226,8 +271,17 @@ const BookingsPage: React.FC = () => {
 
     setIsExporting(true);
     try {
+      // Fetch ALL bookings with current filters
+      const allBookings = await fetchAllBookingsForExport();
+      
+      if (allBookings.length === 0) {
+        alert('No bookings to export.');
+        setIsExporting(false);
+        return;
+      }
+
       const exportDataArray = sanitizeForExport(
-        bookings.map(b => {
+        allBookings.map(b => {
           // Format slots
           const slotsFormatted = b.slots?.map(s => 
             `${new Date(s.date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} ${s.start_time}-${s.end_time}${s.is_next_day ? ' +1' : ''}`
@@ -239,7 +293,7 @@ const BookingsPage: React.FC = () => {
             'Booking Type': b.booking_type || '',
             'Customer Name': b.customer?.name || '',
             'Customer Email': b.customer?.email || '',
-            'Customer Phone': b.customer?.number || '',
+            'Customer Phone': b.customer?.number || b.customer?.mobile || '',
             'Partner': b.partner_name || '',
             'Turf': b.turf_name || '',
             'Court Number': b.court_number || '',
@@ -247,6 +301,10 @@ const BookingsPage: React.FC = () => {
             'Total Amount': formatCurrencyForExport(b.total_amount),
             'Paid Amount': formatCurrencyForExport(b.paid_amount),
             'Pending Amount': formatCurrencyForExport(b.pending_amount),
+            'Admin Discount': formatCurrencyForExport(b.admin_discount_amount),
+            'Partner Discount': formatCurrencyForExport(b.partner_discount_amount),
+            'Total Discount': formatCurrencyForExport(b.total_discount_amount),
+            'Discounted Total': formatCurrencyForExport(b.discounted_total_amount),
             'Payment Status': b.payment_status || '',
             'Booking Status': b.is_cancelled ? 'Cancelled' : 'Active',
             'Created Date': formatDateForExport(b.created_at),
@@ -259,6 +317,8 @@ const BookingsPage: React.FC = () => {
         format: 'excel',
         sheetName: 'Bookings',
       });
+      
+      console.log(`✅ Exported ${allBookings.length} bookings`);
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export data. Please try again.');
@@ -299,7 +359,7 @@ const BookingsPage: React.FC = () => {
             ) : (
               <>
                 <i className="bi bi-download me-1"></i>
-                Export
+                Export All ({safeCount})
               </>
             )}
           </button>
@@ -335,10 +395,11 @@ const BookingsPage: React.FC = () => {
         </div>
         <div className="col-6 col-xl-3">
           <StatCard
-            label="Pending Amount"
-            value={formatCurrency(totalPending)}
-            icon="⏳"
-            color="#ef4444"
+            label="Total Discounts"
+            value={formatCurrency(totalDiscounts)}
+            icon="🏷️"
+            color="#8b5cf6"
+            sub={`${formatCurrency(totalPending)} pending`}
           />
         </div>
       </div>
@@ -528,7 +589,7 @@ const BookingsPage: React.FC = () => {
             <>
               <div className="card border-0 shadow-sm animate__animated animate__fadeInUp" style={{ borderRadius: '16px', overflow: 'hidden' }}>
                 <div className="table-responsive" style={{ overflowX: 'auto', overflowY: 'visible', WebkitOverflowScrolling: 'touch' }}>
-                  <table className="table table-hover align-middle mb-0" style={{ minWidth: '1100px', fontSize: '0.9rem', width: '100%' }}>
+                  <table className="table table-hover align-middle mb-0" style={{ minWidth: '1200px', fontSize: '0.9rem', width: '100%' }}>
                     <thead className="bg-light">
                       <tr>
                         <th className="text-uppercase text-secondary fw-bold small ps-3" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '40px' }}>#</th>
@@ -537,79 +598,106 @@ const BookingsPage: React.FC = () => {
                         <th className="text-uppercase text-secondary fw-bold small" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '130px' }}>Customer</th>
                         <th className="text-uppercase text-secondary fw-bold small" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '120px' }}>Turf</th>
                         <th className="text-uppercase text-secondary fw-bold small" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '150px' }}>Slots</th>
-                        <th className="text-uppercase text-secondary fw-bold small text-end" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '80px' }}>Amount</th>
+                        <th className="text-uppercase text-secondary fw-bold small text-end" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '100px' }}>Amount</th>
+                        <th className="text-uppercase text-secondary fw-bold small text-end" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '80px' }}>Discount</th>
                         <th className="text-uppercase text-secondary fw-bold small text-center" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '100px' }}>Status</th>
                         <th className="text-uppercase text-secondary fw-bold small text-center" style={{ fontSize: '10px', letterSpacing: '0.5px', width: '60px' }}>View</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {bookings.map((b, idx) => (
-                        <tr
-                          key={b.id}
-                          className="table-row-hover"
-                          onClick={() => navigate(`/admin/bookings/${b.id}`)}
-                          style={{ cursor: 'pointer' }}
-                        >
-                          <td className="fw-semibold text-secondary text-center small ps-3">{start + idx}</td>
-                          <td>
-                            <div>
-                              <code className="bg-light px-1 py-0 rounded" style={{ fontSize: '11px' }}>{b.booking_code}</code>
-                              <div className="text-secondary" style={{ fontSize: '9px' }}>ID: {b.id}</div>
-                            </div>
-                          </td>
-                          <td><TypeBadge type={b.booking_type} /></td>
-                          <td>
-                            <div className="fw-semibold" style={{ fontSize: '12px' }}>{b.customer?.name ?? '—'}</div>
-                            <div className="text-secondary" style={{ fontSize: '10px' }}>{b.customer?.email}</div>
-                            <div className="text-secondary" style={{ fontSize: '10px' }}>{b.customer?.number}</div>
-                          </td>
-                          <td>
-                            <div className="fw-semibold" style={{ fontSize: '12px' }}>{b.turf_name}</div>
-                            <div className="text-secondary" style={{ fontSize: '10px' }}>Court {b.court_number}</div>
-                          </td>
-                          <td>
-                            {b.slots?.length > 0 ? (
-                              b.slots.map((s, si) => (
-                                <div key={si} className="bg-light rounded-1 px-2 py-0 mb-1" style={{ fontSize: '10px' }}>
-                                  {new Date(s.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
-                                  <span className="text-secondary"> {s.start_time}–{s.end_time}</span>
-                                  {s.is_next_day && <span className="text-warning">+1</span>}
-                                </div>
-                              ))
-                            ) : (
-                              <span className="text-secondary">—</span>
-                            )}
-                          </td>
-                          <td className="text-end">
-                            <div className="fw-semibold">{formatCurrency(b.total_amount)}</div>
-                            <div className="text-secondary" style={{ fontSize: '10px' }}>
-                              Paid: {formatCurrency(b.paid_amount)}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex flex-column align-items-center gap-1">
-                              <PaymentBadge status={b.payment_status} />
-                              {b.is_cancelled && (
-                                <span className="badge rounded-pill bg-danger" style={{ fontSize: '9px' }}>
-                                  <i className="bi bi-x-circle me-1"></i>Cancelled
-                                </span>
+                      {bookings.map((b, idx) => {
+                        const discountAmount = parseFloat(b.total_discount_amount || '0');
+                        const hasDiscount = discountAmount > 0;
+                        return (
+                          <tr
+                            key={b.id}
+                            className="table-row-hover"
+                            onClick={() => navigate(`/admin/bookings/${b.id}`)}
+                            style={{ cursor: 'pointer' }}
+                          >
+                            <td className="fw-semibold text-secondary text-center small ps-3">{start + idx}</td>
+                            <td>
+                              <div>
+                                <code className="bg-light px-1 py-0 rounded" style={{ fontSize: '11px' }}>{b.booking_code}</code>
+                                <div className="text-secondary" style={{ fontSize: '9px' }}>ID: {b.id}</div>
+                              </div>
+                            </td>
+                            <td><TypeBadge type={b.booking_type} /></td>
+                            <td>
+                              <div className="fw-semibold" style={{ fontSize: '12px' }}>{b.customer?.name ?? '—'}</div>
+                              <div className="text-secondary" style={{ fontSize: '10px' }}>{b.customer?.email}</div>
+                              <div className="text-secondary" style={{ fontSize: '10px' }}>{b.customer?.number || b.customer?.mobile}</div>
+                            </td>
+                            <td>
+                              <div className="fw-semibold" style={{ fontSize: '12px' }}>{b.turf_name}</div>
+                              <div className="text-secondary" style={{ fontSize: '10px' }}>Court {b.court_number}</div>
+                            </td>
+                            <td>
+                              {b.slots?.length > 0 ? (
+                                b.slots.map((s, si) => (
+                                  <div key={si} className="bg-light rounded-1 px-2 py-0 mb-1" style={{ fontSize: '10px' }}>
+                                    {new Date(s.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                                    <span className="text-secondary"> {s.start_time}–{s.end_time}</span>
+                                    {s.is_next_day && <span className="text-warning">+1</span>}
+                                  </div>
+                                ))
+                              ) : (
+                                <span className="text-secondary">—</span>
                               )}
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <button
-                              className="btn btn-sm btn-outline-success rounded-pill"
-                              style={{ fontSize: '11px', padding: '2px 12px' }}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/admin/bookings/${b.id}`);
-                              }}
-                            >
-                              <i className="bi bi-eye me-1"></i>View
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="text-end">
+                              <div className="fw-semibold">{formatCurrency(b.total_amount)}</div>
+                              <div className="text-secondary" style={{ fontSize: '10px' }}>
+                                Paid: {formatCurrency(b.paid_amount)}
+                              </div>
+                              {hasDiscount && (
+                                <div className="text-success" style={{ fontSize: '9px' }}>
+                                  <i className="bi bi-tag me-1"></i>-{formatCurrency(b.total_discount_amount)}
+                                </div>
+                              )}
+                            </td>
+                            <td className="text-end">
+                              {hasDiscount ? (
+                                <div>
+                                  <span className="badge bg-purple rounded-pill" style={{ fontSize: '10px' }}>
+                                    {formatCurrency(b.total_discount_amount)}
+                                  </span>
+                                  <div className="text-secondary" style={{ fontSize: '8px' }}>
+                                    Admin: {formatCurrency(b.admin_discount_amount)}
+                                    {parseFloat(b.partner_discount_amount) > 0 && (
+                                      <> · Partner: {formatCurrency(b.partner_discount_amount)}</>
+                                    )}
+                                  </div>
+                                </div>
+                              ) : (
+                                <span className="text-secondary" style={{ fontSize: '11px' }}>—</span>
+                              )}
+                            </td>
+                            <td>
+                              <div className="d-flex flex-column align-items-center gap-1">
+                                <PaymentBadge status={b.payment_status} />
+                                {b.is_cancelled && (
+                                  <span className="badge rounded-pill bg-danger" style={{ fontSize: '9px' }}>
+                                    <i className="bi bi-x-circle me-1"></i>Cancelled
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="text-center">
+                              <button
+                                className="btn btn-sm btn-outline-success rounded-pill"
+                                style={{ fontSize: '11px', padding: '2px 12px' }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/admin/bookings/${b.id}`);
+                                }}
+                              >
+                                <i className="bi bi-eye me-1"></i>View
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -692,6 +780,10 @@ const BookingsPage: React.FC = () => {
         }
         .btn-ghost:hover {
           background: rgba(0,0,0,0.05) !important;
+        }
+        .bg-purple {
+          background-color: #8b5cf6;
+          color: white;
         }
       `}</style>
     </div>

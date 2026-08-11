@@ -10,9 +10,9 @@ import {
   ChevronDown,
   Star,
 } from "lucide-react";
-import MagneticButton from "../components/MagneticButton";
+import MagneticButton from "./MagneticButton";
 import { QRCodeSVG } from "qrcode.react";
-import logo from "../asset/favicon.png"
+import logo from "../../asset/favicon.png"
 import "./landing.css";
 
 const NAV_LINKS = [

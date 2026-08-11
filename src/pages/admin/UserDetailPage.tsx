@@ -1,8 +1,8 @@
 // src/pages/admin/UserDetailPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate, Navigate } from 'react-router-dom';
-import { getUser, updateUser } from '../../api/users';
-import type { User } from '../../types/user';
+import { getUser, updateUser } from '../../api/admin/users';
+import type { User } from '../../types/admin/user';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const formatDate = (iso: string) =>

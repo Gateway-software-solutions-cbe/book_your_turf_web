@@ -1,4 +1,5 @@
-import client from './client';
+// src/api/userAuth.ts
+import client from '../admin/client';
 import type {
   ApiResponse,
   SendOtpRequest,
@@ -8,7 +9,7 @@ import type {
   LoginData,
   ForgotPasswordOtpRequest,
   ResetPasswordRequest,
-} from '../types/userAuth';
+} from '../../types/user/userAuth';
 
 export const sendOtp = (payload: SendOtpRequest) =>
   client.post<ApiResponse>('/api/user/send-otp/', payload);

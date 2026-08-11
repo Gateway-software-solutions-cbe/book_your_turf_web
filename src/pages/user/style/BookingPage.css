@@ -1,0 +1,824 @@
+/* src/pages/user/style/BookingPage.css */
+
+/* ─── Container ──────────────────────────────────────────────────────────── */
+.booking-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+}
+
+/* ─── Header ────────────────────────────────────────────────────────────── */
+.booking-page__header {
+  margin-bottom: 24px;
+}
+
+.booking-page__back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #6c7a72;
+  font-size: 14px;
+  padding: 8px 0;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.booking-page__back-btn:hover {
+  color: #0b1f1a;
+}
+
+.booking-page__title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #0b1f1a;
+  margin: 0;
+}
+
+.booking-page__meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.booking-page__sport {
+  font-size: 14px;
+  color: #6c7a72;
+}
+
+.booking-page__hours {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1fa463;
+}
+
+/* ─── Content Layout ────────────────────────────────────────────────────── */
+.booking-page__content {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+/* ─── Calendar ──────────────────────────────────────────────────────────── */
+.booking-page__calendar-wrapper {
+  position: sticky;
+  top: 80px;
+  align-self: start;
+}
+
+.booking-page__calendar-card {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+/* ─── Date Picker ───────────────────────────────────────────────────────── */
+.date-picker {
+  user-select: none;
+}
+
+.date-picker__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.date-picker__month {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0b1f1a;
+}
+
+.date-picker__nav {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  cursor: pointer;
+  color: #6c7a72;
+  font-size: 18px;
+  transition: color 0.2s ease;
+}
+
+.date-picker__nav:hover {
+  color: #0b1f1a;
+}
+
+.date-picker__days-of-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.date-picker__day-label {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #9aa8a0;
+  padding: 4px 0;
+}
+
+.date-picker__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.date-picker__day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: none;
+  color: #0b1f1a;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-picker__day:hover:not(.disabled) {
+  background: #f4f8f6;
+}
+
+.date-picker__day.today {
+  font-weight: 700;
+  color: #1fa463;
+}
+
+.date-picker__day.selected {
+  background: #1fa463;
+  color: #fff;
+  font-weight: 600;
+}
+
+.date-picker__day.other-month {
+  color: #d0d8d4;
+}
+
+.date-picker__day.disabled {
+  color: #e8edea;
+  cursor: not-allowed;
+}
+
+/* ─── Legend ────────────────────────────────────────────────────────────── */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  padding-top: 14px;
+  margin-top: 14px;
+  border-top: 1px solid #f0f2f1;
+}
+
+.legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #4a5a52;
+}
+
+.legend__dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  flex-shrink: 0;
+}
+
+.legend__dot--available {
+  border-color: #1fa463;
+  background: transparent;
+}
+
+.legend__dot--selected {
+  background: #1fa463;
+}
+
+.legend__dot--booked {
+  background: #dc3545;
+}
+
+.legend__dot--reserved {
+  background: #ffb627;
+}
+
+.legend__dot--blocked {
+  background: #adb5bd;
+}
+
+.legend__dot--unavailable {
+  background: #6c757d;
+}
+
+.legend__dot--next-day {
+  background: #6f42c1;
+}
+
+/* ─── Slots ─────────────────────────────────────────────────────────────── */
+.booking-page__slots-wrapper {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.booking-page__slots-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0f2f1;
+}
+
+.booking-page__slots-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0b1f1a;
+  margin: 0;
+}
+
+.booking-page__slots-count {
+  font-size: 13px;
+  font-weight: 400;
+  color: #6c7a72;
+  margin-left: 8px;
+}
+
+.booking-page__slots-container {
+  max-height: 600px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.booking-page__slots-container::-webkit-scrollbar {
+  width: 4px;
+}
+
+.booking-page__slots-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.booking-page__slots-container::-webkit-scrollbar-thumb {
+  background: #d0d8d4;
+  border-radius: 4px;
+}
+
+/* ─── Two Column Grid (Desktop) ────────────────────────────────────────── */
+.booking-page__slots-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ─── No Slots ───────────────────────────────────────────────────────────── */
+.booking-page__no-slots {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9aa8a0;
+}
+
+.booking-page__no-slots i {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.booking-page__no-slots p {
+  margin: 0;
+}
+
+/* ─── Slot Card ─────────────────────────────────────────────────────────── */
+.slot-card {
+  display: flex;
+  flex-direction: column;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 2px solid #e8edea;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+  min-height: 80px;
+  justify-content: space-between;
+}
+
+.slot-card:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.slot-card.available {
+  border-color: #1fa463;
+}
+
+.slot-card.selected {
+  border-color: #1fa463;
+  background: rgba(31, 164, 99, 0.06);
+}
+
+.slot-card.booked {
+  border-color: #dc3545;
+  background: rgba(220, 53, 69, 0.04);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.slot-card.reserved {
+  border-color: #ffb627;
+  background: rgba(255, 182, 39, 0.04);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.slot-card.blocked {
+  border-color: #adb5bd;
+  background: rgba(173, 181, 189, 0.04);
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.slot-card.unavailable {
+  border-color: #6c757d;
+  background: rgba(108, 117, 125, 0.04);
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.slot-card.next-day {
+  border-color: #6f42c1;
+  background: rgba(111, 66, 193, 0.04);
+}
+
+.slot-card.disabled {
+  cursor: not-allowed;
+}
+
+.slot-card__time {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0b1f1a;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.slot-card__next-day-badge {
+  font-size: 8px;
+  font-weight: 600;
+  color: #fff;
+  background: #6f42c1;
+  padding: 1px 8px;
+  border-radius: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.slot-card__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.slot-card__price {
+  font-size: 15px;
+  font-weight: 600;
+  color: #0b1f1a;
+}
+
+.slot-card__status {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 10px;
+  border-radius: 10px;
+}
+
+.slot-card__status.available {
+  color: #1fa463;
+  background: rgba(31, 164, 99, 0.08);
+}
+
+.slot-card__status.selected {
+  color: #1fa463;
+  background: rgba(31, 164, 99, 0.12);
+}
+
+.slot-card__status.booked {
+  color: #dc3545;
+  background: rgba(220, 53, 69, 0.08);
+}
+
+.slot-card__status.reserved {
+  color: #ffb627;
+  background: rgba(255, 182, 39, 0.08);
+}
+
+.slot-card__status.blocked {
+  color: #adb5bd;
+  background: rgba(173, 181, 189, 0.08);
+}
+
+.slot-card__status.unavailable {
+  color: #6c757d;
+  background: rgba(108, 117, 125, 0.08);
+}
+
+.slot-card__status.next-day {
+  color: #6f42c1;
+  background: rgba(111, 66, 193, 0.08);
+}
+
+/* ─── Payment Summary ───────────────────────────────────────────────────── */
+.payment-summary {
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.payment-summary__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.payment-summary__header h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0b1f1a;
+  margin: 0;
+}
+
+.payment-summary__options {
+  display: flex;
+  gap: 8px;
+}
+
+.payment-summary__option {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 2px solid #e8edea;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6c7a72;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.payment-summary__option.active {
+  border-color: #1fa463;
+  color: #1fa463;
+  background: rgba(31, 164, 99, 0.04);
+}
+
+.payment-summary__option:hover:not(.active) {
+  border-color: #d0d8d4;
+}
+
+.payment-summary__details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  border-top: 1px solid #f0f2f1;
+  border-bottom: 1px solid #f0f2f1;
+  margin-bottom: 16px;
+}
+
+.payment-summary__row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: #4a5a52;
+}
+
+.payment-summary__row--highlight {
+  font-weight: 600;
+  color: #0b1f1a;
+  font-size: 16px;
+}
+
+.payment-summary__row--total {
+  font-weight: 700;
+  color: #1fa463;
+  font-size: 16px;
+}
+
+.payment-summary__detail {
+  font-size: 13px;
+  font-weight: 400;
+  color: #6c7a72;
+}
+
+.payment-summary__proceed {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1fa463, #0f6e42);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.payment-summary__proceed:hover:not(.disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(31, 164, 99, 0.25);
+}
+
+.payment-summary__proceed.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.payment-summary__proceed-amount {
+  background: rgba(255, 255, 255, 0.15);
+  padding: 2px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+.payment-summary__error {
+  text-align: center;
+  font-size: 13px;
+  color: #dc3545;
+  margin-top: 8px;
+}
+
+/* ─── Loading ───────────────────────────────────────────────────────────── */
+.booking-page__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.booking-page__loading p {
+  color: #6c7a72;
+}
+
+/* ─── Error ─────────────────────────────────────────────────────────────── */
+.booking-page__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 12px;
+  text-align: center;
+}
+
+.booking-page__error i {
+  font-size: 48px;
+  color: #dc3545;
+}
+
+.booking-page__error h3 {
+  margin: 0;
+  color: #0b1f1a;
+}
+
+.booking-page__error p {
+  color: #6c7a72;
+}
+
+.booking-page__error-btn {
+  padding: 10px 24px;
+  border: 2px solid #1fa463;
+  border-radius: 24px;
+  background: transparent;
+  color: #1fa463;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.booking-page__error-btn:hover {
+  background: #1fa463;
+  color: #fff;
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .booking-page__content {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-page__calendar-wrapper {
+    position: static;
+  }
+
+  /* Keep two columns on tablet */
+  .booking-page__slots-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-page {
+    padding: 0 16px 32px;
+  }
+
+  .booking-page__title {
+    font-size: 22px;
+  }
+
+  .booking-page__calendar-card {
+    padding: 16px;
+  }
+
+  .booking-page__slots-wrapper {
+    padding: 16px;
+  }
+
+  /* Switch to single column on mobile */
+  .booking-page__slots-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-summary {
+    padding: 16px;
+  }
+
+  .payment-summary__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .payment-summary__options {
+    justify-content: stretch;
+  }
+
+  .payment-summary__option {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-page__title {
+    font-size: 18px;
+  }
+
+  .booking-page__meta {
+    gap: 8px;
+  }
+
+  .booking-page__slots-container {
+    max-height: 400px;
+  }
+
+  .slot-card {
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .slot-card__time {
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .slot-card__bottom {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .slot-card__price {
+    font-size: 13px;
+  }
+
+  .payment-summary__row {
+    font-size: 13px;
+  }
+
+  .payment-summary__row--highlight,
+  .payment-summary__row--total {
+    font-size: 14px;
+  }
+
+  .payment-summary__proceed {
+    font-size: 14px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .booking-page__content {
+    grid-template-columns: 1fr;
+  }
+
+  .booking-page__calendar-wrapper {
+    position: static;
+  }
+
+  .booking-page__slots-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .booking-page {
+    padding: 0 16px 32px;
+  }
+
+  .booking-page__title {
+    font-size: 22px;
+  }
+
+  .booking-page__calendar-card {
+    padding: 16px;
+  }
+
+  .booking-page__slots-wrapper {
+    padding: 16px;
+  }
+
+  .booking-page__slots-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-summary {
+    padding: 16px;
+  }
+
+  .payment-summary__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .payment-summary__options {
+    justify-content: stretch;
+  }
+
+  .payment-summary__option {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .booking-page__title {
+    font-size: 18px;
+  }
+
+  .booking-page__meta {
+    gap: 8px;
+  }
+
+  .booking-page__slots-container {
+    max-height: 400px;
+  }
+
+  .slot-card {
+    padding: 10px 12px;
+    min-height: 70px;
+  }
+
+  .slot-card__time {
+    font-size: 12px;
+  }
+
+  .slot-card__price {
+    font-size: 14px;
+  }
+
+  .payment-summary__row {
+    font-size: 13px;
+  }
+
+  .payment-summary__row--highlight,
+  .payment-summary__row--total {
+    font-size: 14px;
+  }
+
+  .payment-summary__proceed {
+    font-size: 14px;
+    padding: 12px;
+  }
+}

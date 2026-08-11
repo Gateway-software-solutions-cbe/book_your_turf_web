@@ -11,11 +11,11 @@ import {
   DAYS, 
   DAY_LABELS, 
   DISCOUNT_TYPE_LABELS,
-} from '../../api/discounts';
+} from '../../api/admin/discounts';
 import {
   APPLICABLE_PAYMENT_TYPE_LABELS
-} from '../../types/discount'
-import type { Discount } from '../../types/discount';
+} from '../../types/admin/discount'
+import type { Discount } from '../../types/admin/discount';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 

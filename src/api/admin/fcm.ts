@@ -2,7 +2,7 @@ import apiClient from './client';
 import type {
   UserFcmToken, PartnerFcmToken,
   FcmListParams, FcmPaginatedResponse,
-} from '../types/fcm';
+} from '../../types/admin/fcm';
 
 // ─── Unwrap helper ─────────────────────────────────────────────────────────────
 // Handles both wrapped { result, data: { count, results } }

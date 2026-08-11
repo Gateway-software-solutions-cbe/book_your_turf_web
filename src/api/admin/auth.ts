@@ -6,7 +6,7 @@ import type {
   VerifyRegisterRequest,
   ForgotPasswordOtpRequest,
   ResetPasswordRequest,
-} from '../types/auth';
+} from '../../types/admin/auth';
 
 // ─── Auth API ──────────────────────────────────────────────────────────────────
 

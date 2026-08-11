@@ -3,7 +3,7 @@ import type {
   GameCoinSettings, UpdateGameCoinSettings,
   TurfDefaultSettings, UpdateTurfDefaultSettings,
   BulkUpdateTurfSettings, BulkUpdateResponse,
-} from '../types/setting';
+} from '../../types/admin/setting';
 
 // ─── Game Coin Settings ────────────────────────────────────────────────────────
 

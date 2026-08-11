@@ -1,5 +1,5 @@
 // ─── App Version ───────────────────────────────────────────────────────────────
-import {AppVersion, AppType, AppPlatform,} from '../types/appversion'
+import {AppVersion, AppType, AppPlatform,} from '../../types/admin/appversion'
 import apiClient from './client';
 
 export const getAppVersion = async (

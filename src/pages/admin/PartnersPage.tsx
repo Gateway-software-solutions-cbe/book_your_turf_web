@@ -1,8 +1,8 @@
 // src/pages/admin/PartnersPage.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listPartners, updatePartner } from '../../api/partners';
-import type { Partner, PartnerFilterStatus } from '../../types/partner';
+import { listPartners, updatePartner } from '../../api/admin/partners';
+import type { Partner, PartnerFilterStatus } from '../../types/admin/partner';
 import { usePermission, PERMISSIONS } from '../../hooks/usePermission';
 import { exportData, sanitizeForExport, formatDateForExport } from '../../utils/exportUtils';
 
@@ -189,7 +189,6 @@ const PartnersPage: React.FC = () => {
           'Status': partner.is_active ? 'Active' : 'Inactive',
           'Verified': partner.is_verified ? 'Yes' : 'No',
           'Joined Date': formatDateForExport(partner.created_at),
-          'Total Turfs': partner.turfs?.length || 0,
           'Deactivation Reason': partner.deactivation_reason || '',
         }))
       );

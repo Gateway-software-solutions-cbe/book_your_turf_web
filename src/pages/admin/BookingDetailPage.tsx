@@ -1,8 +1,8 @@
 // src/pages/admin/BookingDetailPage.tsx
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, Navigate } from 'react-router-dom';
-import { getBooking } from '../../api/bookings';
-import type { Booking, PaymentStatus, BookingType } from '../../types/booking';
+import { useParams, Link, Navigate, useNavigate } from 'react-router-dom';
+import { getBooking, cancelBooking } from '../../api/admin/bookings';
+import type { Booking, PaymentStatus, BookingType } from '../../types/admin/booking';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const formatDate = (iso: string) =>
@@ -23,6 +23,24 @@ const formatDateTime = (iso: string) =>
 
 const formatCurrency = (val: string) =>
   `₹${parseFloat(val || '0').toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+
+// ─── Check if booking can be cancelled ───────────────────────────────────────
+const canCancelBooking = (booking: Booking): boolean => {
+  if (booking.is_cancelled) return false;
+  
+  // Get today's date (start of day)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Check if any slot is in the future or today
+  const hasFutureSlot = booking.slots.some(slot => {
+    const slotDate = new Date(slot.date);
+    slotDate.setHours(0, 0, 0, 0);
+    return slotDate >= today;
+  });
+  
+  return hasFutureSlot;
+};
 
 // ─── Badges ────────────────────────────────────────────────────────────────────
 const PaymentBadge: React.FC<{ status: PaymentStatus }> = ({ status }) => {
@@ -53,24 +71,53 @@ const TypeBadge: React.FC<{ type: BookingType }> = ({ type }) => {
 // ─── BookingDetailPage ─────────────────────────────────────────────────────────
 const BookingDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const [booking, setBooking] = useState<Booking | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [refundToWallet, setRefundToWallet] = useState(false);
 
   const numericId = Number(id);
   if (!id || isNaN(numericId)) return <Navigate to="/admin/bookings" replace />;
 
-  useEffect(() => {
+  const fetchBooking = async () => {
     setIsLoading(true);
-    getBooking(numericId)
-      .then((data) => {
-        setBooking(data);
-        console.log("Fetched Booking details:", data);
-      })
-      .catch(() => setError('Failed to load booking details.'))
-      .finally(() => setIsLoading(false));
+    try {
+      const data = await getBooking(numericId);
+      setBooking(data);
+      console.log("Fetched Booking details:", data);
+    } catch {
+      setError('Failed to load booking details.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooking();
   }, [numericId]);
+
+  const handleCancelBooking = async () => {
+    if (!booking) return;
+    setIsCancelling(true);
+    try {
+      const updatedBooking = await cancelBooking(booking.id, true, refundToWallet);
+      setBooking(updatedBooking);
+      setShowCancelModal(false);
+      const message = refundToWallet 
+        ? `Booking cancelled successfully. Refund of ${formatCurrency(booking.paid_amount)} processed to wallet.`
+        : 'Booking cancelled successfully.';
+      alert(message);
+    } catch (err) {
+      console.error('Failed to cancel booking:', err);
+      alert('Failed to cancel booking. Please try again.');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -104,6 +151,23 @@ const BookingDetailPage: React.FC = () => {
     Wallet: '👛',
     Cash: '💵',
   };
+  const isAlreadyCancelled = booking.is_cancelled;
+  const hasPayment = parseFloat(booking.paid_amount) > 0;
+  const isCancellable = canCancelBooking(booking);
+
+  // Get cancellation reason if not cancellable
+  const getCancellationReason = (): string => {
+    if (isAlreadyCancelled) return 'This booking is already cancelled.';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const hasFutureSlot = booking.slots.some(slot => {
+      const slotDate = new Date(slot.date);
+      slotDate.setHours(0, 0, 0, 0);
+      return slotDate >= today;
+    });
+    if (!hasFutureSlot) return 'This booking has already passed and cannot be cancelled.';
+    return '';
+  };
 
   return (
     <div className="container-fluid px-4 py-4" style={{ background: '#f8f9fa', minHeight: '100vh' }}>
@@ -133,6 +197,16 @@ const BookingDetailPage: React.FC = () => {
                 <span className="badge bg-success bg-opacity-25 text-white rounded-pill px-3 py-2" style={{ fontSize: '11px' }}>
                   <i className="bi bi-calendar3 me-1"></i> {formatDate(booking.booked_date)}
                 </span>
+                {isAlreadyCancelled && (
+                  <span className="badge bg-danger rounded-pill px-3 py-2" style={{ fontSize: '11px' }}>
+                    <i className="bi bi-x-circle me-1"></i> CANCELLED
+                  </span>
+                )}
+                {!isAlreadyCancelled && !isCancellable && (
+                  <span className="badge bg-secondary rounded-pill px-3 py-2" style={{ fontSize: '11px' }}>
+                    <i className="bi bi-clock-history me-1"></i> COMPLETED
+                  </span>
+                )}
               </div>
               <h1 className="text-white fw-bold mb-2" style={{ fontSize: 'clamp(20px, 3vw, 32px)' }}>
                 {booking.booking_code}
@@ -140,11 +214,6 @@ const BookingDetailPage: React.FC = () => {
               <div className="d-flex gap-2 flex-wrap">
                 <TypeBadge type={booking.booking_type} />
                 <PaymentBadge status={booking.payment_status} />
-                {booking.is_cancelled && (
-                  <span className="badge rounded-pill bg-danger px-3 py-2">
-                    <i className="bi bi-x-circle me-1"></i>CANCELLED
-                  </span>
-                )}
               </div>
             </div>
             <div className="col-md-4 text-md-end mt-3 mt-md-0">
@@ -153,6 +222,26 @@ const BookingDetailPage: React.FC = () => {
               <div className="text-white-50 small mt-1">
                 <i className="bi bi-clock me-1"></i> {formatDateTime(booking.created_at)}
               </div>
+              {/* Cancel Button - Only show if cancellable */}
+              {isCancellable && !isAlreadyCancelled && (
+                <button
+                  className="btn btn-danger btn-sm rounded-pill px-3 mt-2"
+                  onClick={() => setShowCancelModal(true)}
+                  disabled={isCancelling}
+                >
+                  <i className="bi bi-x-circle me-1"></i>
+                  {isCancelling ? 'Cancelling...' : 'Cancel Booking'}
+                </button>
+              )}
+              {/* Show disabled reason if not cancellable */}
+              {!isCancellable && !isAlreadyCancelled && (
+                <div className="mt-2">
+                  <span className="badge bg-secondary text-white" style={{ fontSize: '10px' }}>
+                    <i className="bi bi-info-circle me-1"></i>
+                    {getCancellationReason()}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -305,6 +394,7 @@ const BookingDetailPage: React.FC = () => {
               </h6>
             </div>
             <div className="card-body">
+              {/* Main Amount Cards */}
               <div className="row g-3">
                 <div className="col-4">
                   <div className="bg-light rounded-3 p-3 text-center">
@@ -327,10 +417,70 @@ const BookingDetailPage: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Discount Section */}
+              {parseFloat(booking.total_discount_amount) > 0 && (
+                <div className="mt-3 pt-3 border-top">
+                  <div className="row g-2">
+                    <div className="col-12">
+                      <div className="bg-gradient-purple rounded-3 p-3">
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <span className="fw-semibold text-white">
+                              <i className="bi bi-tag me-2"></i>Total Discount
+                            </span>
+                            <div className="small text-white-50 mt-1">
+                              {parseFloat(booking.admin_discount_amount) > 0 && (
+                                <span className="me-3">
+                                  <i className="bi bi-person-badge me-1"></i>
+                                  Admin: {formatCurrency(booking.admin_discount_amount)}
+                                </span>
+                              )}
+                              {parseFloat(booking.partner_discount_amount) > 0 && (
+                                <span>
+                                  <i className="bi bi-building me-1"></i>
+                                  Partner: {formatCurrency(booking.partner_discount_amount)}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                          <div className="fs-4 fw-bold text-white">
+                            -{formatCurrency(booking.total_discount_amount)}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Discounted Total */}
+              {parseFloat(booking.total_discount_amount) > 0 && parseFloat(booking.discounted_total_amount) > 0 && (
+                <div className="mt-2">
+                  <div className="d-flex justify-content-between align-items-center bg-light rounded-3 p-3 border border-success border-opacity-25">
+                    <span className="fw-semibold">
+                      <i className="bi bi-check-circle-fill text-success me-2"></i>
+                      Discounted Total
+                    </span>
+                    <span className="fs-5 fw-bold text-success">
+                      {formatCurrency(booking.discounted_total_amount)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Status */}
               <div className="d-flex justify-content-between mt-3 pt-3 border-top">
                 <div>
                   <span className="small text-secondary fw-semibold">Status</span>
-                  <div className="mt-1"><PaymentBadge status={booking.payment_status} /></div>
+                  <div className="mt-1">
+                    <PaymentBadge status={booking.payment_status} />
+                    {booking.is_cancelled && (
+                      <span className="badge bg-danger ms-2">
+                        <i className="bi bi-x-circle me-1"></i>Cancelled
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="text-end">
                   <span className="small text-secondary fw-semibold">Booking ID</span>
@@ -361,21 +511,27 @@ const BookingDetailPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {booking.slots.map((slot, i) => (
-                      <tr key={i}>
-                        <td className="fw-semibold">{formatDate(slot.date)}</td>
-                        <td>{slot.start_time}</td>
-                        <td>{slot.end_time}</td>
-                        <td className="text-end fw-semibold">{formatCurrency(slot.price)}</td>
-                        <td className="text-center">
-                          {slot.is_next_day ? (
-                            <span className="badge rounded-pill bg-warning text-dark">Next Day</span>
-                          ) : (
-                            <span className="text-secondary">—</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
+                    {booking.slots.map((slot, i) => {
+                      const isPast = new Date(slot.date) < new Date();
+                      return (
+                        <tr key={i} className={isPast ? 'opacity-75' : ''}>
+                          <td className="fw-semibold">
+                            {formatDate(slot.date)}
+                            {isPast && <span className="badge bg-secondary ms-1" style={{ fontSize: '8px' }}>Past</span>}
+                          </td>
+                          <td>{slot.start_time}</td>
+                          <td>{slot.end_time}</td>
+                          <td className="text-end fw-semibold">{formatCurrency(slot.price)}</td>
+                          <td className="text-center">
+                            {slot.is_next_day ? (
+                              <span className="badge rounded-pill bg-warning text-dark">Next Day</span>
+                            ) : (
+                              <span className="text-secondary">—</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
                     <tr className="bg-light fw-bold">
                       <td colSpan={3}>Total</td>
                       <td className="text-end">{formatCurrency(String(totalSlotPrice))}</td>
@@ -417,6 +573,9 @@ const BookingDetailPage: React.FC = () => {
                               {p.reference}
                             </code>
                           )}
+                          {p.received_by && (
+                            <span className="text-secondary small">Received by: {p.received_by}</span>
+                          )}
                           <span className="text-secondary small">{formatDateTime(p.date)}</span>
                         </div>
                       </div>
@@ -428,6 +587,111 @@ const BookingDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Cancel Booking Modal */}
+      {showCancelModal && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+          style={{ backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1050 }}
+          onClick={() => setShowCancelModal(false)}
+        >
+          <div
+            className="bg-white rounded-3 p-4"
+            style={{ maxWidth: '500px', width: '90%' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h5 className="fw-bold mb-3">
+              <i className="bi bi-exclamation-triangle-fill text-danger me-2"></i>
+              Cancel Booking
+            </h5>
+            <p className="text-secondary mb-3">
+              Are you sure you want to cancel this booking? This action cannot be undone.
+            </p>
+            
+            <div className="mb-3 p-3 bg-light rounded-3">
+              <div className="d-flex justify-content-between mb-1">
+                <span className="text-secondary">Booking Code</span>
+                <span className="fw-semibold">{booking.booking_code}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-1">
+                <span className="text-secondary">Customer</span>
+                <span className="fw-semibold">{booking.customer?.name}</span>
+              </div>
+              <div className="d-flex justify-content-between mb-1">
+                <span className="text-secondary">Amount Paid</span>
+                <span className="fw-semibold">{formatCurrency(booking.paid_amount)}</span>
+              </div>
+              <div className="d-flex justify-content-between">
+                <span className="text-secondary">Status</span>
+                <span><PaymentBadge status={booking.payment_status} /></span>
+              </div>
+            </div>
+
+            {hasPayment && (
+              <div className="form-check mb-3">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  id="refundToWallet"
+                  checked={refundToWallet}
+                  onChange={(e) => setRefundToWallet(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="refundToWallet">
+                  <span className="fw-semibold">Refund to wallet</span>
+                  <div className="small text-secondary">
+                    Refund the paid amount ({formatCurrency(booking.paid_amount)}) to customer's wallet
+                  </div>
+                </label>
+              </div>
+            )}
+
+            <div className="d-flex gap-2 justify-content-end mt-3">
+              <button
+                className="btn btn-outline-secondary btn-sm rounded-pill px-3"
+                onClick={() => setShowCancelModal(false)}
+                disabled={isCancelling}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger btn-sm rounded-pill px-3"
+                onClick={handleCancelBooking}
+                disabled={isCancelling}
+              >
+                {isCancelling ? (
+                  <>
+                    <span className="spinner-border spinner-border-sm me-1"></span>
+                    Processing...
+                  </>
+                ) : (
+                  'Confirm Cancellation'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style>{`
+        .bg-gradient-purple {
+          background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+        }
+        .text-purple {
+          color: #8b5cf6;
+        }
+        .bg-purple {
+          background-color: #8b5cf6;
+        }
+        .bg-opacity-10 {
+          opacity: 0.1;
+        }
+        .border-dashed {
+          border-style: dashed !important;
+        }
+        .opacity-75 {
+          opacity: 0.75;
+        }
+      `}</style>
     </div>
   );
 };

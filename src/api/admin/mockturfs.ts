@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { MockTurf, MockTurfFormData } from '../types/mockturf';
+import type { MockTurf, MockTurfFormData } from '../../types/admin/mockturf';
 
 // ─── Mock Turfs API ────────────────────────────────────────────────────────────
 // POST uses multipart/form-data (image upload). PATCH also supports multipart.

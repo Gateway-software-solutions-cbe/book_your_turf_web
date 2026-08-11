@@ -7,8 +7,8 @@ import {
   DISCOUNT_TYPES, 
   DAYS, 
   DAY_LABELS 
-} from '../../api/discounts';
-import type { Discount, DiscountType, ListDiscountsParams } from '../../types/discount';
+} from '../../api/admin/discounts';
+import type { Discount, DiscountType, ListDiscountsParams } from '../../types/admin/discount';
 
 const PAGE_SIZE = 20;
 

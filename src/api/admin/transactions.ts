@@ -4,7 +4,7 @@ import type {
   ListTransactionsParams,
   PaginatedTransactions,
   TransactionsListResponse,
-} from '../types/transaction';
+} from '../../types/admin/transaction';
 
 // ─── Unwrap helper ─────────────────────────────────────────────────────────────
 

@@ -8,7 +8,7 @@ import type {
   CreateAdminDiscountRequest,
   CreatePartnerDiscountRequest,
   UpdateDiscountRequest,
-} from '../types/discount';
+} from '../../types/admin/discount';
 
 // ─── Unwrap helper ─────────────────────────────────────────────────────────────
 

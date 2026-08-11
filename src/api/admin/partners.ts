@@ -1,6 +1,6 @@
 // src/api/partners.ts
 import apiClient from './client';
-import type { Partner, CreatePartnerRequest, UpdatePartnerRequest, PartnerTurf } from '../types/partner';
+import type { Partner, CreatePartnerRequest, UpdatePartnerRequest, PartnerTurf } from '../../types/admin/partner';
 
 // ─── Partners API ──────────────────────────────────────────────────────────────
 

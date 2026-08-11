@@ -1,8 +1,8 @@
 // src/pages/admin/UsersPage.tsx
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listUsers } from '../../api/users';
-import type { User } from '../../types/user';
+import { listUsers } from '../../api/admin/users';
+import type { User } from '../../types/admin/user';
 import { exportData, sanitizeForExport, formatDateForExport, formatCurrencyForExport } from '../../utils/exportUtils';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────

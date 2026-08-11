@@ -1,11 +1,11 @@
 // src/pages/admin/NotificationsPage.tsx
 import React, { useEffect, useState, useMemo, type FormEvent, useCallback } from 'react';
-import { getNotificationHistory, sendNotification } from '../../api/notifications';
-import { listPartners } from '../../api/partners';
-import { listUsers } from '../../api/users';
-import type { NotificationRecord, FilterType } from '../../types/notification';
-import type { Partner } from '../../types/partner';
-import type { User } from '../../types/user';
+import { getNotificationHistory, sendNotification } from '../../api/admin/notifications';
+import { listPartners } from '../../api/admin/partners';
+import { listUsers } from '../../api/admin/users';
+import type { NotificationRecord, FilterType } from '../../types/admin/notification';
+import type { Partner } from '../../types/admin/partner';
+import type { User } from '../../types/admin/user';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const HISTORY_PAGE_SIZE = 20;

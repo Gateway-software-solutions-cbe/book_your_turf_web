@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { DashboardStats, DashboardResponse } from '../types/dashboard';
+import type { DashboardStats, DashboardResponse } from '../../types/admin/dashboard';
 
 /**
  * GET /api/admin/dashboard/dashboard/

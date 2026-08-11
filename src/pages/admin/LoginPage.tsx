@@ -1,7 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import type { LoginRequest } from '../../types/auth';
+import type { LoginRequest } from '../../types/admin/auth';
 
 // ─── LoginPage ─────────────────────────────────────────────────────────────────
 

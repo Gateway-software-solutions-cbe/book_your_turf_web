@@ -1,6 +1,6 @@
 // src/api/turfs.ts
 import apiClient from './client';
-import type { Turf, CreateTurfRequest, UpdateTurfRequest } from '../types/turf';
+import type { Turf, CreateTurfRequest, UpdateTurfRequest } from '../../types/admin/turf';
 
 // ─── Turfs API ─────────────────────────────────────────────────────────────────
 
@@ -137,10 +137,30 @@ export const getTurf = async (id: number): Promise<Turf> => {
  * POST /api/admin/turfs/
  * Creates a turf for a given partner.
  */
-export const createTurf = async (data: CreateTurfRequest): Promise<Turf> => {
+export const createTurf = async (data: FormData | CreateTurfRequest): Promise<Turf> => {
   try {
-    console.log('📦 Creating turf with data:', data);
-    const response = await apiClient.post<{ data: Turf }>('/api/admin/turfs/', data);
+    const isFormData = data instanceof FormData;
+    
+    // Log FormData contents if it's FormData
+    if (isFormData) {
+      console.log('📦 Creating turf with FormData:');
+      for (const [key, value] of data.entries()) {
+        if (value instanceof File) {
+          console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
+        } else {
+          console.log(`  ${key}: ${value}`);
+        }
+      }
+    } else {
+      console.log('📦 Creating turf with data:', data);
+    }
+    
+    const response = await apiClient.post<{ data: Turf }>('/api/admin/turfs/', data, {
+      headers: isFormData ? {
+        'Content-Type': 'multipart/form-data',
+      } : undefined,
+    });
+    
     console.log('📦 Create turf response:', response.data);
     
     if (response.data?.data) {
@@ -162,12 +182,32 @@ export const createTurf = async (data: CreateTurfRequest): Promise<Turf> => {
 
 /**
  * PATCH /api/admin/turfs/{id}/
- * Partial update. Most importantly: { status: "Approved" | "Rejected" | "Pending" }
+ * Partial update.
  */
-export const updateTurf = async (id: number, data: UpdateTurfRequest): Promise<Turf> => {
+export const updateTurf = async (id: number, data: FormData | UpdateTurfRequest): Promise<Turf> => {
   try {
-    console.log(`📦 Updating turf ${id} with data:`, data);
-    const response = await apiClient.patch<{ data: Turf }>(`/api/admin/turfs/${id}/`, data);
+    const isFormData = data instanceof FormData;
+    
+    // Log FormData contents if it's FormData
+    if (isFormData) {
+      console.log(`📦 Updating turf ${id} with FormData:`);
+      for (const [key, value] of data.entries()) {
+        if (value instanceof File) {
+          console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
+        } else {
+          console.log(`  ${key}: ${value}`);
+        }
+      }
+    } else {
+      console.log(`📦 Updating turf ${id} with data:`, data);
+    }
+    
+    const response = await apiClient.patch<{ data: Turf }>(`/api/admin/turfs/${id}/`, data, {
+      headers: isFormData ? {
+        'Content-Type': 'multipart/form-data',
+      } : undefined,
+    });
+    
     console.log('📦 Update turf response:', response.data);
     
     if (response.data?.data) {

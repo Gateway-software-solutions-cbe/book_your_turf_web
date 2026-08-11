@@ -1,7 +1,7 @@
 // src/pages/admin/UserFormPage.tsx
 import React, { useEffect, useState, useRef, type FormEvent } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getUser, updateUser, createUser } from '../../api/users';
+import { getUser, updateUser, createUser } from '../../api/admin/users';
 
 const UserFormPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();

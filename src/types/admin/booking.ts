@@ -1,15 +1,17 @@
+// src/types/booking.ts
 // ─── Booking Types ─────────────────────────────────────────────────────────────
 // GET /api/admin/bookings/ and GET /api/admin/bookings/{id}/
 
-export type BookingType    = 'Online' | 'Offline';
+export type BookingType    = 'Online' | 'Offline' | 'Walk-in';
 export type PaymentStatus  = 'Pending' | 'Advance Paid' | 'Fully Paid';
 export type PaymentMethod  = 'Razorpay' | 'Wallet' | 'Cash' | string;
 
 export interface BookingCustomer {
   name:   string;
-  email:  string;
-  number: string;
-  type:   'online' | 'offline' | string;
+  email?:  string;
+  number?: string;
+  mobile?: string;  // Some responses use 'mobile' instead of 'number'
+  type:   'online' | 'offline' | 'walk_in' | string;
 }
 
 export interface BookingSlot {
@@ -21,11 +23,12 @@ export interface BookingSlot {
 }
 
 export interface BookingPayment {
-  type:      string;          // "online" | "wallet" | "cash"
-  amount:    string;          // "250.00"
-  method:    PaymentMethod;
-  date:      string;          // ISO 8601
-  reference: string;
+  type:        string;          // "online" | "wallet" | "cash"
+  amount:      string;          // "250.00"
+  method:      PaymentMethod;
+  date:        string;          // ISO 8601
+  reference?:  string;
+  received_by?: string;         // For cash payments
 }
 
 export interface Booking {
@@ -49,6 +52,13 @@ export interface Booking {
   booked_date:      string;   // "2026-07-09"
   created_at:       string;   // ISO 8601
   payments:         BookingPayment[];
+  // New discount fields
+  admin_discount_id: number | null;
+  admin_discount_amount: string;
+  partner_discount_id: number | null;
+  partner_discount_amount: string;
+  total_discount_amount: string;
+  discounted_total_amount: string;
 }
 
 // ─── API params ────────────────────────────────────────────────────────────────

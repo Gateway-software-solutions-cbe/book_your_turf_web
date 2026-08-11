@@ -1,11 +1,33 @@
-import type { VerificationMethod } from '../types/userAuth';
+// src/utils/identifierPayload.ts
+import type { VerificationMethod } from '../types/user/userAuth';
 
-export function buildIdentifierPayload<T extends Record<string, unknown>>(
-  method: VerificationMethod,
+/**
+ * Builds a payload with the identifier field
+ * @param verificationMethod - 'email' or 'phone' (for reference)
+ * @param identifier - The actual email address or phone number as a string
+ * @param extra - Additional fields to include
+ * @returns The payload object with identifier as string
+ */
+export const buildIdentifierPayload = <T extends Record<string, unknown>>(
+  verificationMethod: VerificationMethod,
   identifier: string,
-  rest: T
-): T & ({ email: string } | { number: string }) {
-  return method === 'email'
-    ? ({ email: identifier, ...rest } as T & { email: string })
-    : ({ number: identifier, ...rest } as T & { number: string });
-}
+  extra: T = {} as T
+): { identifier: string } & T => {
+  return {
+    identifier,
+    ...extra,
+  };
+};
+
+/**
+ * Gets the actual identifier value from form values
+ * @param verificationMethod - 'email' or 'phone'
+ * @param values - Form values containing email or number
+ * @returns The actual email or number as a string
+ */
+export const getIdentifierFromValues = (
+  verificationMethod: VerificationMethod,
+  values: { email?: string; number?: string }
+): string => {
+  return verificationMethod === 'email' ? values.email! : values.number!;
+};

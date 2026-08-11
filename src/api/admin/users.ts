@@ -1,5 +1,5 @@
 import apiClient from './client';
-import type { User, PaginatedUsers, ListUsersParams, UpdateUserRequest } from '../types/user';
+import type { User, PaginatedUsers, ListUsersParams, UpdateUserRequest } from '../../types/admin/user';
 
 // ─── Create User ───────────────────────────────────────────────────────────────
 

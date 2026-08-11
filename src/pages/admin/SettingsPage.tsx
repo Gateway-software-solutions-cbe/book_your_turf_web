@@ -3,10 +3,10 @@ import {
   getGameCoinSettings, updateGameCoinSettings,
   getTurfDefaultSettings, updateTurfDefaultSettings,
   bulkUpdateTurfSettings,
-} from '../../api/settings';
-import { listTurfs } from '../../api/turfs';
-import type { GameCoinSettings, TurfDefaultSettings } from '../../types/setting';
-import type { Turf } from '../../types/turf';
+} from '../../api/admin/settings';
+import { listTurfs } from '../../api/admin/turfs';
+import type { GameCoinSettings, TurfDefaultSettings } from '../../types/admin/setting';
+import type { Turf } from '../../types/admin/turf';
 
 // ─── Tab type ──────────────────────────────────────────────────────────────────
 type SettingsTab = 'game-coins' | 'turf-defaults' | 'bulk-update';

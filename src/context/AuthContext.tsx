@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { loginAdmin } from '../api/auth';
-import { tokenStorage, ADMIN_KEY } from '../api/client';
-import type { AdminUser, AuthContextValue, LoginRequest } from '../types/auth';
+import { loginAdmin } from '../api/admin/auth';
+import { tokenStorage, ADMIN_KEY } from '../api/admin/client';
+import type { AdminUser, AuthContextValue, LoginRequest } from '../types/admin/auth';
 
 // ─── Context ───────────────────────────────────────────────────────────────────
 

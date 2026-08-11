@@ -1,9 +1,9 @@
 // src/pages/admin/MockTurfFormPage.tsx
 import React, { useEffect, useState, useRef, type FormEvent } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getMockTurf, createMockTurf, updateMockTurf } from '../../api/mockturfs';
-import { parseFacilities } from '../../types/mockturf';
-import type { MockTurfFacilities } from '../../types/mockturf';
+import { getMockTurf, createMockTurf, updateMockTurf } from '../../api/admin/mockturfs';
+import { parseFacilities } from '../../types/admin/mockturf';
+import type { MockTurfFacilities } from '../../types/admin/mockturf';
 
 const FACILITY_KEYS: (keyof MockTurfFacilities)[] = [
   'CCTV', 'wifi', 'parking', 'Rest room',
