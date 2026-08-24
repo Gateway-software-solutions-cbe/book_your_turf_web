@@ -8,22 +8,13 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-/**
- * Wraps any route that requires an authenticated admin session.
- * - While auth state is hydrating from localStorage, renders a full-page loader.
- * - Once hydrated: 
- *   - requireAuth=true & unauthenticated → redirect to /admin/login
- *   - requireAuth=false & authenticated → redirect to /admin
- *   - Otherwise → renders child routes via <Outlet />
- */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   requireAuth = true, 
   redirectTo = '/admin/login' 
 }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, sideNav } = useAuth();
   const location = useLocation();
 
-  // Show loading state while checking authentication
   if (isLoading) {
     return (
       <div className="d-flex min-vh-100 align-items-center justify-content-center">
@@ -32,14 +23,36 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // If user needs to be authenticated but isn't
+  // If authentication is required and user is not authenticated
   if (requireAuth && !isAuthenticated) {
     return <Navigate to={redirectTo} state={{ from: location }} replace />;
   }
 
-  // If user is authenticated but trying to access login page
+  // If authentication is not required (login page) and user is authenticated
   if (!requireAuth && isAuthenticated) {
-    return <Navigate to="/admin" replace />;
+    // Redirect to welcome page
+    return <Navigate to="/welcome" replace />;
+  }
+
+  // Check if current path is accessible
+  const isPathAccessible = (path: string): boolean => {
+    // Always allow welcome page and dashboard
+    if (path === '/welcome' || path === '/admin') {
+      return true;
+    }
+    
+    return sideNav.some(item => {
+      return path === item.path || path.startsWith(item.path + '/');
+    });
+  };
+
+  // If authenticated but trying to access a path not in sidebar
+  if (requireAuth && isAuthenticated && sideNav.length > 0) {
+    const currentPath = location.pathname;
+    if (!isPathAccessible(currentPath)) {
+      // Redirect to welcome page
+      return <Navigate to="/welcome" replace />;
+    }
   }
 
   return <Outlet />;

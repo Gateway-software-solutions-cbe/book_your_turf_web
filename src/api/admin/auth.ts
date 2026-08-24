@@ -6,6 +6,7 @@ import type {
   VerifyRegisterRequest,
   ForgotPasswordOtpRequest,
   ResetPasswordRequest,
+  ResendOtpRequest,
 } from '../../types/admin/auth';
 
 // ─── Auth API ──────────────────────────────────────────────────────────────────
@@ -40,14 +41,16 @@ export const verifyAndRegister = async (data: VerifyRegisterRequest): Promise<st
 
 /**
  * POST /api/admin/resend-otp/
+ * Resend OTP for registration.
  */
-export const resendOtp = async (email: string): Promise<string> => {
-  const response = await apiClient.post<string>('/api/admin/resend-otp/', { email });
+export const resendOtp = async (data: ResendOtpRequest): Promise<string> => {
+  const response = await apiClient.post<string>('/api/admin/resend-otp/', data);
   return response.data;
 };
 
 /**
  * POST /api/admin/forgot-password-otp/
+ * Send OTP for password reset.
  */
 export const forgotPasswordOtp = async (data: ForgotPasswordOtpRequest): Promise<string> => {
   const response = await apiClient.post<string>('/api/admin/forgot-password-otp/', data);
@@ -56,6 +59,7 @@ export const forgotPasswordOtp = async (data: ForgotPasswordOtpRequest): Promise
 
 /**
  * POST /api/admin/reset-password/
+ * Reset password with OTP.
  */
 export const resetPassword = async (data: ResetPasswordRequest): Promise<string> => {
   const response = await apiClient.post<string>('/api/admin/reset-password/', data);

@@ -7,6 +7,7 @@ import { exportData, sanitizeForExport, formatDateForExport, formatCurrencyForEx
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 const PAGE_SIZE = 20;
+const FETCH_BATCH_SIZE = 100; // Fetch 100 users per API call (to avoid timeouts)
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const formatDate = (iso: string) =>
@@ -81,6 +82,7 @@ const UsersPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [isExporting, setIsExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0);
 
   // Debounce search
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -130,18 +132,68 @@ const UsersPage: React.FC = () => {
     fetchUsers();
   }, [fetchUsers]);
 
+  // ── Fetch ALL Users for Export ──────────────────────────────────────────────
+  const fetchAllUsersForExport = async (): Promise<User[]> => {
+    let allUsers: User[] = [];
+    let currentPage = 1;
+    let hasMore = true;
+
+    try {
+      while (hasMore) {
+        const params = {
+          page: currentPage,
+          page_size: FETCH_BATCH_SIZE, // Fetch 100 at a time to avoid timeouts
+          ...(debouncedSearch ? { search: debouncedSearch } : {}),
+          ...(activeFilter === 'active' ? { is_active: true } : {}),
+          ...(activeFilter === 'inactive' ? { is_active: false } : {}),
+        };
+        
+        const data = await listUsers(params);
+        allUsers = [...allUsers, ...(data.results || [])];
+        
+        // Update progress
+        const total = data.count || 0;
+        const progress = Math.min((allUsers.length / total) * 100, 100);
+        setExportProgress(progress);
+        
+        // Check if we've fetched all pages
+        hasMore = !!data.next;
+        currentPage++;
+        
+        // Safety limit to prevent infinite loops
+        if (currentPage > 1000) break;
+      }
+    } catch (error) {
+      console.error('Error fetching all users for export:', error);
+      throw error;
+    }
+
+    return allUsers;
+  };
+
   // ── Export Data ──────────────────────────────────────────────────────────────
-  const handleExport = () => {
-    if (users.length === 0) {
+  const handleExport = async () => {
+    // Check if there are users to export
+    if (totalCount === 0) {
       alert('No users to export.');
       return;
     }
 
     setIsExporting(true);
+    setExportProgress(0);
+
     try {
-      // Prepare the data for export
+      // Fetch ALL users (in batches of 100)
+      const allUsers = await fetchAllUsersForExport();
+
+      if (allUsers.length === 0) {
+        alert('No users found to export.');
+        return;
+      }
+
+      // Prepare the data for export - ALL users
       const exportDataArray = sanitizeForExport(
-        users.map(user => ({
+        allUsers.map(user => ({
           'User ID': user.id,
           'Name': user.name,
           'Email': user.email,
@@ -152,22 +204,25 @@ const UsersPage: React.FC = () => {
           'Game Coins': user.game_coins || 0,
           'Referral Code': user.referral_code || '',
           'Joined Date': formatDateForExport(user.created_at),
-          // 'Total Bookings': user.total_bookings || 0,
-          // 'Total Spent': formatCurrencyForExport(user.total_spent || '0'),
         }))
       );
 
-      // Call the export function
+      // Call the export function - exports ALL users
       exportData(exportDataArray, {
         fileName: `users_export_${new Date().toISOString().split('T')[0]}`,
         format: 'excel',
         sheetName: 'Users',
       });
+
+      // Show success message with count
+      alert(`✅ Successfully exported ${allUsers.length} users!`);
+      
     } catch (error) {
       console.error('Export failed:', error);
       alert('Failed to export data. Please try again.');
     } finally {
       setIsExporting(false);
+      setExportProgress(0);
     }
   };
 
@@ -192,18 +247,18 @@ const UsersPage: React.FC = () => {
           <button
             className="btn btn-outline-success rounded-pill px-3"
             onClick={handleExport}
-            disabled={isLoading || users.length === 0 || isExporting}
-            style={{ fontWeight: 500 }}
+            disabled={isLoading || safeCount === 0 || isExporting}
+            style={{ fontWeight: 500, position: 'relative' }}
           >
             {isExporting ? (
               <>
                 <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Exporting...
+                Exporting... {Math.round(exportProgress)}%
               </>
             ) : (
               <>
                 <i className="bi bi-download me-1"></i>
-                Export
+                Export All ({safeCount})
               </>
             )}
           </button>
@@ -217,6 +272,26 @@ const UsersPage: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* ── Export Progress Bar ──────────────────────────────────────────────── */}
+      {isExporting && exportProgress > 0 && exportProgress < 100 && (
+        <div className="mb-3 animate__animated animate__fadeIn">
+          <div className="progress" style={{ height: '8px', borderRadius: '4px' }}>
+            <div 
+              className="progress-bar bg-success" 
+              role="progressbar" 
+              style={{ width: `${exportProgress}%` }}
+              aria-valuenow={exportProgress} 
+              aria-valuemin={0} 
+              aria-valuemax={100}
+            />
+          </div>
+          <small className="text-muted">
+            <i className="bi bi-arrow-repeat me-1 spinner-border spinner-border-sm"></i>
+            Fetching users for export... {Math.round(exportProgress)}% ({Math.round((exportProgress / 100) * totalCount)} of {totalCount} users)
+          </small>
+        </div>
+      )}
 
       {/* ── Filters ──────────────────────────────────────────────────────────── */}
       <div className="card border-0 shadow-sm mb-4 animate__animated animate__fadeInUp" style={{ borderRadius: '16px' }}>
@@ -471,6 +546,12 @@ const UsersPage: React.FC = () => {
         }
         .badge:hover {
           transform: scale(1.05);
+        }
+        .progress {
+          background-color: #e9ecef;
+        }
+        .progress-bar {
+          transition: width 0.3s ease;
         }
       `}</style>
     </div>

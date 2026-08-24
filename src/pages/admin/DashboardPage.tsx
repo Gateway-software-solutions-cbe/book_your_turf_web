@@ -288,18 +288,18 @@ const DashboardPage: React.FC = () => {
       <div className="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
           <h1 className="h2 mb-1" style={{ animation: 'fadeInUp 0.5s ease-out' }}>
-            {greeting}, {admin?.name?.split(' ')[0] ?? 'Admin'} 👋
+            {greeting}, {admin?.name ?? 'Admin'} 👋
           </h1>
           <p className="text-secondary mb-0" style={{ animation: 'fadeInUp 0.5s ease-out 0.1s both' }}>
             Here's what's happening on BookYourTurf today.
           </p>
         </div>
-        <div style={{ animation: 'fadeInUp 0.5s ease-out 0.2s both' }}>
+        {/* <div style={{ animation: 'fadeInUp 0.5s ease-out 0.2s both' }}>
           <span className="badge bg-success rounded-pill px-3 py-2">
             <span className="d-inline-block rounded-circle bg-white me-1" style={{ width: '6px', height: '6px' }}></span>
             {admin?.role ?? 'Admin'}
           </span>
-        </div>
+        </div> */}
       </div>
 
       {/* Loading */}
@@ -348,7 +348,7 @@ const DashboardPage: React.FC = () => {
                 sub={`${formatNumber(stats.active_users)} active`}
                 color="blue"
                 delay={0.1}
-                onClick={() => navigate('/admin/users')}
+                // onClick={() => navigate('/admin/users')}
               />
             </div>
             <div className="col-xl-3 col-lg-6 col-md-6">
@@ -359,7 +359,7 @@ const DashboardPage: React.FC = () => {
                 sub={`of ${formatNumber(stats.total_users)} total`}
                 color="green"
                 delay={0.2}
-                onClick={() => navigate('/admin/users')}
+                // onClick={() => navigate('/admin/users')}
               />
             </div>
             <div className="col-xl-3 col-lg-6 col-md-6">
@@ -370,7 +370,7 @@ const DashboardPage: React.FC = () => {
                 sub={`${formatNumber(stats.active_partners)} active`}
                 color="purple"
                 delay={0.3}
-                onClick={() => navigate('/admin/partners')}
+                // onClick={() => navigate('/admin/partners')}
               />
             </div>
             <div className="col-xl-3 col-lg-6 col-md-6">
@@ -381,7 +381,7 @@ const DashboardPage: React.FC = () => {
                 sub={`of ${formatNumber(stats.total_partners)} total`}
                 color="teal"
                 delay={0.4}
-                onClick={() => navigate('/admin/partners')}
+                // onClick={() => navigate('/admin/partners')}
               />
             </div>
           </div>
@@ -431,7 +431,7 @@ const DashboardPage: React.FC = () => {
           </div>
 
           {/* ── Row 3: Quick Actions ───────────────────────────────────────── */}
-          <h6 className="text-uppercase text-secondary fw-bold small mb-3" style={{ animation: 'fadeInUp 0.5s ease-out 0.7s both' }}>
+          {/* <h6 className="text-uppercase text-secondary fw-bold small mb-3" style={{ animation: 'fadeInUp 0.5s ease-out 0.7s both' }}>
             <i className="bi bi-lightning-charge me-1"></i> Quick Actions
           </h6>
           <div className="row g-3">
@@ -453,7 +453,7 @@ const DashboardPage: React.FC = () => {
                 />
               </div>
             ))}
-          </div>
+          </div> */}
         </>
       )}
     </div>

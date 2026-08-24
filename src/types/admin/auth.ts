@@ -1,16 +1,18 @@
+// src/types/admin/auth.ts
 // ─── Auth Types ───────────────────────────────────────────────────────────────
-// Derived from real POST /api/admin/login/ response (verified via Swagger Try it out)
 
 export interface AdminUser {
   id: number;
   name: string;
   email: string;
   phone: string;
-  /**
-   * Currently always "admin" — will expand to dynamic roles once
-   * the backend ships the roles/permissions endpoints.
-   */
   role: string;
+}
+
+export interface SideNavItem {
+  title: string;
+  path: string;
+  icon: string;
 }
 
 export interface LoginResponse {
@@ -19,20 +21,31 @@ export interface LoginResponse {
   data: {
     access: string;
     admin: AdminUser;
+    sidenav?: SideNavItem[]; // Added: dynamic sidebar from login
+  };
+}
+
+export interface SideNavResponse {
+  result: 'success' | 'error';
+  message: string;
+  data: {
+    items: SideNavItem[];
   };
 }
 
 export interface LoginRequest {
-  /** Email or phone number */
   login_id: string;
   password: string;
 }
+
+// ─── Admin Registration Types ────────────────────────────────────────────────
 
 export interface SendOtpRequest {
   name: string;
   email: string;
   phone: string;
   password: string;
+  role?: string;
 }
 
 export interface VerifyRegisterRequest {
@@ -40,8 +53,12 @@ export interface VerifyRegisterRequest {
   otp: string;
 }
 
+export interface ResendOtpRequest {
+  email: string;
+}
+
 export interface ForgotPasswordOtpRequest {
-  login_id: string;
+  email: string;
 }
 
 export interface ResetPasswordRequest {
@@ -50,7 +67,29 @@ export interface ResetPasswordRequest {
   new_password: string;
 }
 
-// ─── Auth Context Shape ────────────────────────────────────────────────────────
+// ─── Admin Roles ─────────────────────────────────────────────────────────────
+
+export type AdminRole = 'super_admin' | 'admin' | 'cpadmin' | 'accounts' | 'userbooking';
+
+export const ADMIN_ROLES: AdminRole[] = ['super_admin', 'admin', 'cpadmin', 'accounts', 'userbooking'];
+
+export const ADMIN_ROLE_LABELS: Record<AdminRole, string> = {
+  super_admin: 'Super Admin',
+  admin: 'Admin',
+  cpadmin: 'Channel Partner Admin',
+  accounts: 'Accounts Manager',
+  userbooking: 'Booking Manager',
+};
+
+export const ADMIN_ROLE_COLORS: Record<AdminRole, string> = {
+  super_admin: 'bg-danger',
+  admin: 'bg-primary',
+  cpadmin: 'bg-info text-dark',
+  accounts: 'bg-warning text-dark',
+  userbooking: 'bg-success',
+};
+
+// ─── Auth Context Shape ──────────────────────────────────────────────────────
 
 export interface AuthContextValue {
   admin: AdminUser | null;

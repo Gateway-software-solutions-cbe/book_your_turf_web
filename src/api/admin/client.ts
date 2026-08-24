@@ -1,3 +1,4 @@
+// src/api/admin/client.ts
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
@@ -7,10 +8,12 @@ import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 const rawBaseUrl = import.meta.env.VITE_API_BASE_URL;
 export const BASE_URL = rawBaseUrl.replace(/\/$/, '');
 
-export const TOKEN_KEY = 'turf_admin_token';
-export const ADMIN_KEY = 'turf_admin_user';
-export const USER_TOKEN_KEY = 'turf_user_token';
-export const USER_KEY = 'turf_user_data';
+// Use consistent key names - remove duplicates
+export const TOKEN_KEY = 'admin_token';
+export const ADMIN_KEY = 'admin_user';
+export const SIDENAV_KEY = 'admin_sidenav';
+export const USER_TOKEN_KEY = 'user_token';
+export const USER_KEY = 'user_data';
 
 // Log which backend is active so you can confirm env mode at a glance
 console.info(`[API] Base URL: ${BASE_URL} (env: ${import.meta.env.VITE_APP_ENV ?? 'default'})`);
@@ -23,6 +26,11 @@ export const tokenStorage = {
   clear: (): void => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(ADMIN_KEY);
+    localStorage.removeItem(SIDENAV_KEY);
+    // Remove any old keys that might exist
+    localStorage.removeItem('turf_admin_token');
+    localStorage.removeItem('turf_admin_user');
+    localStorage.removeItem('turf_admin_sidenav');
   },
 };
 
@@ -32,6 +40,9 @@ export const userTokenStorage = {
   clear: (): void => {
     localStorage.removeItem(USER_TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
+    // Remove any old keys
+    localStorage.removeItem('turf_user_token');
+    localStorage.removeItem('turf_user_data');
   },
 };
 
@@ -44,10 +55,6 @@ const apiClient = axios.create({
 });
 
 // ─── Request Interceptor — Attach Bearer Token ─────────────────────────────────
-//
-// Admin and user have separate tokens. We pick the right one based on the
-// request path — adjust the `/api/admin/` check if your backend uses a
-// different prefix convention.
 
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
@@ -62,11 +69,6 @@ apiClient.interceptors.request.use(
 );
 
 // ─── Response Interceptor — Handle 401 ────────────────────────────────────────
-//
-// Neither admin nor user login responses include a refresh token. On 401, we
-// clear the relevant stored credentials and redirect to the relevant login
-// page — token from live backend won't work on test backend either, so this
-// also self-heals when switching envs.
 
 apiClient.interceptors.response.use(
   (response) => response,
