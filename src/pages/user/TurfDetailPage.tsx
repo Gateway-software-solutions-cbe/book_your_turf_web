@@ -8,7 +8,7 @@ import './style/TurfDetailPage.css';
 
 // ─── Image Slider Component ──────────────────────────────────────────────
 interface ImageSliderProps {
-  images: string[];
+  images: string[];      // ✅ Turf.images is string[]
   name: string;
 }
 
@@ -17,8 +17,11 @@ const ImageSlider = ({ images, name }: ImageSliderProps) => {
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  const validImages = images?.filter(img => img) || [];
-  const imageList = validImages.length > 0 ? validImages : ['https://placehold.co/800x500/0b1f1a/1fa463?text=BYT'];
+  const validImages = images?.filter(Boolean) || [];
+  const imageList =
+    validImages.length > 0
+      ? validImages
+      : ['https://placehold.co/800x500/0b1f1a/1fa463?text=BYT'];
 
   useEffect(() => {
     if (isAutoPlaying && imageList.length > 1) {
@@ -27,9 +30,7 @@ const ImageSlider = ({ images, name }: ImageSliderProps) => {
       }, 4000);
     }
     return () => {
-      if (autoPlayRef.current) {
-        clearInterval(autoPlayRef.current);
-      }
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
   }, [isAutoPlaying, imageList.length]);
 
@@ -55,7 +56,7 @@ const ImageSlider = ({ images, name }: ImageSliderProps) => {
   };
 
   return (
-    <div 
+    <div
       className="turf-detail__slider"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -74,13 +75,19 @@ const ImageSlider = ({ images, name }: ImageSliderProps) => {
 
       {imageList.length > 1 && (
         <>
-          <button className="turf-detail__slider-btn turf-detail__slider-btn--prev" onClick={goToPrevious}>
+          <button
+            className="turf-detail__slider-btn turf-detail__slider-btn--prev"
+            onClick={goToPrevious}
+          >
             <i className="bi bi-chevron-left" />
           </button>
-          <button className="turf-detail__slider-btn turf-detail__slider-btn--next" onClick={goToNext}>
+          <button
+            className="turf-detail__slider-btn turf-detail__slider-btn--next"
+            onClick={goToNext}
+          >
             <i className="bi bi-chevron-right" />
           </button>
-          
+
           <div className="turf-detail__slider-dots">
             {imageList.map((_, index) => (
               <button
@@ -144,17 +151,14 @@ const TurfDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ─── Get Turf Data ────────────────────────────────────────────────────
-
   useEffect(() => {
     const fetchTurfDetail = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       setError(null);
 
       try {
-        // Check if turf data was passed via navigation state
         const state = location.state as { turf?: Turf } | null;
         if (state?.turf && state.turf.id === parseInt(id)) {
           console.log('📥 Using turf data from navigation state');
@@ -163,12 +167,11 @@ const TurfDetailPage = () => {
           return;
         }
 
-        // Fetch from API using list endpoint
         console.log('📤 Fetching turf details from API...');
         const response = await listTurfs({ search: String(id), page_size: 50 });
-        
+
         if (response.result === 'success' && response.data) {
-          const foundTurf = response.data.results.find(t => t.id === parseInt(id));
+          const foundTurf = response.data.results.find((t) => t.id === parseInt(id));
           if (foundTurf) {
             setTurf(foundTurf);
           } else {
@@ -188,8 +191,6 @@ const TurfDetailPage = () => {
     fetchTurfDetail();
   }, [id, location.state]);
 
-  // ─── Format Time ──────────────────────────────────────────────────────
-
   const formatTime = (time: string | null): string => {
     if (!time) return 'Not specified';
     try {
@@ -203,29 +204,27 @@ const TurfDetailPage = () => {
     }
   };
 
-  const getTimeDisplay = (openTime: string | null, closeTime: string | null): { display: string; isNextDay: boolean } => {
+  const getTimeDisplay = (
+    openTime: string | null,
+    closeTime: string | null
+  ): { display: string; isNextDay: boolean } => {
     if (!openTime || !closeTime) {
       return { display: 'Not specified', isNextDay: false };
     }
-    
     const open = formatTime(openTime);
     const close = formatTime(closeTime);
-    
     if (openTime === closeTime) {
       return { display: '24 hours', isNextDay: false };
     }
-    
     const openHour = parseInt(openTime.split(':')[0]);
     const closeHour = parseInt(closeTime.split(':')[0]);
-    const isNextDay = closeHour < openHour || (closeHour === openHour && closeTime > openTime);
-    
-    return { 
+    const isNextDay =
+      closeHour < openHour || (closeHour === openHour && closeTime > openTime);
+    return {
       display: `${open} - ${close}${isNextDay ? ' (Next Day)' : ''}`,
-      isNextDay
+      isNextDay,
     };
   };
-
-  // ─── Get Court/Turf Label ────────────────────────────────────────────
 
   const getCourtLabel = (gameType: string): string => {
     const type = gameType?.toLowerCase() || '';
@@ -235,14 +234,10 @@ const TurfDetailPage = () => {
     return 'Turfs';
   };
 
-  // ─── Get Sport Tags ──────────────────────────────────────────────────
-
   const getSportTags = (gameType: string): string[] => {
     if (!gameType) return ['Multi-sport'];
-    return gameType.split('&').map(s => s.trim()).filter(Boolean);
+    return gameType.split('&').map((s) => s.trim()).filter(Boolean);
   };
-
-  // ─── Loading State ────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -255,15 +250,16 @@ const TurfDetailPage = () => {
     );
   }
 
-  // ─── Error State ──────────────────────────────────────────────────────
-
   if (error || !turf) {
     return (
       <div className="turf-detail__error">
         <i className="bi bi-exclamation-triangle-fill" />
         <h3>Failed to load turf details</h3>
         <p>{error || 'Turf not found'}</p>
-        <button className="btn btn-outline-success rounded-pill" onClick={() => navigate('/turfs')}>
+        <button
+          className="btn btn-outline-success rounded-pill"
+          onClick={() => navigate('/turfs')}
+        >
           <i className="bi bi-arrow-left me-1" />
           Back to Turfs
         </button>
@@ -271,40 +267,35 @@ const TurfDetailPage = () => {
     );
   }
 
-  // ─── Prepare Data ─────────────────────────────────────────────────────
-
   const isVerified = turf.type === 'real' && turf.status === 'Approved';
   const courtLabel = getCourtLabel(turf.game_type);
   const timeInfo = getTimeDisplay(turf.open_time, turf.close_time);
   const sportTags = getSportTags(turf.game_type);
-  
-  const amenities = turf.facilities ? [
-    { icon: 'car-front', label: 'Parking', available: turf.facilities.parking },
-    { icon: 'door-open', label: 'Rest room', available: turf.facilities['Rest room'] },
-    { icon: 'dribbble', label: 'Sports kits', available: turf.facilities['Sports kits'] },
-    { icon: 'person', label: 'Dressing room', available: turf.facilities['Dressing room'] },
-    { icon: 'music-note', label: 'Music systems', available: turf.facilities['Music systems'] },
-    { icon: 'cup-hot', label: 'Drinking water', available: turf.facilities['Drinking water'] },
-    { icon: 'wifi', label: 'WiFi', available: turf.facilities.wifi },
-    { icon: 'cctv', label: 'CCTV', available: turf.facilities.CCTV },
-  ] : [];
 
-  // ─── Render ────────────────────────────────────────────────────────────
+  const amenities = turf.facilities
+    ? [
+        { icon: 'car-front', label: 'Parking', available: turf.facilities.parking },
+        { icon: 'door-open', label: 'Rest room', available: turf.facilities['Rest room'] },
+        { icon: 'dribbble', label: 'Sports kits', available: turf.facilities['Sports kits'] },
+        { icon: 'person', label: 'Dressing room', available: turf.facilities['Dressing room'] },
+        { icon: 'music-note', label: 'Music systems', available: turf.facilities['Music systems'] },
+        { icon: 'cup-hot', label: 'Drinking water', available: turf.facilities['Drinking water'] },
+        { icon: 'wifi', label: 'WiFi', available: turf.facilities.wifi },
+        { icon: 'cctv', label: 'CCTV', available: turf.facilities.CCTV },
+      ]
+    : [];
 
   return (
     <div className="turf-detail">
-      {/* ─── Back Button ────────────────────────────────────────────────── */}
       <button className="turf-detail__back-btn" onClick={() => navigate('/turfs')}>
         <i className="bi bi-arrow-left" />
         Back to Turfs
       </button>
 
-      {/* ─── Image Slider ───────────────────────────────────────────────── */}
+      {/* ✅ turf.images is string[] */}
       <ImageSlider images={turf.images} name={turf.name} />
 
-      {/* ─── Content ───────────────────────────────────────────────────── */}
       <div className="turf-detail__content">
-        {/* ─── Header ──────────────────────────────────────────────────── */}
         <div className="turf-detail__header">
           <div className="turf-detail__name-section">
             <h1 className="turf-detail__name">{turf.name}</h1>
@@ -321,26 +312,20 @@ const TurfDetailPage = () => {
           </p>
         </div>
 
-        {/* ─── Quick Stats ────────────────────────────────────────────── */}
         <div className="turf-detail__stats">
-          <StatItem 
-            label="Sport" 
-            value={sportTags.join(' · ')} 
-            icon="tag"
-          />
-          <StatItem 
-            label="Max Persons" 
-            value={turf.max_persons || 'Not specified'} 
+          <StatItem label="Sport" value={sportTags.join(' · ')} icon="tag" />
+          <StatItem
+            label="Max Persons"
+            value={turf.max_persons || 'Not specified'}
             icon="people"
           />
-          <StatItem 
-            label={courtLabel} 
-            value={turf.courts || 1} 
+          <StatItem
+            label={courtLabel}
+            value={turf.courts || 1}
             icon="grid"
           />
         </div>
 
-        {/* ─── Opening Hours ───────────────────────────────────────────── */}
         <div className="turf-detail__section">
           <h3 className="turf-detail__section-title">
             <i className="bi bi-clock" />
@@ -355,7 +340,9 @@ const TurfDetailPage = () => {
               <span className="turf-detail__hours-label">Closing Time</span>
               <span className="turf-detail__hours-value">
                 {formatTime(turf.close_time)}
-                {timeInfo.isNextDay && <span className="turf-detail__next-day-badge">Next Day</span>}
+                {timeInfo.isNextDay && (
+                  <span className="turf-detail__next-day-badge">Next Day</span>
+                )}
               </span>
             </div>
             <div className="turf-detail__hours-item turf-detail__hours-item--full">
@@ -367,7 +354,6 @@ const TurfDetailPage = () => {
           </div>
         </div>
 
-        {/* ─── Amenities ───────────────────────────────────────────────── */}
         <div className="turf-detail__section">
           <h3 className="turf-detail__section-title">
             <i className="bi bi-grid-3x3-gap-fill" />
@@ -385,7 +371,6 @@ const TurfDetailPage = () => {
           </div>
         </div>
 
-        {/* ─── Available Sports ────────────────────────────────────────── */}
         <div className="turf-detail__section">
           <h3 className="turf-detail__section-title">
             <i className="bi bi-activity" />
@@ -400,19 +385,17 @@ const TurfDetailPage = () => {
           </div>
         </div>
 
-        {/* ─── Book Now Button ─────────────────────────────────────────── */}
         <div className="turf-detail__book-section">
-          <button 
+          <button
             className="turf-detail__book-btn"
-            onClick={() => {
-              navigate(`/booking/${turf.id}`, { state: { turf } });
-            }}
+            onClick={() => navigate(`/booking/${turf.id}`, { state: { turf } })}
           >
             <i className="bi bi-calendar-plus" />
             Book Now
           </button>
           <p className="turf-detail__book-note">
-            Select a date and time slot to book this {courtLabel.toLowerCase().slice(0, -1)}
+            Select a date and time slot to book this{' '}
+            {courtLabel.toLowerCase().slice(0, -1)}
           </p>
         </div>
       </div>

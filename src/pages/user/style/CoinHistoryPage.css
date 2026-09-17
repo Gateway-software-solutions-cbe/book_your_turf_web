@@ -1,0 +1,305 @@
+/* src/pages/user/style/CoinHistoryPage.css */
+.coin-history-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 16px 100px;
+}
+
+/* Header */
+.coin-history-page__header { margin-bottom: 20px; }
+
+.coin-history-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  color: #1fa463;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.coin-history-page__header h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #1a1a1a;
+}
+
+.coin-history-page__header p {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Coin Balance Card */
+.coin-balance-card {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 20px rgba(245, 158, 11, 0.25);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.coin-balance-card::before {
+  content: '';
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.coin-balance-card__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  opacity: 0.9;
+  margin-bottom: 6px;
+}
+
+.coin-balance-card__amount {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 2.2rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.coin-balance-card__amount i { font-size: 1.8rem; }
+
+.coin-balance-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.coin-balance-card__cta:hover { background: rgba(255, 255, 255, 0.3); }
+
+/* Filters */
+.coin-history-page__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.coin-history-page__filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.coin-history-page__filter-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: #6b7280;
+  min-width: 48px;
+}
+
+.coin-history-page__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.coin-history-page__chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #4b5563;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.coin-history-page__chip:hover { border-color: #1fa463; color: #1fa463; }
+.coin-history-page__chip.active {
+  background: #1fa463;
+  border-color: #1fa463;
+  color: #fff;
+}
+
+/* States */
+.coin-history-page__loading,
+.coin-history-page__error,
+.coin-history-page__empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+
+.coin-history-page__error i,
+.coin-history-page__empty i {
+  font-size: 2.6rem;
+  color: #9ca3af;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.coin-history-page__error i { color: #ef4444; }
+
+.coin-history-page__empty h3 {
+  margin: 0 0 6px;
+  color: #1a1a1a;
+  font-size: 1.05rem;
+}
+
+.coin-history-page__error button {
+  margin-top: 14px;
+  padding: 10px 22px;
+  background: #1fa463;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* List */
+.coin-history-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.coin-txn-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  background: #fff;
+  border: 1px solid #f3f4f6;
+  border-radius: 12px;
+}
+
+.coin-txn-row__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.coin-txn-row__icon--credit { background: #fef3c7; color: #b45309; }
+.coin-txn-row__icon--debit { background: #fee2e2; color: #991b1b; }
+
+.coin-txn-row__body { flex: 1; min-width: 0; }
+
+.coin-txn-row__desc {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
+
+.coin-txn-row__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: #9ca3af;
+  flex-wrap: wrap;
+}
+
+.coin-txn-row__dot { opacity: 0.5; }
+
+.coin-txn-row__ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
+  white-space: nowrap;
+}
+
+.coin-txn-row__booking-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.coin-txn-row__booking-link:hover { background: #dbeafe; }
+
+.coin-txn-row__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.coin-txn-row__amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.coin-txn-row__amount--credit { color: #b45309; }
+.coin-txn-row__amount--debit { color: #dc2626; }
+
+.coin-txn-row__amount i { font-size: 0.85rem; }
+
+.coin-txn-row__status {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.coin-txn-row__status--success { background: #d1fae5; color: #065f46; }
+.coin-txn-row__status--pending { background: #fef3c7; color: #92400e; }
+.coin-txn-row__status--failed { background: #fee2e2; color: #991b1b; }
+
+.coin-txn-row__balance {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.coin-txn-row__balance strong { color: #4b5563; }
+
+@media (max-width: 640px) {
+  .coin-history-page__filter-group { flex-direction: column; align-items: flex-start; }
+  .coin-txn-row__ref { max-width: 120px; }
+  .coin-balance-card__amount { font-size: 1.9rem; }
+}

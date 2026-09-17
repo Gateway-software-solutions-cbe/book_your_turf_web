@@ -82,8 +82,8 @@ apiClient.interceptors.response.use(
         }
       } else {
         userTokenStorage.clear();
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
+        if (!window.location.pathname.includes('/')) {
+          window.location.href = '/';
         }
       }
     }

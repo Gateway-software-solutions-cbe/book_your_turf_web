@@ -1,4 +1,5 @@
-// src/types/userAuth.ts
+// src/types/user/userAuth.ts
+
 export interface ApiResponse<T = undefined> {
   result: 'success' | 'error';
   message: string;
@@ -7,28 +8,70 @@ export interface ApiResponse<T = undefined> {
 
 export type VerificationMethod = 'email' | 'phone';
 
-// 1. Send OTP - Matches the API exactly
-export type SendOtpRequest = {
-  name: string;
-  email?: string;
-  number?: string;
-  password: string;
-  referral_code?: string;
-  verification_method: VerificationMethod;
-};
+// ─── Phone Authentication Types ──────────────────────────────────────────
 
-// 2. Verify OTP & Create Account - identifier is the actual email or number (string)
-export interface VerifyRegisterRequest {
-  identifier: string; // The actual email address or phone number as a string
+// 1. Send OTP
+export interface PhoneSendOtpRequest {
+  number: string;
+  referral_code?: string;
+}
+
+export interface PhoneSendOtpResponse {
+  number: string;
+  is_registered: boolean;
+  is_number_verified: boolean;
+}
+
+// 2. Verify OTP
+export interface PhoneVerifyOtpRequest {
+  number: string;
   otp: string;
 }
 
-// 3. Resend OTP - identifier is the actual email or number (string)
-export interface ResendOtpRequest {
-  identifier: string; // The actual email address or phone number as a string
+export interface PhoneUser {
+  id: number;
+  name: string;
+  email: string;
+  number: string;
+  is_number_verified: boolean;
+  wallet_balance: string;
+  game_coins: number;
+  referral_code: string;
 }
 
-// 4. Login
+export interface PhoneVerifyOtpResponse {
+  access: string;
+  is_new_user: boolean;
+  profile_complete: boolean;
+  user: PhoneUser;
+}
+
+// ─── Legacy Auth Types (for backward compatibility) ─────────────────────
+
+// 1. Send OTP (Registration - Email/Phone with password)
+export type SendRegistrationOtpRequest =
+  | {
+      verification_method: 'email';
+      name: string;
+      email: string;
+      password: string;
+      referral_code?: string;
+    }
+  | {
+      verification_method: 'phone';
+      name: string;
+      number: string;
+      password: string;
+      referral_code?: string;
+    };
+
+// 2. Verify OTP & Create Account
+export interface VerifyRegisterRequest {
+  identifier: string;
+  otp: string;
+}
+
+// 3. Login
 export interface LoginRequest {
   login_id: string;
   password: string;
@@ -39,9 +82,11 @@ export interface LoginUser {
   name: string;
   email: string;
   number: string;
+  is_number_verified: boolean;      // ← ADD
   wallet_balance: string;
   game_coins: number;
   referral_code: string;
+  profile_image_url?: string; 
 }
 
 export interface LoginData {
@@ -49,14 +94,42 @@ export interface LoginData {
   user: LoginUser;
 }
 
-// 5. Forgot Password - Send OTP - API expects email, number, and verification_method
-export type ForgotPasswordOtpRequest = 
-  | { verification_method: 'email'; email: string }
-  | { verification_method: 'phone'; number: string };
+// 4. Forgot Password - Send OTP
+export interface ForgotPasswordOtpRequest {
+  email: string;
+  number: string;
+  verification_method: VerificationMethod;
+}
 
-// 6. Reset Password - identifier can be email OR phone number
+// 5. Reset Password
 export interface ResetPasswordRequest {
-  identifier: string; // The actual email address OR phone number
+  identifier: string;
   otp: string;
   new_password: string;
+}
+
+// ─── Profile Types
+export interface ProfileResponse {
+  id: number;
+  name: string;
+  email: string;
+  number: string;
+  is_number_verified: boolean;
+  wallet_balance: string;
+  game_coins: number;
+  referral_code: string;
+  profile_image_url?: string;
+}
+
+export interface ProfileUpdateRequest {
+  name?: string;
+  email?: string;
+  number?: string;
+  profile_image?: File;
+}
+
+export interface ApiErrorResponse {
+  result: 'fail';
+  message: string;
+  data?: any;
 }

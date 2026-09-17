@@ -126,7 +126,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSideNav([]);
     
     // Navigate to login page
-    window.location.href = '/admin/login';
+    window.location.href = '/';
   }, []);
 
   const value: ExtendedAuthContextValue = {

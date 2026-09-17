@@ -177,7 +177,7 @@ const ForgotPassword = () => {
 
             <div className="text-center mt-3 switch-text">
               <span>Back to </span>
-              <Link to="/login" className="switch-link">
+              <Link to="/phone-auth" className="switch-link">
                 Sign In
               </Link>
             </div>

@@ -44,7 +44,7 @@ const ResetPassword = () => {
       
       console.log('📤 Reset password payload:', payload);
       await run(payload);
-      navigate('/login', { state: { passwordReset: true } });
+      navigate('/phone-auth', { state: { passwordReset: true } });
     } catch (err) {
       console.error('❌ Reset password error:', err);
     }
@@ -166,7 +166,7 @@ const ResetPassword = () => {
 
             <div className="text-center mt-3 switch-text">
               <span>Back to </span>
-              <Link to="/login" className="switch-link">
+              <Link to="/phone-auth" className="switch-link">
                 Sign In
               </Link>
             </div>

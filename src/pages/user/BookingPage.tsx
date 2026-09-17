@@ -1,9 +1,10 @@
 // src/pages/user/BookingPage.tsx
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { getTurfCalendar } from '../../api/user/turfs';
-import type { CalendarSlot } from '../../api/user/turfs';
-import './style/BookingPage.css';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
+import { getTurfCalendar } from "../../api/user/turfs";
+import { useUserAuth } from "../../context/UserAuthContext";
+import type { CalendarSlot } from "../../api/user/turfs";
+import "./style/BookingPage.css";
 
 // ─── Date Picker ──────────────────────────────────────────────────────────
 interface DatePickerProps {
@@ -18,12 +19,25 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
     setCurrentMonth(new Date(selectedDate));
   }, [selectedDate]);
 
-  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = [
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
+  ];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  
+
   const maxDate = new Date(today);
   maxDate.setDate(maxDate.getDate() + 30);
 
@@ -33,9 +47,9 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
-    
+
     const days: Date[] = [];
-    
+
     for (let i = firstDay - 1; i >= 0; i--) {
       days.push(new Date(year, month - 1, daysInPrevMonth - i));
     }
@@ -58,15 +72,19 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
   };
 
   const isToday = (date: Date) => {
-    return date.getDate() === today.getDate() &&
-           date.getMonth() === today.getMonth() &&
-           date.getFullYear() === today.getFullYear();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
   };
 
   const isSelected = (date: Date) => {
-    return date.getDate() === selectedDate.getDate() &&
-           date.getMonth() === selectedDate.getMonth() &&
-           date.getFullYear() === selectedDate.getFullYear();
+    return (
+      date.getDate() === selectedDate.getDate() &&
+      date.getMonth() === selectedDate.getMonth() &&
+      date.getFullYear() === selectedDate.getFullYear()
+    );
   };
 
   const changeMonth = (delta: number) => {
@@ -88,28 +106,30 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
           <i className="bi bi-chevron-right" />
         </button>
       </div>
-      
+
       <div className="date-picker__days-of-week">
-        {daysOfWeek.map(day => (
-          <span key={day} className="date-picker__day-label">{day}</span>
+        {daysOfWeek.map((day) => (
+          <span key={day} className="date-picker__day-label">
+            {day}
+          </span>
         ))}
       </div>
-      
+
       <div className="date-picker__days">
         {days.map((date, index) => {
           const isInRange = isDateInRange(date);
           const isTodayDate = isToday(date);
           const isSelectedDate = isSelected(date);
           const isCurrentMonth = date.getMonth() === currentMonth.getMonth();
-          
+
           return (
             <button
               key={index}
               className={`date-picker__day 
-                ${!isInRange ? 'disabled' : ''} 
-                ${isSelectedDate ? 'selected' : ''} 
-                ${isTodayDate ? 'today' : ''} 
-                ${!isCurrentMonth ? 'other-month' : ''}`}
+                ${!isInRange ? "disabled" : ""} 
+                ${isSelectedDate ? "selected" : ""} 
+                ${isTodayDate ? "today" : ""} 
+                ${!isCurrentMonth ? "other-month" : ""}`}
               onClick={() => isInRange && onDateSelect(date)}
               disabled={!isInRange}
             >
@@ -131,64 +151,67 @@ interface SlotCardProps {
 
 const SlotCard = ({ slot, isSelected, onSelect }: SlotCardProps) => {
   const formatTime = (time: string) => {
-    const [hours, minutes] = time.split(':');
+    const [hours, minutes] = time.split(":");
     const hour = parseInt(hours);
-    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const ampm = hour >= 12 ? "PM" : "AM";
     const hour12 = hour % 12 || 12;
     return `${hour12}:${minutes} ${ampm}`;
   };
 
-  // ─── Get Status Class ──────────────────────────────────────────────────
   const getStatusClass = (): string => {
-    if (isSelected) return 'selected';
-    
+    if (isSelected) return "selected";
+
     const statusMap: Record<string, string> = {
-      'Available': 'available',
-      'Booked': 'booked',
-      'Reserved': 'reserved',
-      'Blocked': 'blocked',
-      'Unavailable': 'unavailable',
+      Available: "available",
+      Booked: "booked",
+      Reserved: "reserved",
+      Blocked: "blocked",
+      Unavailable: "unavailable",
     };
-    
+
     if (slot.status && statusMap[slot.status]) {
       return statusMap[slot.status];
     }
-    
-    if (slot.is_next_day) return 'next-day';
-    return 'available';
+
+    if (slot.is_next_day) return "next-day";
+    return "available";
   };
 
-  // ─── Get Status Label ──────────────────────────────────────────────────
   const getStatusLabel = (): string => {
-    if (isSelected) return 'SELECTED';
+    if (isSelected) return "SELECTED";
     return slot.status.toUpperCase();
   };
 
-  // ─── Check if disabled ──────────────────────────────────────────────────
   const isDisabled = (): boolean => {
-    return slot.status === 'Booked' || 
-           slot.status === 'Blocked' || 
-           slot.status === 'Reserved' || 
-           slot.status === 'Unavailable';
+    return (
+      slot.status === "Booked" ||
+      slot.status === "Blocked" ||
+      slot.status === "Reserved" ||
+      slot.status === "Unavailable"
+    );
   };
 
   const disabled = isDisabled();
   const statusClass = getStatusClass();
 
   return (
-    <div 
-      className={`slot-card ${statusClass} ${isSelected ? 'selected' : ''} ${disabled ? 'disabled' : ''}`}
+    <div
+      className={`slot-card ${statusClass} ${isSelected ? "selected" : ""} ${disabled ? "disabled" : ""}`}
       onClick={() => !disabled && onSelect()}
     >
       <div className="slot-card__time">
-        <span>{formatTime(slot.start_time)} – {formatTime(slot.end_time)}</span>
-        {slot.is_next_day && statusClass !== 'booked' && (
+        <span>
+          {formatTime(slot.start_time)} – {formatTime(slot.end_time)}
+        </span>
+        {slot.is_next_day && statusClass !== "booked" && (
           <span className="slot-card__next-day-badge">Next Day</span>
         )}
       </div>
       <div className="slot-card__bottom">
         <span className="slot-card__price">₹{slot.price}</span>
-        <span className={`slot-card__status ${statusClass}`}>{getStatusLabel()}</span>
+        <span className={`slot-card__status ${statusClass}`}>
+          {getStatusLabel()}
+        </span>
       </div>
     </div>
   );
@@ -233,8 +256,8 @@ interface PaymentSummaryProps {
   selectedSlots: CalendarSlot[];
   totalAmount: number;
   advanceAmount: number;
-  paymentOption: 'full' | 'advance';
-  onPaymentOptionChange: (option: 'full' | 'advance') => void;
+  paymentOption: "full" | "advance";
+  onPaymentOptionChange: (option: "full" | "advance") => void;
   minSlots: number;
   onProceed: () => void;
 }
@@ -248,7 +271,7 @@ const PaymentSummary = ({
   minSlots,
   onProceed,
 }: PaymentSummaryProps) => {
-  const finalAmount = paymentOption === 'full' ? totalAmount : advanceAmount;
+  const finalAmount = paymentOption === "full" ? totalAmount : advanceAmount;
   const isValid = selectedSlots.length >= minSlots;
 
   return (
@@ -256,15 +279,15 @@ const PaymentSummary = ({
       <div className="payment-summary__header">
         <h3>Payment</h3>
         <div className="payment-summary__options">
-          <button 
-            className={`payment-summary__option ${paymentOption === 'full' ? 'active' : ''}`}
-            onClick={() => onPaymentOptionChange('full')}
+          <button
+            className={`payment-summary__option ${paymentOption === "full" ? "active" : ""}`}
+            onClick={() => onPaymentOptionChange("full")}
           >
             Full Payment
           </button>
-          <button 
-            className={`payment-summary__option ${paymentOption === 'advance' ? 'active' : ''}`}
-            onClick={() => onPaymentOptionChange('advance')}
+          <button
+            className={`payment-summary__option ${paymentOption === "advance" ? "active" : ""}`}
+            onClick={() => onPaymentOptionChange("advance")}
           >
             Advance Payment
           </button>
@@ -291,19 +314,21 @@ const PaymentSummary = ({
         </div>
       </div>
 
-      <button 
-        className={`payment-summary__proceed ${!isValid ? 'disabled' : ''}`}
+      <button
+        className={`payment-summary__proceed ${!isValid ? "disabled" : ""}`}
         onClick={onProceed}
         disabled={!isValid}
       >
         <i className="bi bi-credit-card" />
         Proceed to Pay
-        <span className="payment-summary__proceed-amount">₹{finalAmount.toFixed(2)}</span>
+        <span className="payment-summary__proceed-amount">
+          ₹{finalAmount.toFixed(2)}
+        </span>
       </button>
-      
+
       {!isValid && (
         <p className="payment-summary__error">
-          Minimum {minSlots} slot{minSlots > 1 ? 's' : ''} required
+          Minimum {minSlots} slot{minSlots > 1 ? "s" : ""} required
         </p>
       )}
     </div>
@@ -317,6 +342,7 @@ const BookingPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const turf = location.state?.turf;
+  const { user } = useUserAuth();
 
   const [slots, setSlots] = useState<CalendarSlot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -326,14 +352,25 @@ const BookingPage = () => {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   });
   const [selectedSlots, setSelectedSlots] = useState<CalendarSlot[]>([]);
-  const [paymentOption, setPaymentOption] = useState<'full' | 'advance'>('full');
+  const [paymentOption, setPaymentOption] = useState<"full" | "advance">(
+    "full",
+  );
+  const [selectedCourt, setSelectedCourt] = useState<number>(1);
+
+  // ─── Check if profile is complete ──────────────────────────────────
+  const isProfileComplete = !!(
+    user?.name &&
+    user?.name.trim() !== "" &&
+    user?.email &&
+    user?.email.trim() !== ""
+  );
 
   const formatDateForAPI = (date: Date) => {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}-${month}-${year}`;
-  };
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 
   // ─── Fetch Slots ──────────────────────────────────────────────────────
 
@@ -344,26 +381,28 @@ const BookingPage = () => {
       setError(null);
       try {
         const formattedDate = formatDateForAPI(selectedDate);
-        const response = await getTurfCalendar(parseInt(id), formattedDate, 1);
-        if (response.result === 'success') {
+        const response = await getTurfCalendar(parseInt(id), formattedDate, selectedCourt);
+        if (response.result === "success") {
           setSlots(response.data);
         } else {
-          setError(response.message || 'Failed to load slots');
+          setError(response.message || "Failed to load slots");
         }
       } catch (err: any) {
-        setError(err.response?.data?.message || 'Something went wrong');
+        setError(err.response?.data?.message || "Something went wrong");
       } finally {
         setLoading(false);
       }
     };
     fetchSlots();
-  }, [id, selectedDate]);
+  }, [id, selectedDate, selectedCourt]);
 
   // ─── Handlers ──────────────────────────────────────────────────────────
 
   const handleSlotSelect = (slot: CalendarSlot) => {
-    setSelectedSlots(prev => {
-      const index = prev.findIndex(s => s.start_time === slot.start_time && s.date === slot.date);
+    setSelectedSlots((prev) => {
+      const index = prev.findIndex(
+        (s) => s.start_time === slot.start_time && s.date === slot.date,
+      );
       if (index >= 0) {
         return prev.filter((_, i) => i !== index);
       }
@@ -376,7 +415,7 @@ const BookingPage = () => {
     today.setHours(0, 0, 0, 0);
     const selected = new Date(date);
     selected.setHours(0, 0, 0, 0);
-    
+
     if (selected < today) {
       setSelectedDate(new Date(today));
     } else {
@@ -386,23 +425,40 @@ const BookingPage = () => {
   };
 
   const isSlotSelected = (slot: CalendarSlot) => {
-    return selectedSlots.some(s => s.start_time === slot.start_time && s.date === slot.date);
+    return selectedSlots.some(
+      (s) => s.start_time === slot.start_time && s.date === slot.date,
+    );
   };
 
+  // ─── Handle Proceed to Payment / Profile ──────────────────────────────
   const handleProceed = () => {
-    console.log('Proceeding to payment:', {
+    // ─── Proceed to payment summary ────────────────────────────────────
+    console.log("Proceeding to payment:", {
       turfId: id,
       slots: selectedSlots,
       paymentOption,
       totalAmount,
       advanceAmount,
-      finalAmount: paymentOption === 'full' ? totalAmount : advanceAmount,
+      finalAmount: paymentOption === "full" ? totalAmount : advanceAmount,
     });
-  };
+
+    // Navigate to payment summary page
+    navigate('/payment-summary', {
+    state: {
+      turf: turf,
+      selectedSlots: selectedSlots,
+      paymentOption: paymentOption,
+      totalAmount: totalAmount,
+      advanceAmount: advanceAmount,
+      finalAmount: paymentOption === 'full' ? totalAmount : advanceAmount,
+      selectedDate: selectedDate,
+      courtNumber: selectedCourt,
+    }
+  });
+};
 
   // ─── Handle Back Navigation ──────────────────────────────────────────
   const handleBack = () => {
-    // Navigate back to turf detail with the turf data if available
     if (turf) {
       navigate(`/turfs/${id}`, { state: { turf } });
     } else {
@@ -412,8 +468,14 @@ const BookingPage = () => {
 
   // ─── Calculations ─────────────────────────────────────────────────────
 
-  const totalAmount = selectedSlots.reduce((sum, slot) => sum + parseFloat(slot.price), 0);
-  const advanceAmount = selectedSlots.reduce((sum, slot) => sum + parseFloat(slot.required_advance), 0);
+  const totalAmount = selectedSlots.reduce(
+    (sum, slot) => sum + parseFloat(slot.price),
+    0,
+  );
+  const advanceAmount = selectedSlots.reduce(
+    (sum, slot) => sum + parseFloat(slot.required_advance),
+    0,
+  );
   const minSlots = turf?.min_slots || 1;
 
   // ─── Loading ──────────────────────────────────────────────────────────
@@ -434,8 +496,11 @@ const BookingPage = () => {
       <div className="booking-page__error">
         <i className="bi bi-exclamation-triangle-fill" />
         <h3>Failed to load slots</h3>
-        <p>{error || 'Please try again'}</p>
-        <button className="booking-page__error-btn" onClick={() => navigate(`/turfs`)}>
+        <p>{error || "Please try again"}</p>
+        <button
+          className="booking-page__error-btn"
+          onClick={() => navigate(`/turfs`)}
+        >
           Back to Turfs
         </button>
       </div>
@@ -454,10 +519,12 @@ const BookingPage = () => {
         </button>
         <h1 className="booking-page__title">{turf.name}</h1>
         <div className="booking-page__meta">
-          <span className="booking-page__sport">{turf.game_type || 'Multi-sport'}</span>
+          <span className="booking-page__sport">
+            {turf.game_type || "Multi-sport"}
+          </span>
           <span className="booking-page__hours">
             {turf.open_time} – {turf.close_time}
-            {turf.open_time === turf.close_time && ' (24 hours)'}
+            {turf.open_time === turf.close_time && " (24 hours)"}
           </span>
         </div>
       </div>
@@ -466,10 +533,32 @@ const BookingPage = () => {
         {/* ─── Left Column: Calendar ──────────────────────────────────── */}
         <div className="booking-page__calendar-wrapper">
           <div className="booking-page__calendar-card">
-            <DatePicker 
+            <DatePicker
               selectedDate={selectedDate}
               onDateSelect={handleDateSelect}
             />
+            {/* ✅ ADD: Court selector */}
+            {turf?.courts && turf.courts > 1 && (
+              <div className="booking-page__court-selector">
+                <h4 className="booking-page__court-title">Select Turf/Court</h4>
+                <div className="booking-page__court-buttons">
+                  {Array.from({ length: turf.courts }, (_, i) => i + 1).map((courtNum) => (
+                    <button
+                      key={courtNum}
+                      className={`booking-page__court-btn ${
+                        selectedCourt === courtNum ? 'active' : ''
+                      }`}
+                      onClick={() => {
+                        setSelectedCourt(courtNum);
+                        setSelectedSlots([]); // Clear selection on court change
+                      }}
+                    >
+                      Turf {courtNum}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <Legend />
           </div>
         </div>
@@ -479,7 +568,9 @@ const BookingPage = () => {
           <div className="booking-page__slots-header">
             <h3 className="booking-page__slots-title">
               Available Slots
-              <span className="booking-page__slots-count">{slots.length} slots</span>
+              <span className="booking-page__slots-count">
+                {slots.length} slots
+              </span>
             </h3>
           </div>
           <div className="booking-page__slots-container">

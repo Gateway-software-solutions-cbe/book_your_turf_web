@@ -81,12 +81,34 @@ export const getTurfCalendar = async (
 /**
  * GET /api/user/applicable-discounts/
  * Get applicable discounts for a turf
+ * 
+ * @param turfId - Turf ID (required)
+ * @param date - Date in YYYY-MM-DD format (required)
+ * @param amount - Total amount before discount (optional, used for min_amount checks)
+ * @param slots - Array of slot objects with start_time (optional but recommended)
  */
 export const getApplicableDiscounts = async (
-  turfId: number
+  turfId: number,
+  date: string,
+  amount?: number,
+  slots?: { start_time: string }[]
 ): Promise<ApplicableDiscountsResponse> => {
+  const params: Record<string, any> = {
+    turf_id: turfId,
+    date: date,
+  };
+
+  if (amount !== undefined) {
+    params.amount = amount;
+  }
+
+  if (slots && slots.length > 0) {
+    params.slots = JSON.stringify(slots);
+  }
+
   const response = await apiClient.get<ApplicableDiscountsResponse>(
-    `/api/user/applicable-discounts/?turf_id=${turfId}`
+    '/api/user/applicable-discounts/',
+    { params }
   );
   return response.data;
 };

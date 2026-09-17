@@ -2,22 +2,24 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useUserAuth } from '../../../context/UserAuthContext';
-import logo from '../../../asset/favicon.png';
+import logo from '../../../asset/bytlogo.png';
 import './UserLayout.css';
+import { useRegisterDevice } from '../../../hooks/useRegisterDevice';
+import NotificationBell from '../NotificationBell';
 
 // ─── Navigation Items ──────────────────────────────────────────────────────
 const SIDEBAR_ITEMS = [
   { label: 'Home', icon: 'house-fill', path: '/turfs' },
   { label: 'My Bookings', icon: 'calendar-event-fill', path: '/bookings' },
-  { label: 'Dashboard', icon: 'person-circle', path: '/dashboard' },
+  // { label: 'Dashboard', icon: 'person-circle', path: '/dashboard' },
   { label: 'Favorite Turfs', icon: 'heart-fill', path: '/favorites' },
   { label: 'Wallet', icon: 'wallet-fill', path: '/wallet' },
-  { label: 'Wallet Transactions', icon: 'arrow-left-right', path: '/wallet/transactions' },
+  // { label: 'Wallet Transactions', icon: 'arrow-left-right', path: '/wallet/transactions' },
   { label: 'Coin History', icon: 'coin', path: '/coins/history' },
-  { label: 'App Info', icon: 'info-circle', path: '/app-info' },
-  { label: 'Privacy Policy', icon: 'shield-lock', path: '/privacy' },
-  { label: 'Terms & Conditions', icon: 'file-text', path: '/terms' },
-  { label: 'Manage Devices', icon: 'devices', path: '/devices' },
+  // { label: 'App Info', icon: 'info-circle', path: '/app-info' },
+  // { label: 'Privacy Policy', icon: 'shield-lock', path: '/privacy' },
+  // { label: 'Terms & Conditions', icon: 'file-text', path: '/terms' },
+  { label: 'Manage Devices', icon: 'phone', path: '/devices' },
 ];
 
 const BOTTOM_NAV_ITEMS = [
@@ -40,6 +42,7 @@ const UserLayout = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  useRegisterDevice();
 
   // Close sidebar on route change
   useEffect(() => {
@@ -131,15 +134,7 @@ const UserLayout = () => {
             </button>
 
             {/* Notifications */}
-            <button
-              type="button"
-              className="user-layout__notif-btn"
-              onClick={() => navigate('/notifications')}
-              aria-label="Notifications"
-            >
-              <Icon name="bell" size={22} />
-              <span className="user-layout__notif-badge">3</span>
-            </button>
+            <NotificationBell />
 
             {/* User Dropdown */}
             <div className="user-layout__user-menu" ref={dropdownRef}>
@@ -176,9 +171,9 @@ const UserLayout = () => {
                   <Link to="/profile" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                     <Icon name="person" size={18} /> Profile
                   </Link>
-                  <Link to="/settings" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
+                  {/* <Link to="/settings" className="dropdown-item" onClick={() => setDropdownOpen(false)}>
                     <Icon name="gear" size={18} /> Settings
-                  </Link>
+                  </Link> */}
                   <hr className="my-2" />
                   <button className="dropdown-item text-danger" onClick={handleLogout}>
                     <Icon name="box-arrow-right" size={18} /> Logout
@@ -230,9 +225,9 @@ const UserLayout = () => {
             </div>
 
             {/* App Version */}
-            <div className="user-layout__app-version">
+            {/* <div className="user-layout__app-version">
               App version 2.0.0
-            </div>
+            </div> */}
           </nav>
         </aside>
 

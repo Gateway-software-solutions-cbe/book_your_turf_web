@@ -822,3 +822,48 @@
     padding: 12px;
   }
 }
+
+/* src/pages/user/style/BookingPage.css */
+
+.booking-page__court-selector {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f2f1;
+}
+
+.booking-page__court-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0b1f1a;
+  margin: 0 0 10px;
+}
+
+.booking-page__court-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.booking-page__court-btn {
+  padding: 8px 16px;
+  border: 2px solid #e8edea;
+  border-radius: 10px;
+  background: #fff;
+  color: #4a5a52;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.booking-page__court-btn:hover {
+  border-color: #c8e6d4;
+  background: #f8faf9;
+}
+
+.booking-page__court-btn.active {
+  border-color: #1fa463;
+  background: rgba(31, 164, 99, 0.08);
+  color: #1fa463;
+  font-weight: 600;
+}

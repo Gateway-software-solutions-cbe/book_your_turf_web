@@ -12,8 +12,9 @@ import {
 } from "lucide-react";
 import MagneticButton from "./MagneticButton";
 import { QRCodeSVG } from "qrcode.react";
-import logo from "../../asset/favicon.png"
+import logo from "../../asset/bytlogo.png"
 import "./landing.css";
+import LogoAnimation from "../3d/LogoAnimation";
 
 const NAV_LINKS = [
   { label: "Home", href: "#home" },
@@ -231,8 +232,8 @@ const Landing = () => {
       <header className={`byt-header ${scrolled ? "byt-header--solid" : ""}`}>
         <div className="byt-header__inner">
           <Link to="/" className="byt-logo" aria-label="Book Your Turf home">
-            <img src={logo} alt="Book Your Turf" width="90" height="80"/>
-          </Link>
+  <LogoAnimation size={80} />
+</Link>
 
           <nav
             className={`byt-nav ${mobileNavOpen ? "byt-nav--open" : ""}`}
@@ -275,7 +276,7 @@ const Landing = () => {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => navigate("/login")}
+                    onClick={() => navigate("/phone-auth")}
                   >
                     <span className="byt-role-menu__title">
                       Continue as User
@@ -609,9 +610,9 @@ const Landing = () => {
               <li>
                 <Link to="/admin/login">Admin panel</Link>
               </li>
-              <li>
+              {/* <li>
                 <Link to="/login">Login</Link>
-              </li>
+              </li> */}
             </ul>
           </div>
 

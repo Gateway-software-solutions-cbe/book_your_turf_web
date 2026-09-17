@@ -1,188 +1,186 @@
 // src/pages/user/auth/VerifyOtp.tsx
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { otpSchema, type OtpFormValues } from '../../../validations/auth.schema';
-import { verifyRegister, resendOtp } from '../../../api/user/userAuth';
-import { useApiState } from '../../../hooks/useApiState';
-import type { VerificationMethod } from '../../../types/user/userAuth';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { phoneSendOtp, phoneVerifyOtp } from '../../../api/user/userAuth';
+import { useUserAuth } from '../../../context/UserAuthContext';
 import './auth.css';
 
-const RESEND_COOLDOWN_SECONDS = 30;
-
 interface LocationState {
-  identifier: string; // The actual email address or phone number
-  verification_method: VerificationMethod;
-  flow: 'register' | 'forgot-password';
+  number: string;
+  is_registered: boolean;
+  is_number_verified: boolean;
 }
 
 const VerifyOtp = () => {
-  const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as LocationState | undefined;
+  const navigate = useNavigate();
+  const { loginSuccess } = useUserAuth();
+  
+  const state = location.state as LocationState;
 
-  const [cooldown, setCooldown] = useState(RESEND_COOLDOWN_SECONDS);
+  const [otp, setOtp] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(30);
+  const [resending, setResending] = useState(false);
 
-  const { run: verifyRun, loading: verifying, error: verifyError } = useApiState(verifyRegister);
-  const { run: resendRun, loading: resending, error: resendError } = useApiState(resendOtp);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<OtpFormValues>({ resolver: zodResolver(otpSchema) });
-
+  // ─── Cooldown timer ─────────────────────────────────────────────────
   useEffect(() => {
-    if (!state?.identifier) navigate('/register', { replace: true });
-  }, [state, navigate]);
+    timerRef.current = setInterval(() => {
+      setCooldown((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
 
-  useEffect(() => {
-    if (cooldown === 0) return;
-    const timer = setInterval(() => setCooldown((c) => c - 1), 1000);
-    return () => clearInterval(timer);
-  }, [cooldown]);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
 
-  if (!state?.identifier) return null;
+  // ─── Handle Verify ────────────────────────────────────────────────
+  const handleVerify = async () => {
+    if (!otp || otp.length < 6) {
+      setError('Please enter the 6-digit OTP');
+      return;
+    }
 
-  const onSubmit = async (values: OtpFormValues) => {
+    setLoading(true);
+    setError(null);
+
     try {
-      // identifier is the actual email or phone number as a string
       const payload = {
-        identifier: state.identifier,
-        otp: values.otp,
+        number: state.number,
+        otp: otp,
       };
       
-      console.log('📤 Verifying OTP payload:', payload);
-      await verifyRun(payload);
-      navigate('/login', { state: { registered: true } });
-    } catch (err) {
+      console.log('📤 Verifying OTP:', payload);
+      
+      const response = await phoneVerifyOtp(payload);
+      
+      if (response.data.result === 'success' && response.data.data) {
+        const data = response.data.data;
+        
+        console.log('📥 Verify response:', data);
+        
+        // Save user data
+        localStorage.setItem('user_phone', state.number);
+        localStorage.setItem('user_access_token', data.access);
+        localStorage.setItem('user_data', JSON.stringify(data.user));
+        
+        // Update auth context
+        loginSuccess({
+          access: data.access,
+          user: {
+            id: data.user.id,
+            name: data.user.name,
+            email: data.user.email,
+            number: data.user.number,
+            wallet_balance: data.user.wallet_balance,
+            game_coins: data.user.game_coins,
+            referral_code: data.user.referral_code,
+          }
+        });
+        
+        // ─── ALWAYS navigate to Turfs page ──────────────────────────────
+        // Profile completion is required ONLY at booking time
+        // Users can browse turfs freely without completing profile
+        navigate('/turfs');
+        
+      } else {
+        setError(response.data.message || 'Invalid OTP');
+      }
+    } catch (err: any) {
       console.error('❌ Verification error:', err);
+      setError(err.response?.data?.message || 'Verification failed');
+    } finally {
+      setLoading(false);
     }
   };
 
+  // ─── Handle Resend ────────────────────────────────────────────────
   const handleResend = async () => {
-    try {
-      // identifier is the actual email or phone number as a string
-      const payload = {
-        identifier: state.identifier,
-      };
-      console.log('📤 Resending OTP payload:', payload);
-      await resendRun(payload);
-      setCooldown(RESEND_COOLDOWN_SECONDS);
-    } catch (err) {
-      console.error('❌ Resend error:', err);
-    }
-  };
+    if (cooldown > 0) return;
+    
+    setResending(true);
+    setError(null);
 
-  // Format the identifier for display (mask phone number)
-  const formatIdentifier = (identifier: string, method: VerificationMethod) => {
-    if (method === 'phone' && identifier.length === 10) {
-      return identifier.slice(0, 3) + '******' + identifier.slice(-2);
+    try {
+      const payload = {
+        number: state.number,
+      };
+      
+      const response = await phoneSendOtp(payload);
+      
+      if (response.data.result === 'success') {
+        setCooldown(30);
+        setOtp('');
+      } else {
+        setError(response.data.message || 'Failed to resend OTP');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to resend OTP');
+    } finally {
+      setResending(false);
     }
-    return identifier;
   };
 
   return (
-    <div className="login-container">
-      <div className="login-bg">
-        <div className="stadium-lights">
-          <div className="light left" />
-          <div className="light right" />
-          <div className="light center" />
-        </div>
-        <div className="goalpost left" />
-        <div className="goalpost right" />
-        <div className="field-lines" />
-        <div className="turf-texture" />
-        <div className="field-circle" />
-      </div>
-
-      <div className="login-card-wrapper">
-        <div className="login-card glass-card">
-          <div className="text-center mb-3">
-            <div className="logo-icon">
-              <i className="bi bi-envelope-check-fill" />
-            </div>
-            <h1 className="login-title">Verify OTP</h1>
-            <p className="login-subtitle">
-              Enter the OTP sent to{' '}
-              <strong>{formatIdentifier(state.identifier, state.verification_method)}</strong>
-            </p>
-          </div>
-
-          {verifyError && (
-            <div className="alert alert-danger">
-              <i className="bi bi-exclamation-triangle-fill me-1" />
-              {verifyError}
-            </div>
-          )}
-          {resendError && (
-            <div className="alert alert-danger">
-              <i className="bi bi-exclamation-triangle-fill me-1" />
-              {resendError}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit(onSubmit)} noValidate>
-            <div className="form-floating mb-3">
-              <input
-                className={`form-control text-center ${errors.otp ? 'is-invalid' : ''}`}
-                maxLength={6}
-                placeholder="Enter OTP"
-                {...register('otp')}
-              />
-              <label>
-                <i className="bi bi-shield-check me-2" />
-                Enter OTP
-              </label>
-              {errors.otp && <div className="invalid-feedback">{errors.otp.message}</div>}
-            </div>
-
-            <button type="submit" className="btn btn-success w-100 login-btn" disabled={verifying}>
-              {verifying ? (
-                <>
-                  <span className="spinner-border spinner-border-sm me-2" role="status" />
-                  Verifying...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-check-circle me-2" />
-                  Verify & Continue
-                </>
-              )}
-            </button>
-
-            <div className="text-center mt-3">
-              {cooldown > 0 ? (
-                <span className="text-muted">Resend OTP in {cooldown}s</span>
-              ) : (
-                <button
-                  type="button"
-                  className="btn btn-link p-0 text-decoration-none switch-link"
-                  onClick={handleResend}
-                  disabled={resending}
-                >
-                  {resending ? 'Resending...' : 'Resend OTP'}
-                </button>
-              )}
-            </div>
-
-            <div className="text-center mt-2 switch-text">
-              <span>Back to </span>
-              <Link to="/login" className="switch-link">
-                Sign In
-              </Link>
-            </div>
-          </form>
-        </div>
-
-        <div className="login-footer">
-          <p>
-            <i className="bi bi-shield-check me-1" />
-            Secure &nbsp;·&nbsp; <i className="bi bi-clock me-1" /> 24/7 Booking
+    <div className="auth-container">
+      <div className="auth-card auth-card--otp">
+        <div className="auth-otp-header">
+          <i className="bi bi-shield-check" />
+          <h2>Verify OTP</h2>
+          <p>Enter the OTP sent to <strong>{state.number}</strong></p>
+          <p className="auth-otp-sub">
+            {state.is_registered ? 'Welcome back!' : 'Creating your account...'}
           </p>
         </div>
+
+        {error && <div className="auth-error">{error}</div>}
+
+        <div className="auth-otp-inputs">
+          <input
+            type="text"
+            maxLength={6}
+            value={otp}
+            onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+            placeholder="Enter OTP"
+            className="auth-otp-field"
+            autoFocus
+          />
+        </div>
+
+        <button 
+          className="auth-btn"
+          onClick={handleVerify}
+          disabled={loading || otp.length < 6}
+        >
+          {loading ? (
+            <>
+              <span className="spinner-border spinner-border-sm me-2" role="status" />
+              Verifying...
+            </>
+          ) : (
+            'Verify OTP'
+          )}
+        </button>
+
+        <div className="auth-resend">
+          {cooldown > 0 ? (
+            <span>Resend OTP in {cooldown}s</span>
+          ) : (
+            <button onClick={handleResend} disabled={resending}>
+              {resending ? 'Sending...' : 'Resend OTP'}
+            </button>
+          )}
+        </div>
+
+        <button 
+          className="auth-link-btn"
+          onClick={() => navigate('/phone-auth')}
+        >
+          Use a different number
+        </button>
       </div>
     </div>
   );

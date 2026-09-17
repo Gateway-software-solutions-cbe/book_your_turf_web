@@ -9,7 +9,7 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ 
   requireAuth = true, 
-  redirectTo = '/login' 
+  redirectTo = '/' 
 }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useUserAuth();
   const location = useLocation();

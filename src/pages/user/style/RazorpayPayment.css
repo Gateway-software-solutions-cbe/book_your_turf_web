@@ -1,0 +1,108 @@
+/* src/pages/user/style/RazorpayPayment.css */
+
+.razorpay-payment {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f4f8f6 0%, #e8f0eb 100%);
+  padding: 20px;
+}
+
+.razorpay-payment__card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 40px 32px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.razorpay-payment__card h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0b1f1a;
+  margin: 0;
+}
+
+.razorpay-payment__card p {
+  font-size: 14px;
+  color: #6c7a72;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.razorpay-payment__error-icon {
+  font-size: 56px;
+  color: #dc3545;
+}
+
+.razorpay-payment__actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.razorpay-payment__btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.razorpay-payment__btn--outline {
+  background: transparent;
+  border: 2px solid #1fa463;
+  color: #1fa463;
+}
+
+.razorpay-payment__btn--outline:hover {
+  background: #f0f9f4;
+}
+
+.razorpay-payment__btn--primary {
+  background: linear-gradient(135deg, #1fa463, #0f6e42);
+  color: #fff;
+}
+
+.razorpay-payment__btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(31, 164, 99, 0.25);
+}
+
+.razorpay-payment__btn:not(.razorpay-payment__btn--outline):not(.razorpay-payment__btn--primary) {
+  background: linear-gradient(135deg, #1fa463, #0f6e42);
+  color: #fff;
+  width: 100%;
+}
+
+.razorpay-payment__btn:not(.razorpay-payment__btn--outline):not(.razorpay-payment__btn--primary):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(31, 164, 99, 0.25);
+}
+
+/* ─── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .razorpay-payment__card {
+    padding: 32px 24px;
+    border-radius: 16px;
+  }
+
+  .razorpay-payment__card h2 {
+    font-size: 18px;
+  }
+
+  .razorpay-payment__actions {
+    flex-direction: column;
+  }
+}

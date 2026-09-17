@@ -3,9 +3,11 @@ import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext';
 import { UserAuthProvider } from '../context/UserAuthContext';
+import { FavoritesProvider } from '../context/FavoritesContext';
 import { commonRoutes } from './common.routes';
 import { adminRoutes } from './admin.routes';
 import { userRoutes } from './user.routes';
+import { NotificationsProvider } from '../context/NotificationsContext';
 // import { partnerRoutes } from './partner.routes';
 
 const PageLoader = () => (
@@ -40,6 +42,8 @@ const AppRouter: React.FC = () => {
     <BrowserRouter>
       <AuthProvider>
         <UserAuthProvider>
+          <FavoritesProvider>
+            <NotificationsProvider>
           <Suspense fallback={<PageLoader />}>
             <Routes>
               {allRoutes.map((route, index) => {
@@ -95,6 +99,8 @@ const AppRouter: React.FC = () => {
               })}
             </Routes>
           </Suspense>
+          </NotificationsProvider>
+          </FavoritesProvider>
         </UserAuthProvider>
       </AuthProvider>
     </BrowserRouter>

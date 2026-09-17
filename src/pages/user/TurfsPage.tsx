@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useUserAuth } from '../../context/UserAuthContext';
 import { listTurfs } from '../../api/user/turfs';
 import type { Turf, ListTurfsParams } from '../../types/user/turf';
+import FavoriteButton from '../../components/user/FavoriteButton';
 import './style/TurfsPage.css';
 
 // ─── Sport Filter ──────────────────────────────────────────────────────────
@@ -26,24 +27,33 @@ const SportFilter = ({ label, icon, active, onClick }: SportFilterProps) => (
 
 // ─── Turf Card ─────────────────────────────────────────────────────────────
 interface TurfCardProps {
-  turf: Turf;
+  turf: Turf;                         // ✅ images: string[]
   onClick: () => void;
 }
 
 const TurfCard = ({ turf, onClick }: TurfCardProps) => {
-  const firstImage = turf.images?.[0] || 'https://placehold.co/600x400/0b1f1a/1fa463?text=BYT';
+  // ✅ images are strings — direct index access
+  const firstImage =
+    turf.images?.[0] ||
+    'https://placehold.co/600x400/0b1f1a/1fa463?text=BYT';
+
   const isReal = turf.type === 'real';
   const isVerified = isReal && turf.status === 'Approved';
   const isMock = turf.type === 'mock';
   const gameType = turf.game_type || 'Multi-sport';
-  
-  const distanceDisplay = turf.distance_km !== null && turf.distance_km !== undefined
-    ? `${turf.distance_km < 1 ? '<1' : Math.round(turf.distance_km)} km away`
-    : null;
 
-  const shortAddress = turf.address?.split(',')?.slice(0, 2)?.join(',') || turf.address || 'Location not available';
+  const distanceDisplay =
+    turf.distance_km !== null && turf.distance_km !== undefined
+      ? `${turf.distance_km < 1 ? '<1' : Math.round(turf.distance_km)} km away`
+      : null;
+
+  const shortAddress =
+    turf.district && turf.state
+      ? `${turf.district}, ${turf.state}`
+      : turf.address || 'Location not available';
+
   const showVerifiedBadge = isReal && isVerified;
-  const showFavourite = isReal && !isMock;
+  const showFavourite = isReal && turf.is_bookable !== false;
 
   const handleAction = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -70,7 +80,7 @@ const TurfCard = ({ turf, onClick }: TurfCardProps) => {
     <div className="turf-card" onClick={onClick}>
       <div className="turf-card__image">
         <img src={firstImage} alt={turf.name} loading="lazy" />
-        
+
         {showVerifiedBadge && (
           <div className="turf-card__verified-badge">
             <i className="bi bi-check-circle-fill" />
@@ -78,22 +88,16 @@ const TurfCard = ({ turf, onClick }: TurfCardProps) => {
         )}
 
         {showFavourite && (
-          <button 
-            className="turf-card__favourite-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              console.log('Toggle favourite for:', turf.id);
-            }}
-          >
-            <i className={`bi ${turf.is_favorited ? 'bi-heart-fill' : 'bi-heart'}`} />
-          </button>
+          <div className="turf-card__favourite-wrap">
+            <FavoriteButton turfId={turf.id} size="sm" position="inline" />
+          </div>
         )}
       </div>
 
       <div className="turf-card__body">
         <h3 className="turf-card__name">{turf.name}</h3>
         <p className="turf-card__address">{shortAddress}</p>
-        
+
         <div className="turf-card__meta-row">
           <span className="turf-card__sport">
             <i className="bi bi-tag" />
@@ -107,8 +111,8 @@ const TurfCard = ({ turf, onClick }: TurfCardProps) => {
           )}
         </div>
 
-        <button 
-          className={`turf-card__action-btn ${isMock ? 'turf-card__action-btn--call' : ''}`} 
+        <button
+          className={`turf-card__action-btn ${isMock ? 'turf-card__action-btn--call' : ''}`}
           onClick={handleAction}
         >
           <i className={getButtonIcon()} />
@@ -132,18 +136,26 @@ const TurfSkeleton = () => (
 );
 
 // ─── Empty State ──────────────────────────────────────────────────────────
-const EmptyState = ({ onRetry, searchQuery, sportName }: { onRetry: () => void; searchQuery: string; sportName: string }) => (
+const EmptyState = ({
+  onRetry,
+  searchQuery,
+  sportName,
+}: {
+  onRetry: () => void;
+  searchQuery: string;
+  sportName: string;
+}) => (
   <div className="empty-state">
     <div className="empty-state__icon">
       <i className="bi bi-search" />
     </div>
     <h3 className="empty-state__title">No turfs found</h3>
     <p className="empty-state__desc">
-      {searchQuery 
-        ? `No turfs match your search "${searchQuery}"` 
-        : sportName 
-          ? `No "${sportName}" turfs available within 25km of your location`
-          : 'No turfs available within 25km of your location'}
+      {searchQuery
+        ? `No turfs match your search "${searchQuery}"`
+        : sportName
+        ? `No "${sportName}" turfs available within 25km of your location`
+        : 'No turfs available within 25km of your location'}
     </p>
     <button className="empty-state__btn" onClick={onRetry}>
       <i className="bi bi-arrow-clockwise me-1" />
@@ -199,7 +211,6 @@ const TurfsPage = () => {
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  // ─── Sport Filters ──────────────────────────────────────────────────────
   const sports = [
     { label: 'All', icon: 'grid' },
     { label: 'Cricket & Football', icon: 'people' },
@@ -207,25 +218,12 @@ const TurfsPage = () => {
     { label: 'Badminton', icon: 'badminton' },
   ];
 
-  // ─── Sport Name to API Format Map ─────────────────────────────────────
   const sportMap: Record<string, string> = {
     'Cricket & Football': 'cricket & football',
-    'Pickleball': 'pickleball',
-    'Badminton': 'badminton',
+    Pickleball: 'pickleball',
+    Badminton: 'badminton',
   };
 
-  // ─── Get Sport Display Name ────────────────────────────────────────────
-  const getSportDisplayName = (sport: string | null): string => {
-    if (!sport) return '';
-    const map: Record<string, string> = {
-      'cricket & football': 'Cricket & Football',
-      'pickleball': 'Pickleball',
-      'badminton': 'Badminton',
-    };
-    return map[sport] || sport;
-  };
-
-  // ─── Get User Location ──────────────────────────────────────────────────
   const getUserLocation = useCallback(async (): Promise<{ lat: number; lng: number }> => {
     if (user?.latitude && user?.longitude) {
       return {
@@ -237,10 +235,7 @@ const TurfsPage = () => {
     const storedLat = localStorage.getItem('user_lat');
     const storedLng = localStorage.getItem('user_lng');
     if (storedLat && storedLng) {
-      return {
-        lat: parseFloat(storedLat),
-        lng: parseFloat(storedLng),
-      };
+      return { lat: parseFloat(storedLat), lng: parseFloat(storedLng) };
     }
 
     try {
@@ -264,17 +259,15 @@ const TurfsPage = () => {
     }
   }, [user]);
 
-  // ─── Load Location on Mount ────────────────────────────────────────────
   useEffect(() => {
     const loadLocation = async () => {
-      const location = await getUserLocation();
-      setUserLocation(location);
+      const loc = await getUserLocation();
+      setUserLocation(loc);
       setLocationLoaded(true);
     };
     loadLocation();
   }, [getUserLocation]);
 
-  // ─── Parse search from URL ─────────────────────────────────────────────
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const search = params.get('search');
@@ -287,19 +280,19 @@ const TurfsPage = () => {
     }
   }, [location.search]);
 
-  // ─── Update URL when search changes ──────────────────────────────────
-  const updateSearchParam = useCallback((query: string) => {
-    const params = new URLSearchParams(location.search);
-    if (query) {
-      params.set('search', query);
-    } else {
-      params.delete('search');
-    }
-    const newUrl = params.toString() ? `${location.pathname}?${params}` : location.pathname;
-    navigate(newUrl, { replace: true });
-  }, [location.pathname, location.search, navigate]);
+  const updateSearchParam = useCallback(
+    (query: string) => {
+      const params = new URLSearchParams(location.search);
+      if (query) params.set('search', query);
+      else params.delete('search');
+      const newUrl = params.toString()
+        ? `${location.pathname}?${params}`
+        : location.pathname;
+      navigate(newUrl, { replace: true });
+    },
+    [location.pathname, location.search, navigate]
+  );
 
-  // ─── Handle Search Change ─────────────────────────────────────────────
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setIsSearching(!!value.trim());
@@ -312,219 +305,173 @@ const TurfsPage = () => {
     updateSearchParam('');
   };
 
-  // ─── Fetch Turfs ──────────────────────────────────────────────────────
-
-  const fetchTurfs = useCallback(async (reset = true) => {
-    if (!locationLoaded || !userLocation) return;
-
-    if (reset) {
-      setLoading(true);
-      setPage(1);
-      setError(null);
-    } else {
-      setLoadingMore(true);
-    }
-
-    try {
-      const currentPage = reset ? 1 : page + 1;
-      
-      // ─── Determine if we should search ALL turfs ──────────────────────
-      const isManualSearch = searchQuery.trim().length > 0;
-      
-      // Sport filter value
-      const sportValue = selectedSport && selectedSport !== 'All' 
-        ? sportMap[selectedSport] 
-        : null;
-
-      console.log('🔍 Search state:', { 
-        searchQuery, 
-        isManualSearch, 
-        selectedSport, 
-        sportValue 
-      });
-
-      // ─── CASE 1: Manual Search (user typed in search bar) ──────────────
-      if (isManualSearch) {
-        const searchParams: ListTurfsParams = {
-          page: currentPage,
-          page_size: 50,
-          search: searchQuery,
-        };
-
-        // If sport filter is also active, filter results manually after fetch
-        // (Since API search might not support sport filtering properly)
-
-        console.log('🔍 Manual Search (ALL turfs):', searchParams);
-        const response = await listTurfs(searchParams);
-
-        if (response.result === 'success' && response.data) {
-          let { results, count } = response.data;
-          
-          // ─── Manual sport filter (client-side) ──────────────────────────
-          if (sportValue) {
-            results = results.filter(t => 
-              t.game_type?.toLowerCase().includes(sportValue.toLowerCase())
-            );
-            count = results.length;
-            console.log(`🏏 Filtered by sport "${sportValue}": ${results.length} turfs`);
-          }
-          
-          // Calculate distances
-          const processedResults = results.map(turf => {
-            if (turf.distance_km === null && turf.latitude && turf.longitude) {
-              turf.distance_km = calculateDistance(
-                userLocation.lat,
-                userLocation.lng,
-                parseFloat(turf.latitude),
-                parseFloat(turf.longitude)
-              );
-            }
-            return turf;
-          });
-
-          // Sort: Real turfs first (by distance), mock turfs at the end
-          const sortedResults = [...processedResults].sort((a, b) => {
-            if (a.type === 'mock' && b.type !== 'mock') return 1;
-            if (b.type === 'mock' && a.type !== 'mock') return -1;
-            if (a.distance_km === null && b.distance_km === null) return 0;
-            if (a.distance_km === null) return 1;
-            if (b.distance_km === null) return -1;
-            return a.distance_km - b.distance_km;
-          });
-
-          if (reset) {
-            setTurfs(sortedResults);
-          } else {
-            setTurfs(prev => [...prev, ...sortedResults]);
-          }
-          setTotalCount(count);
-          setHasMore(results.length > 0 && currentPage * 20 < count);
-        }
-      } 
-      // ─── CASE 2: Sport Filter Only (no manual search) ──────────────────
-      else if (sportValue) {
-        // Fetch ALL turfs within 25km, then filter by sport client-side
-        const sportParams: ListTurfsParams = {
-          page: currentPage,
-          page_size: 50,
-          lat: userLocation.lat,
-          lng: userLocation.lng,
-          radius: 25,
-        };
-
-        console.log('📍 Fetching all turfs within 25km for sport filter:', sportParams);
-        const response = await listTurfs(sportParams);
-
-        if (response.result === 'success' && response.data) {
-          let { results, count } = response.data;
-          
-          // ─── Filter by sport client-side ────────────────────────────────
-          const filteredResults = results.filter(t => {
-            // Only real turfs (no mock turfs in sport filter)
-            if (t.type === 'mock') return false;
-            // Check if game_type matches the sport
-            const gameType = t.game_type?.toLowerCase() || '';
-            return gameType.includes(sportValue.toLowerCase());
-          });
-          
-          console.log(`🏏 Sport filter "${sportValue}": ${filteredResults.length} turfs found`);
-          
-          // Sort by distance (nearest first)
-          const sortedResults = [...filteredResults].sort((a, b) => {
-            if (a.distance_km === null && b.distance_km === null) return 0;
-            if (a.distance_km === null) return 1;
-            if (b.distance_km === null) return -1;
-            return a.distance_km - b.distance_km;
-          });
-
-          if (reset) {
-            setTurfs(sortedResults);
-          } else {
-            setTurfs(prev => [...prev, ...sortedResults]);
-          }
-          setTotalCount(sortedResults.length);
-          setHasMore(results.length > 0 && currentPage * 20 < count);
-        }
-      }
-      // ─── CASE 3: Default (No search, no sport filter) ──────────────────
-      else {
-        const defaultParams: ListTurfsParams = {
-          page: currentPage,
-          page_size: 50,
-          lat: userLocation.lat,
-          lng: userLocation.lng,
-          radius: 25,
-        };
-
-        console.log('📍 Default (within 25km):', defaultParams);
-        const response = await listTurfs(defaultParams);
-
-        if (response.result === 'success' && response.data) {
-          const { results, count } = response.data;
-          
-          // Filter: Only real turfs (no mock turfs in default view)
-          const realTurfs = results.filter(t => t.type === 'real');
-          
-          // Sort by distance (nearest first)
-          const sortedResults = [...realTurfs].sort((a, b) => {
-            if (a.distance_km === null && b.distance_km === null) return 0;
-            if (a.distance_km === null) return 1;
-            if (b.distance_km === null) return -1;
-            return a.distance_km - b.distance_km;
-          });
-
-          if (reset) {
-            setTurfs(sortedResults);
-          } else {
-            setTurfs(prev => [...prev, ...sortedResults]);
-          }
-          setTotalCount(sortedResults.length);
-          setHasMore(results.length > 0 && currentPage * 20 < count);
-        }
-      }
-
-      if (!reset) {
-        setPage(currentPage);
-      }
-
-    } catch (err: any) {
-      console.error('❌ Failed to fetch turfs:', err);
-      setError(err.response?.data?.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
-      setLoadingMore(false);
-    }
-  }, [searchQuery, selectedSport, page, userLocation, locationLoaded]);
-
-  // ─── Distance Calculation Helper ──────────────────────────────────────
-  const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+  const calculateDistance = (
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number => {
     if (!lat2 || !lon2) return 0;
     const R = 6371;
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-              Math.sin(dLon/2) * Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c;
   };
 
-  // ─── Effects ──────────────────────────────────────────────────────────
+  const fetchTurfs = useCallback(
+    async (reset = true) => {
+      if (!locationLoaded || !userLocation) return;
+
+      if (reset) {
+        setLoading(true);
+        setPage(1);
+        setError(null);
+      } else {
+        setLoadingMore(true);
+      }
+
+      try {
+        const currentPage = reset ? 1 : page + 1;
+        const isManualSearch = searchQuery.trim().length > 0;
+        const sportValue =
+          selectedSport && selectedSport !== 'All'
+            ? sportMap[selectedSport]
+            : null;
+
+        if (isManualSearch) {
+          const searchParams: ListTurfsParams = {
+            page: currentPage,
+            page_size: 50,
+            search: searchQuery,
+          };
+
+          const response = await listTurfs(searchParams);
+
+          if (response.result === 'success' && response.data) {
+            let { results, count } = response.data;
+
+            if (sportValue) {
+              results = results.filter((t) =>
+                t.game_type?.toLowerCase().includes(sportValue.toLowerCase())
+              );
+              count = results.length;
+            }
+
+            const processedResults = results.map((turf) => {
+              if (turf.distance_km === null && turf.latitude && turf.longitude) {
+                turf.distance_km = calculateDistance(
+                  userLocation.lat,
+                  userLocation.lng,
+                  parseFloat(turf.latitude),
+                  parseFloat(turf.longitude)
+                );
+              }
+              return turf;
+            });
+
+            const sortedResults = [...processedResults].sort((a, b) => {
+              if (a.type === 'mock' && b.type !== 'mock') return 1;
+              if (b.type === 'mock' && a.type !== 'mock') return -1;
+              if (a.distance_km === null && b.distance_km === null) return 0;
+              if (a.distance_km === null) return 1;
+              if (b.distance_km === null) return -1;
+              return a.distance_km - b.distance_km;
+            });
+
+            setTurfs(reset ? sortedResults : (prev) => [...prev, ...sortedResults]);
+            setTotalCount(count);
+            setHasMore(results.length > 0 && currentPage * 20 < count);
+          }
+        } else if (sportValue) {
+          const sportParams: ListTurfsParams = {
+            page: currentPage,
+            page_size: 50,
+            lat: userLocation.lat,
+            lng: userLocation.lng,
+            radius: 25,
+          };
+
+          const response = await listTurfs(sportParams);
+
+          if (response.result === 'success' && response.data) {
+            const { results, count } = response.data;
+
+            const filteredResults = results.filter((t) => {
+              if (t.type === 'mock') return false;
+              const gameType = t.game_type?.toLowerCase() || '';
+              return gameType.includes(sportValue.toLowerCase());
+            });
+
+            const sortedResults = [...filteredResults].sort((a, b) => {
+              if (a.distance_km === null && b.distance_km === null) return 0;
+              if (a.distance_km === null) return 1;
+              if (b.distance_km === null) return -1;
+              return a.distance_km - b.distance_km;
+            });
+
+            setTurfs(reset ? sortedResults : (prev) => [...prev, ...sortedResults]);
+            setTotalCount(sortedResults.length);
+            setHasMore(results.length > 0 && currentPage * 20 < count);
+          }
+        } else {
+          const defaultParams: ListTurfsParams = {
+            page: currentPage,
+            page_size: 50,
+            lat: userLocation.lat,
+            lng: userLocation.lng,
+            radius: 25,
+          };
+
+          const response = await listTurfs(defaultParams);
+
+          if (response.result === 'success' && response.data) {
+            const { results, count } = response.data;
+
+            const realTurfs = results.filter((t) => t.type === 'real');
+
+            const sortedResults = [...realTurfs].sort((a, b) => {
+              if (a.distance_km === null && b.distance_km === null) return 0;
+              if (a.distance_km === null) return 1;
+              if (b.distance_km === null) return -1;
+              return a.distance_km - b.distance_km;
+            });
+
+            setTurfs(reset ? sortedResults : (prev) => [...prev, ...sortedResults]);
+            setTotalCount(sortedResults.length);
+            setHasMore(results.length > 0 && currentPage * 20 < count);
+          }
+        }
+
+        if (!reset) setPage(currentPage);
+      } catch (err: any) {
+        console.error('❌ Failed to fetch turfs:', err);
+        setError(err.response?.data?.message || 'Something went wrong');
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [searchQuery, selectedSport, page, userLocation, locationLoaded]
+  );
 
   useEffect(() => {
     if (locationLoaded && userLocation) {
       fetchTurfs(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, selectedSport, locationLoaded, userLocation]);
-
-  // ─── Infinite Scroll ──────────────────────────────────────────────────
 
   useEffect(() => {
     if (loading || !hasMore || !locationLoaded) return;
 
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
+    if (observerRef.current) observerRef.current.disconnect();
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -535,18 +482,13 @@ const TurfsPage = () => {
       { threshold: 0.1, rootMargin: '100px' }
     );
 
-    if (loadMoreRef.current) {
-      observerRef.current.observe(loadMoreRef.current);
-    }
+    if (loadMoreRef.current) observerRef.current.observe(loadMoreRef.current);
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
+      if (observerRef.current) observerRef.current.disconnect();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasMore, loadingMore, loading, locationLoaded]);
-
-  // ─── Handlers ──────────────────────────────────────────────────────────
 
   const handleSportSelect = (sport: string) => {
     setSelectedSport(sport === 'All' ? null : sport);
@@ -560,14 +502,11 @@ const TurfsPage = () => {
     fetchTurfs(true);
   };
 
-  // ─── Get Sport Display Name for Empty State ──────────────────────────
-  const sportDisplayName = selectedSport && selectedSport !== 'All' 
-    ? selectedSport 
-    : '';
+  const sportDisplayName =
+    selectedSport && selectedSport !== 'All' ? selectedSport : '';
 
   return (
     <div className="turfs-page">
-      {/* Header */}
       <div className="turfs-page__header">
         <div>
           <h1 className="turfs-page__greeting">
@@ -578,23 +517,21 @@ const TurfsPage = () => {
         <div className="turfs-page__location-badge">
           <i className="bi bi-geo-alt-fill" />
           <span>
-            {searchQuery.trim() 
-              ? `Searching: "${searchQuery}"` 
+            {searchQuery.trim()
+              ? `Searching: "${searchQuery}"`
               : `${totalCount} turf${totalCount !== 1 ? 's' : ''} within 25km`}
           </span>
         </div>
       </div>
 
-      {/* Search Bar */}
       <div className="turfs-page__search-wrapper">
-        <SearchBar 
+        <SearchBar
           value={searchQuery}
           onChange={handleSearchChange}
           onClear={handleClearSearch}
         />
       </div>
 
-      {/* Filters */}
       <div className="turfs-page__filters-row">
         <div className="turfs-page__filters">
           {sports.map((sport) => (
@@ -602,19 +539,23 @@ const TurfsPage = () => {
               key={sport.label}
               label={sport.label}
               icon={sport.icon}
-              active={selectedSport === sport.label || (sport.label === 'All' && !selectedSport)}
+              active={
+                selectedSport === sport.label ||
+                (sport.label === 'All' && !selectedSport)
+              }
               onClick={() => handleSportSelect(sport.label)}
             />
           ))}
         </div>
         <div className="turfs-page__results-count">
           {totalCount > 0 && (
-            <span>{totalCount} turf{totalCount !== 1 ? 's' : ''} found</span>
+            <span>
+              {totalCount} turf{totalCount !== 1 ? 's' : ''} found
+            </span>
           )}
         </div>
       </div>
 
-      {/* Error */}
       {error && (
         <div className="turfs-page__error">
           <i className="bi bi-exclamation-triangle-fill" />
@@ -623,7 +564,6 @@ const TurfsPage = () => {
         </div>
       )}
 
-      {/* Turfs Grid */}
       {loading ? (
         <div className="turfs-grid">
           {[...Array(6)].map((_, i) => (
@@ -631,8 +571,8 @@ const TurfsPage = () => {
           ))}
         </div>
       ) : turfs.length === 0 ? (
-        <EmptyState 
-          onRetry={handleRetry} 
+        <EmptyState
+          onRetry={handleRetry}
           searchQuery={searchQuery}
           sportName={sportDisplayName}
         />
@@ -648,7 +588,6 @@ const TurfsPage = () => {
             ))}
           </div>
 
-          {/* Load More */}
           <div ref={loadMoreRef} className="turfs-page__load-trigger">
             {loadingMore && (
               <div className="turfs-page__loading-more">

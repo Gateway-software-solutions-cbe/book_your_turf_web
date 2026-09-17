@@ -1,0 +1,239 @@
+/* src/pages/user/style/FavoritesPage.css */
+.favorites-page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px 100px;
+}
+
+/* Header */
+.favorites-page__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.favorites-page__header h1 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: #1a1a1a;
+}
+
+.favorites-page__header p {
+  color: #6b7280;
+  font-size: 0.88rem;
+  margin: 0;
+}
+
+.favorites-page__count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+/* States */
+.favorites-page__loading,
+.favorites-page__empty {
+  text-align: center;
+  padding: 80px 20px;
+  color: #6b7280;
+}
+
+.favorites-page__empty-icon {
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  font-size: 2.2rem;
+}
+
+.favorites-page__empty h3 {
+  font-size: 1.15rem;
+  color: #1a1a1a;
+  margin: 0 0 6px;
+}
+
+.favorites-page__empty p {
+  font-size: 0.9rem;
+  margin: 0 0 20px;
+  max-width: 320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.favorites-page__empty button {
+  padding: 12px 26px;
+  background: #1fa463;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.favorites-page__empty button:hover { background: #178a52; }
+
+/* Grid */
+.favorites-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+/* Turf card */
+.fav-turf-card {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+}
+
+.fav-turf-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.08);
+}
+
+.fav-turf-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: #f3f4f6;
+  overflow: hidden;
+}
+
+.fav-turf-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s;
+}
+
+.fav-turf-card:hover .fav-turf-card__media img {
+  transform: scale(1.05);
+}
+
+.fav-turf-card__placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d1d5db;
+  font-size: 2.5rem;
+}
+
+.fav-turf-card__sport {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  backdrop-filter: blur(4px);
+}
+
+.fav-turf-card__body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.fav-turf-card__name {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fav-turf-card__location {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #6b7280;
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.fav-turf-card__location i {
+  color: #1fa463;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.fav-turf-card__location span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fav-turf-card__meta {
+  display: flex;
+  gap: 14px;
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.fav-turf-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.fav-turf-card__meta i { color: #9ca3af; }
+
+.fav-turf-card__cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1fa463;
+  padding-top: 12px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: auto;
+}
+
+@media (max-width: 480px) {
+  .favorites-page__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .favorites-page__grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}

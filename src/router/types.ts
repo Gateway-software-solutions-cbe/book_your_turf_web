@@ -51,19 +51,18 @@ export const ROUTES = {
   
   // User
   USER: {
-    LOGIN: '/login',
     REGISTER: '/register',
     VERIFY_OTP: '/verify-otp',
     FORGOT_PASSWORD: '/forgot-password',
     RESET_PASSWORD: '/reset-password',
-    DASHBOARD: '/dashboard',
+    // DASHBOARD: '/dashboard',
     TURFS: '/turfs',
     TURF_DETAIL: '/turfs/:id',
     BOOKINGS: '/bookings',
     BOOKING_DETAIL: '/bookings/:id',
     WALLET: '/wallet',
     PROFILE: '/profile',
-    SETTINGS: '/settings',
+    // SETTINGS: '/settings',
     NOTIFICATIONS: '/notifications',
   },
   

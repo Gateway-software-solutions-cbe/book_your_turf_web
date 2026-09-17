@@ -2,6 +2,8 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { userTokenStorage, USER_KEY } from '../api/admin/client';
 import type { LoginData, LoginUser } from '../types/user/userAuth';
+import { updateProfile } from '../api/user/userAuth';
+import type { ProfileUpdateRequest } from '../types/user/userAuth';
 import apiClient from '../api/admin/client';
 
 interface UserAuthContextValue {
@@ -14,6 +16,7 @@ interface UserAuthContextValue {
   logout: () => void;
   updateUser: (user: LoginUser) => void;
   refreshUserData: () => Promise<void>;
+  updateProfile: (data: ProfileUpdateRequest) => Promise<void>; // ← ADD THIS
 }
 
 const UserAuthContext = createContext<UserAuthContextValue | undefined>(undefined);
@@ -58,32 +61,55 @@ export const UserAuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // ─── ADD THIS: Update Profile ──────────────────────────────────────────
+  const handleUpdateProfile = async (data: ProfileUpdateRequest) => {
+    try {
+      const response = await updateProfile(data);
+      if (response.data.result === 'success' && response.data.data) {
+        const updatedProfile = response.data.data;
+        
+        if (user) {
+          const updatedUser: LoginUser = {
+            ...user,
+            name: updatedProfile.name || user.name,
+            email: updatedProfile.email || user.email,
+            wallet_balance: updatedProfile.wallet_balance || user.wallet_balance,
+            game_coins: updatedProfile.game_coins ?? user.game_coins,
+            referral_code: updatedProfile.referral_code || user.referral_code,
+          };
+          updateUser(updatedUser);
+        }
+      } else {
+        throw new Error(response.data.message || 'Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+      throw error;
+    }
+  };
+
   // ─── Token validation on mount ──────────────────────────────────────
   useEffect(() => {
     const validateToken = async () => {
       const token = userTokenStorage.get();
       
-      // If no token, just set loading to false
       if (!token) {
         setIsLoading(false);
         return;
       }
 
-      // If we have a user in localStorage but no token, clear everything
       if (!token && user) {
         logout();
         setIsLoading(false);
         return;
       }
 
-      // Validate token by fetching user profile
       try {
         const response = await apiClient.get<{ result: string; data: LoginUser }>('/api/user/profile/');
         if (response.data.data) {
           updateUser(response.data.data);
         }
       } catch (error) {
-        // Token is invalid or expired
         console.error('Token validation failed:', error);
         logout();
       } finally {
@@ -106,6 +132,7 @@ export const UserAuthProvider = ({ children }: { children: ReactNode }) => {
         logout,
         updateUser,
         refreshUserData,
+        updateProfile: handleUpdateProfile, // ← ADD THIS
       }}
     >
       {children}

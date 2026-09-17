@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+  optimizeDeps: {
+    // Exclude lottie-web from Vite's automatic dependency optimization
+    exclude: ['lottie-web']
+  },
   build: {
     sourcemap: false,
     minify: 'esbuild'
