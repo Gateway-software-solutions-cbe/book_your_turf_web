@@ -1,0 +1,233 @@
+.pt-bkc-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #eef2f0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pt-bkc-card.pt-bkc-cancelled {
+  opacity: 0.75;
+  background: #fafafa;
+}
+
+/* Top */
+.pt-bkc-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.pt-bkc-customer {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.pt-bkc-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.pt-bkc-customer-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #14532d;
+  margin-bottom: 4px;
+}
+
+.pt-bkc-customer-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pt-bkc-phone {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pt-bkc-sport-chip {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.pt-bkc-type-chip {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.pt-bkc-type-offline {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pt-bkc-type-online {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Grid */
+.pt-bkc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px 16px;
+}
+
+.pt-bkc-grid-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.pt-bkc-grid-icon {
+  font-size: 14px;
+  color: #16a34a;
+  margin-top: 2px;
+}
+
+.pt-bkc-grid-label {
+  display: block;
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pt-bkc-grid-value {
+  display: block;
+  font-size: 13px;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+/* Amounts */
+.pt-bkc-amounts {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  padding: 12px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+
+.pt-bkc-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: center;
+}
+
+.pt-bkc-amount-mid {
+  border-left: 1px dashed #e5e7eb;
+  border-right: 1px dashed #e5e7eb;
+}
+
+.pt-bkc-amount-label {
+  font-size: 10px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pt-bkc-amount-value {
+  font-size: 15px;
+  font-weight: 800;
+  color: #14532d;
+}
+
+.pt-bkc-amount-paid {
+  color: #16a34a;
+}
+.pt-bkc-amount-pending {
+  color: #b45309;
+}
+
+/* Status pill */
+.pt-bkc-status {
+  padding: 8px 12px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+}
+
+.pt-bkc-status-fully-paid {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.pt-bkc-status-advance-paid {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pt-bkc-status-pending {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.pt-bkc-status-cancelled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+/* Actions */
+.pt-bkc-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.pt-bkc-btn {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.pt-bkc-btn-collect {
+  background: #22c55e;
+  color: #fff;
+}
+.pt-bkc-btn-collect:hover {
+  background: #16a34a;
+}
+
+.pt-bkc-btn-cancel {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+.pt-bkc-btn-cancel:hover {
+  background: #fecaca;
+}
+
+@media (max-width: 640px) {
+  .pt-bkc-grid {
+    grid-template-columns: 1fr;
+  }
+}

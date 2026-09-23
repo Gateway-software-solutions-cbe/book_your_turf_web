@@ -19,7 +19,7 @@ const LogoAnimation = ({ size = 90 }) => {
       role="img"
     >
       <Player
-        loop={false}      // ← run once
+        loop={true}
   autoplay={true}
         src={splashAnimation}
         style={{ width: '100%', height: '100%' }}

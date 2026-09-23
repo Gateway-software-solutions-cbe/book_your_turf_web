@@ -1,0 +1,79 @@
+/* src/pages/partner/auth/PartnerVerifyOtp.css */
+@import "./partnerAuth.css";
+
+.pt-otp-card {
+  max-width: 480px;
+  text-align: center;
+}
+
+.pt-otp-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ade80, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  color: #fff;
+  font-size: 30px;
+}
+
+.pt-otp-card .pt-subtitle {
+  text-align: center;
+}
+
+.pt-otp-identifier {
+  color: var(--pt-green-dark);
+  font-weight: 600;
+  font-size: 15px;
+  margin: 4px 0 24px;
+}
+
+.pt-otp-inputs {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin: 20px 0 8px;
+}
+
+.pt-otp-inputs input {
+  width: 52px;
+  height: 60px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--pt-text);
+  border: 1px solid var(--pt-green-border);
+  border-radius: var(--pt-radius);
+  background: var(--pt-green-soft);
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pt-otp-inputs input:focus {
+  border-color: var(--pt-green);
+  background: #fff;
+}
+
+.pt-otp-resend {
+  font-size: 14px;
+  color: var(--pt-muted);
+  margin: 12px 0 24px;
+}
+
+.pt-otp-resend .pt-resend-btn {
+  background: none;
+  border: none;
+  color: var(--pt-green-dark);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 0;
+}
+
+.pt-otp-note {
+  font-size: 12px;
+  color: var(--pt-muted);
+  margin-top: 16px;
+}

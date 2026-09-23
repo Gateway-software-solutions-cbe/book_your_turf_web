@@ -1,0 +1,507 @@
+.pt-venues-page {
+  padding: 24px 24px 120px;
+  background: #f6f8f7;
+  min-height: 100%;
+}
+
+/* Header */
+.pt-venues-header h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0 0 6px;
+}
+
+.pt-venues-header p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 24px;
+}
+
+/* Sport filter */
+.pt-venues-filter-wrap {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.pt-venues-filter-label {
+  display: inline-block;
+  font-size: 13px;
+  color: #6b7280;
+  margin-bottom: 8px;
+  padding-left: 14px;
+  position: relative;
+}
+
+.pt-venues-filter-label::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 14px;
+  border-radius: 2px;
+  background: #22c55e;
+}
+
+.pt-venues-filter {
+  position: relative;
+  max-width: 420px;
+}
+
+.pt-venues-filter-current {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  color: #4b5563;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pt-venues-filter-current:hover {
+  border-color: #22c55e;
+}
+
+.pt-venues-filter-emoji {
+  font-size: 20px;
+}
+
+.pt-venues-filter-current > span:nth-child(2) {
+  flex: 1;
+}
+
+.pt-venues-filter-check {
+  color: #22c55e;
+  font-weight: 700;
+}
+
+.pt-venues-filter-caret {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+.pt-venues-filter-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 8px;
+  z-index: 20;
+  animation: pt-fade-in 0.15s ease;
+}
+
+.pt-venues-filter-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  font-size: 15px;
+  color: #1f2937;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pt-venues-filter-option:hover {
+  background: #f0fdf4;
+}
+
+.pt-venues-filter-option.pt-active {
+  background: #dcfce7;
+  color: #14532d;
+  font-weight: 700;
+}
+
+.pt-check {
+  margin-left: auto;
+  color: #22c55e;
+}
+
+/* Content */
+.pt-venues-content {
+  min-height: 400px;
+}
+
+.pt-venues-empty {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.pt-venues-empty-icon {
+  width: 90px;
+  height: 90px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  color: #22c55e;
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.15);
+}
+
+.pt-venues-empty h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0 0 8px;
+}
+
+.pt-venues-empty p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Grid of venue cards */
+.pt-venues-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.pt-venue-card {
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.pt-venue-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.pt-venue-card-image {
+  height: 160px;
+  background: #f3f4f6;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pt-venue-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pt-venue-card-placeholder {
+  font-size: 48px;
+  color: #9ca3af;
+}
+
+.pt-venue-card-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pt-venue-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pt-venue-card-top h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #14532d;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pt-venue-status {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pt-venue-status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.pt-venue-status-approved {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+.pt-venue-status-rejected {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.pt-venue-card-sport {
+  font-size: 13px;
+  color: #22c55e;
+  font-weight: 600;
+  margin: 0;
+}
+
+.pt-venue-card-address {
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pt-venue-card-footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+/* Floating Add button */
+.pt-add-venue-fab {
+  position: fixed;
+  right: 28px;
+  bottom: 28px;
+  background: #4ade80;
+  color: #fff;
+  border: none;
+  padding: 16px 26px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(74, 222, 128, 0.45);
+  transition: transform 0.1s ease, background 0.15s ease;
+  z-index: 50;
+}
+
+.pt-add-venue-fab:hover {
+  background: #16a34a;
+  transform: translateY(-2px);
+}
+
+.pt-fab-plus {
+  font-size: 20px;
+  line-height: 1;
+}
+
+@media (max-width: 700px) {
+  .pt-venues-page {
+    padding: 20px 16px 120px;
+  }
+  .pt-add-venue-fab {
+    right: 16px;
+    bottom: 16px;
+    padding: 14px 22px;
+  }
+}
+
+/* Card interaction states */
+.pt-venue-card.pt-clickable {
+  cursor: pointer;
+}
+.pt-venue-card.pt-clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+.pt-venue-card.pt-static {
+  cursor: default;
+}
+.pt-venue-card.pt-static:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Status overlay on image */
+.pt-venue-card-image {
+  position: relative;
+}
+.pt-venue-card-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  backdrop-filter: blur(1.5px);
+}
+.pt-overlay-pending {
+  background: rgba(245, 158, 11, 0.88);
+}
+.pt-overlay-rejected {
+  background: rgba(220, 38, 38, 0.85);
+}
+.pt-overlay-icon {
+  font-size: 32px;
+}
+.pt-overlay-text {
+  font-size: 14px;
+  letter-spacing: 0.5px;
+}
+
+/* Edit button on card */
+.pt-venue-card-edit {
+  margin-top: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid #22c55e;
+  background: #f0fdf4;
+  color: #14532d;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.pt-venue-card-edit:hover:not(.pt-disabled) {
+  background: #dcfce7;
+}
+.pt-venue-card-edit.pt-disabled,
+.pt-venue-card-edit:disabled {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+/* Sport picker modal */
+.pt-sport-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+  animation: pt-fade-in 0.15s ease;
+}
+
+.pt-sport-modal {
+  background: #fff;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 420px;
+  padding: 28px 24px 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  animation: pt-slide-up 0.2s ease;
+}
+
+.pt-sport-modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.pt-sport-modal-header h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0 0 6px;
+}
+
+.pt-sport-modal-header p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.pt-sport-modal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 12px;
+}
+
+.pt-sport-modal-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 8px;
+  border: none;
+  border-bottom: 1px solid #f3f4f6;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+  color: #1f2937;
+  text-align: left;
+  transition: background 0.12s ease;
+  font-family: inherit;
+}
+
+.pt-sport-modal-item:hover {
+  background: #f0fdf4;
+}
+
+.pt-sport-modal-emoji {
+  font-size: 22px;
+  width: 32px;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.pt-sport-modal-label {
+  flex: 1;
+  font-weight: 600;
+}
+
+.pt-sport-modal-arrow {
+  color: #9ca3af;
+  font-size: 22px;
+}
+
+.pt-sport-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+}
+
+.pt-sport-modal-cancel {
+  background: transparent;
+  border: none;
+  color: #7c3aed;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 10px;
+}
+
+.pt-sport-modal-cancel:hover {
+  background: #f5f3ff;
+}

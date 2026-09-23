@@ -1,0 +1,25 @@
+/* src/pages/partner/auth/PartnerLogin.css */
+@import "./partnerAuth.css";
+
+.pt-login-card {
+  /* optional overrides specific to login */
+}
+
+.pt-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.pt-login-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4ade80, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  font-size: 28px;
+}

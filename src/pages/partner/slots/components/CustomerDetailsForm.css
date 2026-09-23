@@ -1,0 +1,89 @@
+.pt-cdf-section {
+  /* inherits from .pt-form-section */
+}
+
+.pt-cdf-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pt-cdf-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pt-cdf-field:focus-within {
+  border-color: #22c55e;
+  background: #fff;
+}
+
+.pt-cdf-icon {
+  font-size: 16px;
+  color: #16a34a;
+  width: 20px;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.pt-cdf-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  font-family: inherit;
+  color: #1f2937;
+  padding: 2px 0;
+}
+
+.pt-cdf-input::placeholder {
+  color: #9ca3af;
+}
+
+.pt-cdf-input[type="number"]::-webkit-outer-spin-button,
+.pt-cdf-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.pt-cdf-input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.pt-cdf-balance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: #fef3c7;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pt-cdf-balance-label {
+  color: #92400e;
+}
+
+.pt-cdf-balance-value {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.pt-cdf-due {
+  color: #b45309;
+}
+.pt-cdf-paid {
+  color: #16a34a;
+}
+.pt-cdf-overpaid {
+  color: #b91c1c;
+}

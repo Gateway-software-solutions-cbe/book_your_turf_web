@@ -282,8 +282,8 @@ const PaymentSummary = () => {
         date: dateStr,
         slots: slots,
         total_amount: totalAmount.toFixed(2),
-        ...(paymentOption === 'advance' && { advance_amount: finalAmount.toFixed(2) }),
-        ...(appliedDiscount && { admin_discount_id: appliedDiscount.id }),
+        advance_amount: finalAmount.toFixed(2),
+  ...(appliedDiscount && { admin_discount_id: appliedDiscount.id }),
       };
 
       console.log('💳 Initiate online payment payload:', payload);

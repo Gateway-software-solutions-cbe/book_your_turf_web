@@ -1,0 +1,199 @@
+.pt-bc-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  animation: pt-bc-fade 0.15s ease;
+}
+
+.pt-bc-modal {
+  background: #fff;
+  border-radius: 24px;
+  padding: 32px 24px 20px;
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: pt-bc-pop 0.25s ease;
+}
+
+.pt-bc-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.pt-bc-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0 0 4px;
+}
+
+.pt-bc-subtitle {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 20px;
+}
+
+.pt-bc-customer {
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pt-bc-customer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #14532d;
+  font-weight: 600;
+}
+
+.pt-bc-customer-icon {
+  font-size: 16px;
+}
+
+.pt-bc-id {
+  background: #f3f4f6;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pt-bc-id-label {
+  font-size: 11px;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pt-bc-id-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: #1f2937;
+  font-family: "Courier New", monospace;
+  word-break: break-all;
+}
+
+.pt-bc-amounts {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+}
+
+.pt-bc-amount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: #4b5563;
+  padding: 6px 0;
+}
+
+.pt-bc-amount-total {
+  font-size: 15px;
+  font-weight: 800;
+  color: #14532d;
+}
+.pt-bc-amount-paid {
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.pt-bc-balance-row {
+  border-top: 1px dashed #e5e7eb;
+  padding-top: 10px;
+  margin-top: 4px;
+}
+
+.pt-bc-amount-balance {
+  font-weight: 800;
+  color: #b45309;
+  font-size: 15px;
+}
+
+.pt-bc-whatsapp {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: #fff;
+  border: 1.5px solid #22c55e;
+  color: #16a34a;
+  padding: 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 10px;
+  transition: background 0.15s ease;
+}
+
+.pt-bc-whatsapp:hover {
+  background: #f0fdf4;
+}
+
+.pt-bc-wa-icon {
+  font-size: 18px;
+}
+
+.pt-bc-close {
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 10px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pt-bc-close:hover {
+  color: #6b7280;
+}
+
+@keyframes pt-bc-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pt-bc-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

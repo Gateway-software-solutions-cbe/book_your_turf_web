@@ -30,7 +30,7 @@ export interface InitiateBookingRequest {
   date: string;
   slots: BookingSlot[];
   total_amount: string;
-  advance_amount?: string;
+  advance_amount: string;
   admin_discount_id?: number;
   partner_discount_id?: number;
 }
@@ -62,7 +62,7 @@ export interface ConfirmBookingRequest {
   date: string;
   slots: BookingSlot[];
   total_amount: string;
-  advance_amount?: string;
+  advance_amount: string;
 }
 
 export interface ConfirmBookingResponse {

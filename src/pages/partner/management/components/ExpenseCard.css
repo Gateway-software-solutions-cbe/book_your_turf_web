@@ -1,0 +1,80 @@
+.pt-exc-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #eef2f0;
+  transition: box-shadow 0.15s ease, transform 0.1s ease;
+}
+.pt-exc-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+}
+
+.pt-exc-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #fee2e2;
+  color: #b91c1c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.pt-exc-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pt-exc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.pt-exc-purpose {
+  font-size: 14px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.pt-exc-amount {
+  font-size: 15px;
+  font-weight: 900;
+  color: #b91c1c;
+  white-space: nowrap;
+}
+
+.pt-exc-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pt-exc-date {
+  font-weight: 600;
+}
+
+.pt-exc-notes {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 260px;
+  color: #9ca3af;
+}

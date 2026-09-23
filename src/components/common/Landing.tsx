@@ -288,7 +288,7 @@ const Landing = () => {
                   <button
                     type="button"
                     role="menuitem"
-                    onClick={() => navigate("/partner/login")}
+                    onClick={() => navigate("/partner/auth")}
                   >
                     <span className="byt-role-menu__title">
                       Continue as Channel Partner

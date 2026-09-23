@@ -123,9 +123,7 @@ const RazorpayPayment = () => {
         date: dateStr,
         slots,
         total_amount: bookingData.totalAmount.toFixed(2),
-        ...(bookingData.paymentOption === 'advance' && {
-          advance_amount: bookingData.advanceAmount.toFixed(2),
-        }),
+        advance_amount: bookingData.finalAmount.toFixed(2),
       };
 
       console.log('📤 Confirming booking:', payload);

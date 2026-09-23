@@ -1,0 +1,154 @@
+.pt-ano {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.pt-ano-card {
+  background: #f9fafb;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pt-ano-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+/* Donut */
+.pt-ano-donut {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.pt-ano-donut-svg {
+  width: 220px;
+  height: 220px;
+}
+
+.pt-ano-donut-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: none;
+}
+
+.pt-ano-donut-center-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: #14532d;
+}
+.pt-ano-donut-center-label {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.pt-ano-donut-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 13px;
+}
+.pt-ano-donut-empty-ring {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  border: 28px solid #e5e7eb;
+  margin: 0 auto 12px;
+}
+
+/* Legend */
+.pt-ano-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.pt-ano-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.pt-ano-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Top expenses */
+.pt-ano-top-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pt-ano-top-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "purpose amount"
+    "bar     bar";
+  row-gap: 6px;
+  column-gap: 12px;
+}
+
+.pt-ano-top-purpose {
+  grid-area: purpose;
+  font-size: 13px;
+  font-weight: 700;
+  color: #14532d;
+}
+
+.pt-ano-top-amount {
+  grid-area: amount;
+  font-size: 13px;
+  font-weight: 800;
+  color: #b91c1c;
+  text-align: right;
+}
+
+.pt-ano-top-pct {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 600;
+  margin-left: 6px;
+}
+
+.pt-ano-top-bar-track {
+  grid-area: bar;
+  height: 10px;
+  background: #fee2e2;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.pt-ano-top-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ef4444, #b91c1c);
+  border-radius: 5px;
+  transition: width 0.4s ease;
+}
+
+.pt-ano-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 13px;
+}
