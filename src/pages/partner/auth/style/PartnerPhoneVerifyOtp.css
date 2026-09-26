@@ -1,0 +1,1013 @@
+
+/* =========================================
+   BOOKYOURTURF - PARTNER OTP VERIFICATION
+   Premium sports theme / blue accent palette
+========================================= */
+
+.pvo-page {
+  --pvo-blue: #315fc4;
+  --pvo-blue-dark: #23499e;
+  --pvo-blue-light: #eaf1ff;
+  --pvo-green: #39994d;
+  --pvo-text: #202a3a;
+  --pvo-muted: #7c8797;
+  --pvo-border: #e6ebf2;
+
+  position: relative;
+  min-height: 100vh;
+  padding: 36px 5%;
+  overflow: hidden;
+  isolation: isolate;
+
+  background:
+    radial-gradient(
+      ellipse at 8% 10%,
+      rgba(49, 95, 196, 0.11),
+      transparent 36%
+    ),
+    radial-gradient(
+      ellipse at 92% 88%,
+      rgba(57, 153, 77, 0.10),
+      transparent 36%
+    ),
+    linear-gradient(135deg, #f5f8fc 0%, #ffffff 55%, #f0f7f4 100%);
+
+  color: var(--pvo-text);
+  font-family: Inter, "Segoe UI", Arial, sans-serif;
+}
+
+/* Background decorations */
+
+.pvo-bg-orb {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border: 1px solid rgba(49, 95, 196, 0.08);
+  border-radius: 50%;
+}
+
+.pvo-bg-orb-one {
+  width: 440px;
+  height: 440px;
+  top: -230px;
+  right: 12%;
+  box-shadow:
+    0 0 0 24px rgba(49, 95, 196, 0.025),
+    0 0 0 52px rgba(49, 95, 196, 0.02);
+}
+
+.pvo-bg-orb-two {
+  width: 520px;
+  height: 520px;
+  bottom: -360px;
+  left: -180px;
+  border-color: rgba(57, 153, 77, 0.10);
+  box-shadow:
+    0 0 0 28px rgba(57, 153, 77, 0.025),
+    0 0 0 58px rgba(57, 153, 77, 0.02);
+}
+
+/* Back button */
+
+.pvo-back-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 11px 18px;
+  margin-bottom: 26px;
+
+  color: var(--pvo-blue);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--pvo-border);
+  border-radius: 30px;
+
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.pvo-back-button span:first-child {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.pvo-back-button:hover {
+  background: #ffffff;
+  transform: translateX(-3px);
+  box-shadow: 0 5px 18px rgba(35, 73, 158, 0.08);
+}
+
+/* Main layout */
+
+.pvo-layout {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 0.94fr);
+  align-items: center;
+  gap: clamp(45px, 7vw, 110px);
+}
+
+/* Left introduction */
+
+.pvo-intro {
+  padding: 10px 0 20px;
+}
+
+.pvo-eyebrow,
+.pvo-card-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  color: #31569c;
+  font-size: 11px;
+  font-weight: 750;
+  letter-spacing: 1.7px;
+  line-height: 1.5;
+}
+
+.pvo-eyebrow {
+  padding: 12px 18px;
+  margin-bottom: 32px;
+
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(49, 95, 196, 0.10);
+  border-radius: 30px;
+}
+
+.pvo-status-dot {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+
+  background: #4ca65b;
+  border-radius: 50%;
+
+  box-shadow: 0 0 0 5px rgba(76, 166, 91, 0.12);
+}
+
+.pvo-brand {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 120px;
+  height: 120px;
+  margin-bottom: 38px;
+
+  padding: 15px;
+  overflow: hidden;
+
+  background: #ffffff;
+  border: 1px solid rgba(49, 95, 196, 0.08);
+  border-radius: 28px;
+
+  box-shadow: 0 16px 40px rgba(35, 73, 158, 0.07);
+}
+
+.pvo-logo {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pvo-section-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  margin-bottom: 24px;
+
+  color: var(--pvo-blue);
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 2px;
+}
+
+.pvo-section-label > span {
+  width: 34px;
+  height: 2px;
+  background: var(--pvo-green);
+}
+
+.pvo-intro h1 {
+  margin: 0;
+
+  color: #23499e;
+  font-size: clamp(43px, 5vw, 72px);
+  font-weight: 750;
+  letter-spacing: -2.7px;
+  line-height: 1.08;
+}
+
+.pvo-intro h1 span {
+  color: #39994d;
+}
+
+.pvo-intro-description {
+  max-width: 510px;
+  margin: 25px 0 30px;
+
+  color: var(--pvo-muted);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.85;
+}
+
+/* Benefits */
+
+.pvo-benefits {
+  display: grid;
+  gap: 14px;
+  max-width: 500px;
+}
+
+.pvo-benefit {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  padding: 17px 19px;
+
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(49, 95, 196, 0.09);
+  border-radius: 18px;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.pvo-benefit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(35, 73, 158, 0.07);
+}
+
+.pvo-benefit-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+
+  width: 48px;
+  height: 48px;
+
+  color: var(--pvo-blue);
+  background: #e9f0ff;
+  border-radius: 15px;
+
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.pvo-benefit h3 {
+  margin: 0 0 5px;
+  color: #25334a;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.pvo-benefit p {
+  margin: 0;
+  color: var(--pvo-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pvo-tagline {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+
+  margin-top: 38px;
+
+  color: #82917f;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 2.5px;
+}
+
+.pvo-tagline > span {
+  width: 35px;
+  height: 2px;
+  background: var(--pvo-green);
+}
+
+/* Verification card */
+
+.pvo-card {
+  position: relative;
+  width: 100%;
+  max-width: 610px;
+  justify-self: end;
+
+  overflow: hidden;
+
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(49, 95, 196, 0.07);
+  border-radius: 30px;
+
+  box-shadow:
+    0 30px 90px rgba(37, 60, 105, 0.10),
+    0 5px 20px rgba(37, 60, 105, 0.035);
+
+  animation: pvo-card-enter 0.55s ease both;
+}
+
+.pvo-card-top-line {
+  width: 100%;
+  height: 4px;
+
+  background: linear-gradient(
+    90deg,
+    #dce7ff 0%,
+    #4775d5 35%,
+    #63bd7a 75%,
+    #e2f3e5 100%
+  );
+}
+
+.pvo-card-content {
+  padding: clamp(28px, 4vw, 48px);
+}
+
+.pvo-heading-icon {
+  display: grid;
+  place-items: center;
+
+  width: 48px;
+  height: 48px;
+  margin-bottom: 22px;
+
+  color: var(--pvo-blue);
+  background: #edf3ff;
+  border-radius: 16px;
+
+  font-size: 23px;
+}
+
+.pvo-card-eyebrow {
+  margin-bottom: 17px;
+  color: #478e54;
+}
+
+.pvo-card h2 {
+  margin: 0;
+
+  color: #26344a;
+  font-size: clamp(29px, 3vw, 38px);
+  font-weight: 700;
+  letter-spacing: -1.1px;
+  line-height: 1.2;
+}
+
+.pvo-card-description {
+  margin: 15px 0 24px;
+
+  color: var(--pvo-muted);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.8;
+}
+
+/* Phone number display */
+
+.pvo-number-display {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 11px;
+
+  padding: 15px 17px;
+  margin-bottom: 28px;
+
+  background: #f5f8fc;
+  border: 1px solid #e9eef7;
+  border-radius: 14px;
+
+  color: #35435a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.pvo-phone-icon {
+  display: grid;
+  place-items: center;
+
+  width: 32px;
+  height: 32px;
+
+  color: var(--pvo-blue);
+  background: #e6edff;
+  border-radius: 10px;
+
+  font-size: 16px;
+}
+
+.pvo-edit-number {
+  margin-left: auto;
+  padding: 6px 10px;
+
+  color: var(--pvo-blue);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.pvo-edit-number:hover {
+  background: #e8efff;
+}
+
+/* OTP inputs */
+
+.pvo-otp-section {
+  margin-bottom: 19px;
+}
+
+.pvo-field-label {
+  display: block;
+  margin-bottom: 14px;
+
+  color: #33415a;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.pvo-otp-inputs {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pvo-otp-input {
+  width: 100%;
+  min-width: 0;
+  height: 64px;
+
+  padding: 0;
+
+  color: #244a9d;
+  background: #f8faff;
+  border: 1.5px solid #dfe6f1;
+  border-radius: 13px;
+  outline: none;
+
+  text-align: center;
+  font-family: inherit;
+  font-size: 25px;
+  font-weight: 650;
+
+  caret-color: var(--pvo-blue);
+
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease;
+}
+
+.pvo-otp-input:hover {
+  border-color: #b8c9ed;
+}
+
+.pvo-otp-input:focus {
+  background: #ffffff;
+  border-color: #4775d5;
+  box-shadow: 0 0 0 4px rgba(71, 117, 213, 0.12);
+  transform: translateY(-2px);
+}
+
+.pvo-otp-input.pvo-otp-filled {
+  background: #edf3ff;
+  border-color: #a9bde9;
+}
+
+.pvo-otp-input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.pvo-otp-helper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  margin-top: 11px;
+
+  color: #8a95a5;
+  font-size: 12px;
+}
+
+.pvo-otp-counter {
+  color: #63738d;
+  font-weight: 600;
+}
+
+/* Resend controls */
+
+.pvo-resend-row {
+  min-height: 30px;
+  margin-bottom: 20px;
+}
+
+.pvo-resend-row p {
+  margin: 0;
+  color: #7c8797;
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.pvo-resend-countdown {
+  color: #526a95;
+  font-weight: 600;
+}
+
+.pvo-resend-button {
+  margin-left: 7px;
+  padding: 3px 0;
+
+  color: var(--pvo-blue);
+  background: transparent;
+  border: none;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.pvo-resend-button:hover {
+  color: var(--pvo-blue-dark);
+  text-decoration: underline;
+}
+
+.pvo-resend-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Error message */
+
+.pvo-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+
+  padding: 12px 14px;
+  margin-bottom: 18px;
+
+  color: #b42332;
+  background: #fff1f2;
+  border: 1px solid #ffd9de;
+  border-radius: 12px;
+
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.pvo-error > span {
+  display: grid;
+  place-items: center;
+  flex: 0 0 19px;
+
+  width: 19px;
+  height: 19px;
+
+  color: #ffffff;
+  background: #d94a59;
+  border-radius: 50%;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Verify button */
+
+.pvo-verify-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+
+  width: 100%;
+  min-height: 62px;
+  padding: 16px 22px;
+
+  color: #ffffff;
+  background: linear-gradient(
+    110deg,
+    #4775d5 0%,
+    #315fc4 55%,
+    #2852ad 100%
+  );
+
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 15px;
+
+  box-shadow: 0 10px 24px rgba(49, 95, 196, 0.19);
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 650;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.pvo-verify-button > span:last-child {
+  font-size: 20px;
+  transition: transform 0.2s ease;
+}
+
+.pvo-verify-button:hover:not(:disabled) {
+  background: linear-gradient(
+    110deg,
+    #3b69ca 0%,
+    #284fa9 100%
+  );
+
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(49, 95, 196, 0.25);
+}
+
+.pvo-verify-button:hover:not(:disabled) > span:last-child {
+  transform: translateX(4px);
+}
+
+.pvo-verify-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.pvo-verify-button:disabled {
+  opacity: 0.55;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Loading spinner */
+
+.pvo-spinner {
+  width: 18px;
+  height: 18px;
+
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+
+  animation: pvo-spin 0.7s linear infinite;
+}
+
+/* Security message */
+
+.pvo-security-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  padding: 15px;
+  margin-top: 23px;
+
+  background: #f0f8f1;
+  border: 1px solid #e0f0e2;
+  border-radius: 13px;
+}
+
+.pvo-security-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+
+  width: 30px;
+  height: 30px;
+
+  color: #398b4a;
+  background: #dff2e2;
+  border-radius: 10px;
+
+  font-size: 14px;
+  font-weight: 750;
+}
+
+.pvo-security-note p {
+  margin: 0;
+
+  color: #63806a;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+/* Footer */
+
+.pvo-card-divider {
+  height: 1px;
+  margin: 27px 0 23px;
+  background: #edf0f5;
+}
+
+.pvo-card-footer {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 8px;
+
+  text-align: center;
+}
+
+.pvo-card-footer > span {
+  color: #91a095;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 1.8px;
+}
+
+.pvo-card-footer strong {
+  color: #3156a4;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.pvo-card-footer p {
+  margin: 0;
+
+  color: #9aa4b1;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* Animations */
+
+@keyframes pvo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pvo-card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================
+   TABLET RESPONSIVENESS
+========================================= */
+
+@media (max-width: 1024px) {
+  .pvo-page {
+    padding: 28px 4%;
+  }
+
+  .pvo-layout {
+    grid-template-columns: minmax(0, 0.85fr) minmax(390px, 1fr);
+    gap: 35px;
+  }
+
+  .pvo-intro h1 {
+    font-size: clamp(40px, 5.2vw, 56px);
+    letter-spacing: -1.8px;
+  }
+
+  .pvo-intro-description {
+    font-size: 14px;
+  }
+
+  .pvo-card-content {
+    padding: 32px;
+  }
+
+  .pvo-otp-inputs {
+    gap: 8px;
+  }
+
+  .pvo-otp-input {
+    height: 58px;
+    font-size: 23px;
+  }
+}
+
+/* =========================================
+   MOBILE RESPONSIVENESS
+========================================= */
+
+@media (max-width: 760px) {
+  .pvo-page {
+    min-height: 100vh;
+    padding: 18px 16px 35px;
+  }
+
+  .pvo-back-button {
+    margin-bottom: 22px;
+    padding: 10px 15px;
+  }
+
+  .pvo-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 25px;
+  }
+
+  .pvo-intro {
+    padding: 0;
+  }
+
+  .pvo-eyebrow {
+    margin-bottom: 20px;
+    padding: 10px 13px;
+    font-size: 9px;
+    letter-spacing: 1.1px;
+  }
+
+  .pvo-brand {
+    width: 84px;
+    height: 84px;
+    padding: 11px;
+    margin-bottom: 24px;
+    border-radius: 21px;
+  }
+
+  .pvo-section-label {
+    margin-bottom: 15px;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+  }
+
+  .pvo-intro h1 {
+    font-size: clamp(38px, 10vw, 52px);
+    letter-spacing: -1.8px;
+    line-height: 1.08;
+  }
+
+  .pvo-intro-description {
+    margin: 17px 0 20px;
+    font-size: 14px;
+    line-height: 1.75;
+  }
+
+  .pvo-benefits {
+    display: none;
+  }
+
+  .pvo-tagline {
+    display: none;
+  }
+
+  .pvo-card {
+    max-width: none;
+    justify-self: stretch;
+    border-radius: 23px;
+  }
+
+  .pvo-card-content {
+    padding: 25px 20px 27px;
+  }
+
+  .pvo-heading-icon {
+    width: 42px;
+    height: 42px;
+    margin-bottom: 18px;
+    border-radius: 13px;
+  }
+
+  .pvo-card-eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.1px;
+  }
+
+  .pvo-card h2 {
+    font-size: 30px;
+    letter-spacing: -0.8px;
+  }
+
+  .pvo-card-description {
+    margin: 12px 0 20px;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .pvo-number-display {
+    gap: 9px;
+    padding: 12px;
+    margin-bottom: 25px;
+    font-size: 13px;
+  }
+
+  .pvo-edit-number {
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .pvo-field-label {
+    font-size: 13px;
+  }
+
+  .pvo-otp-inputs {
+    gap: 7px;
+  }
+
+  .pvo-otp-input {
+    height: 53px;
+    border-radius: 10px;
+    font-size: 22px;
+  }
+
+  .pvo-otp-helper {
+    font-size: 11px;
+  }
+
+  .pvo-resend-row p {
+    font-size: 12px;
+  }
+
+  .pvo-verify-button {
+    min-height: 56px;
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 14px;
+  }
+
+  .pvo-security-note {
+    align-items: flex-start;
+    padding: 12px;
+    margin-top: 19px;
+  }
+
+  .pvo-security-note p {
+    font-size: 11px;
+  }
+
+  .pvo-card-footer strong {
+    font-size: 12px;
+  }
+
+  .pvo-card-footer > span {
+    font-size: 9px;
+  }
+}
+
+/* Small mobile screens */
+
+@media (max-width: 380px) {
+  .pvo-page {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .pvo-card-content {
+    padding: 22px 15px;
+  }
+
+  .pvo-otp-inputs {
+    gap: 5px;
+  }
+
+  .pvo-otp-input {
+    height: 47px;
+    border-radius: 8px;
+    font-size: 20px;
+  }
+
+  .pvo-card h2 {
+    font-size: 27px;
+  }
+
+  .pvo-intro h1 {
+    font-size: 37px;
+  }
+}
+
+/* Reduced motion accessibility */
+
+@media (prefers-reduced-motion: reduce) {
+  .pvo-page *,
+  .pvo-page *::before,
+  .pvo-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -2,8 +2,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// Use bootstrap-icons via className instead of react-bootstrap-icons
-// This avoids the dependency issue
 import { useUserAuth } from '../../context/UserAuthContext';
 
 // Icon components using Bootstrap Icons CSS classes
@@ -11,7 +9,6 @@ const Icon = ({ name, size = 28, className = '' }: { name: string; size?: number
   <i className={`bi bi-${name} ${className}`} style={{ fontSize: size }} />
 );
 
-// Types for booking and transaction data
 interface BookingPreview {
   id: number;
   turf_name: string;
@@ -29,7 +26,6 @@ interface TransactionPreview {
   date: string;
 }
 
-// Stat Card component - moved outside parent for performance and reusability
 interface StatCardProps {
   iconName: string;
   label: string;

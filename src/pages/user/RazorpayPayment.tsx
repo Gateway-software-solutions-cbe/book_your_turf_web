@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserAuth } from '../../context/UserAuthContext';
 import { confirmBooking } from '../../api/user/bookings';
+import { metaPurchase } from '../../lib/metaPixel';
 import './style/RazorpayPayment.css';
 import { formatLocalDate } from '../../utils/dateUtils';
 
@@ -132,6 +133,29 @@ const RazorpayPayment = () => {
 
       if (response.result === 'success') {
         console.log('✅ Booking confirmed:', response.data);
+
+        const confirmedBookingId =
+    response.data?.booking_id ||
+    orderData.booking_id ||
+    razorpayOrderId;
+
+  // Meta Pixel: Booking confirmed → Purchase
+  metaPurchase({
+    booking_id: confirmedBookingId,
+    turf_id: bookingData.turf.id,
+    value: bookingData.finalAmount,
+    user_id: user?.id,
+  });
+
+  if (import.meta.env.DEV) {
+    console.log('[Meta Pixel] Purchase → Booking Confirmed', {
+      booking_id: confirmedBookingId,
+      turf_id: bookingData.turf.id,
+      value: bookingData.finalAmount,
+      user_id: user?.id,
+    });
+  }
+
         await refreshUserData();
 
         navigate('/booking-success', {

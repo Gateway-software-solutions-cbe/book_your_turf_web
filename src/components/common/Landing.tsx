@@ -305,7 +305,7 @@ const Landing = () => {
               type="button"
               className="byt-nav-toggle"
               onClick={() => setMobileNavOpen((open) => !open)}
-              aria-label="Toggle menu"
+              aria-label={mobileNavOpen ? "Close navigation menu" : "Open navigation menu"}
               aria-expanded={mobileNavOpen}
             >
               <span />
@@ -356,8 +356,7 @@ const Landing = () => {
               transition={{ duration: 0.6, delay: 0.3 }}
             >
               <MagneticButton
-                as="a"
-                href=""
+                as="button"
                 onClick={() => setRoleMenuOpen((open) => !open)}
                 className="byt-btn byt-btn--accent byt-btn--lg"
               >

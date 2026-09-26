@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useUserAuth } from '../../../context/UserAuthContext';
-import logo from '../../../asset/bytlogo.png';
+import logo from '../../../asset/logo.png';
 import './UserLayout.css';
 import { useRegisterDevice } from '../../../hooks/useRegisterDevice';
 import NotificationBell from '../NotificationBell';
@@ -25,7 +25,7 @@ const SIDEBAR_ITEMS = [
 const BOTTOM_NAV_ITEMS = [
   { label: 'Home', icon: 'house-fill', path: '/turfs' },
   { label: 'Bookings', icon: 'calendar-event-fill', path: '/bookings' },
-  { label: 'Dashboard', icon: 'person-circle', path: '/dashboard' },
+  { label: 'Profile', icon: 'person-circle', path: '/profile' },
 ];
 
 // ─── Icon Component ──────────────────────────────────────────────────────

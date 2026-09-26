@@ -1,78 +1,493 @@
+
+/* =========================================
+   BookYourTurf - Dashboard Stat Card
+   Premium sports-inspired green theme
+========================================= */
+
 .pt-dsc {
-  width: 100%;
+  --dsc-green: #159447;
+  --dsc-green-dark: #11783a;
+  --dsc-green-light: #eaf7ee;
+  --dsc-ink: #26382d;
+  --dsc-muted: #78867d;
+  --dsc-border: #e5eee8;
+
+  position: relative;
+  isolation: isolate;
+
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 16px 16px 14px;
-  border-radius: 16px;
-  border: none;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: #fff;
+
+  width: 100%;
+  min-width: 0;
+  min-height: 116px;
+  height: 100%;
+
+  gap: 13px;
+  padding: 17px 15px;
+
+  overflow: hidden;
+
+  border: 1px solid var(--dsc-border);
+  border-radius: 17px;
+
+  background: #ffffff;
+  color: var(--dsc-ink);
+
   text-align: left;
-  cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 6px 18px rgba(22, 163, 74, 0.18);
-  transition: transform 0.1s ease, box-shadow 0.15s ease;
-  min-height: 110px;
-}
-.pt-dsc:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.25);
-}
-.pt-dsc:disabled {
-  cursor: default;
+
+  box-shadow:
+    0 3px 8px rgba(30, 75, 47, 0.025),
+    0 8px 20px rgba(30, 75, 47, 0.035);
+
+  cursor: pointer;
+
+  appearance: none;
+  -webkit-appearance: none;
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease,
+    background-color 200ms ease;
 }
 
+/* =========================================
+   Subtle Top Accent
+========================================= */
+
+.pt-dsc-accent {
+  position: absolute;
+  top: 0;
+  left: 18px;
+
+  width: 42px;
+  height: 3px;
+
+  border-radius: 0 0 5px 5px;
+
+  background: linear-gradient(
+    90deg,
+    #20b45c,
+    #8bdaa7
+  );
+
+  opacity: 0.85;
+
+  transition:
+    width 200ms ease,
+    opacity 200ms ease;
+}
+
+/* =========================================
+   Icon Container
+========================================= */
+
 .pt-dsc-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
+
+  flex: 0 0 43px;
+
+  width: 43px;
+  height: 43px;
+
+  border: 1px solid #e2f1e7;
+  border-radius: 13px;
+
+  background: linear-gradient(
+    145deg,
+    #eff9f2,
+    #e3f4e9
+  );
+
+  color: var(--dsc-green-dark);
+
   font-size: 20px;
-  flex-shrink: 0;
+  line-height: 1;
+
+  transition:
+    transform 200ms ease,
+    background-color 200ms ease;
 }
+
+/* =========================================
+   Card Content
+========================================= */
 
 .pt-dsc-body {
-  flex: 1;
-  min-width: 0;
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: 2px;
+
+  justify-content: center;
+  align-items: flex-start;
+
+  gap: 4px;
+
+  min-width: 0;
+  min-height: 0;
 }
+
+/* =========================================
+   Label
+========================================= */
 
 .pt-dsc-label {
+  display: block;
+  max-width: 100%;
+
+  overflow: hidden;
+
+  color: var(--dsc-muted);
+
   font-size: 11px;
-  opacity: 0.9;
+  font-weight: 500;
+
+  line-height: 1.4;
+  letter-spacing: 0.065em;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  font-weight: 700;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* =========================================
+   Main Value
+========================================= */
+
 .pt-dsc-value {
-  font-size: 22px;
-  font-weight: 900;
-  letter-spacing: -0.3px;
-  line-height: 1.1;
+  display: block;
+  max-width: 100%;
+
+  overflow: hidden;
+
+  color: var(--dsc-ink);
+
+  font-size: clamp(21px, 1.65vw, 27px);
+  font-weight: 600;
+
+  line-height: 1.2;
+  letter-spacing: -0.045em;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-variant-numeric: tabular-nums;
+
+  transition: color 180ms ease;
 }
+
+/* =========================================
+   Supporting Statistics
+========================================= */
 
 .pt-dsc-subs {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  margin-top: 4px;
-  font-size: 10px;
-  opacity: 0.85;
-  font-weight: 500;
-}
-.pt-dsc-sub strong {
-  font-weight: 800;
+
+  width: 100%;
+  gap: 3px;
+
+  margin-top: 3px;
 }
 
+.pt-dsc-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+
+  width: 100%;
+  min-width: 0;
+
+  color: var(--dsc-muted);
+
+  font-size: 11px;
+  font-weight: 400;
+
+  line-height: 1.4;
+}
+
+.pt-dsc-sub-label {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pt-dsc-sub-value {
+  flex: 0 0 auto;
+
+  color: #506357;
+
+  font-size: 11px;
+  font-weight: 500;
+
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* =========================================
+   Arrow
+========================================= */
+
 .pt-dsc-arrow {
-  font-size: 20px;
-  opacity: 0.75;
-  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  flex: 0 0 25px;
+
+  width: 25px;
+  height: 25px;
+
+  margin-left: auto;
+
+  border-radius: 8px;
+
+  color: #a0b1a5;
+
+  transition:
+    transform 200ms ease,
+    color 200ms ease,
+    background-color 200ms ease;
+}
+
+/* =========================================
+   Hover Interaction
+========================================= */
+
+.pt-dsc:hover:not(:disabled) {
+  transform: translateY(-3px);
+
+  border-color: #bfe3cc;
+
+  background: #fefffe;
+
+  box-shadow:
+    0 5px 12px rgba(24, 116, 58, 0.045),
+    0 13px 28px rgba(24, 116, 58, 0.09);
+}
+
+.pt-dsc:hover:not(:disabled) .pt-dsc-accent {
+  width: 65px;
+  opacity: 1;
+}
+
+.pt-dsc:hover:not(:disabled) .pt-dsc-icon {
+  transform: scale(1.06);
+
+  background: #e4f5e9;
+}
+
+.pt-dsc:hover:not(:disabled) .pt-dsc-arrow {
+  transform: translateX(3px);
+
+  color: var(--dsc-green-dark);
+
+  background: var(--dsc-green-light);
+}
+
+.pt-dsc:hover:not(:disabled) .pt-dsc-value {
+  color: var(--dsc-green-dark);
+}
+
+/* =========================================
+   Active / Press Interaction
+========================================= */
+
+.pt-dsc:active:not(:disabled) {
+  transform: translateY(-1px) scale(0.99);
+
+  box-shadow:
+    0 3px 8px rgba(24, 116, 58, 0.06);
+}
+
+/* =========================================
+   Disabled State
+========================================= */
+
+.pt-dsc:disabled {
+  cursor: default;
+  opacity: 1;
+}
+
+/* =========================================
+   Keyboard Accessibility
+========================================= */
+
+.pt-dsc:focus {
+  outline: none;
+}
+
+.pt-dsc:focus-visible {
+  outline: 3px solid rgba(21, 148, 71, 0.3);
+  outline-offset: 3px;
+
+  border-color: var(--dsc-green);
+}
+
+/* =========================================
+   Tablet
+========================================= */
+
+@media (max-width: 1024px) {
+  .pt-dsc {
+    min-height: 112px;
+    gap: 11px;
+    padding: 15px 13px;
+  }
+
+  .pt-dsc-icon {
+    flex-basis: 40px;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+
+    font-size: 19px;
+  }
+
+  .pt-dsc-value {
+    font-size: clamp(20px, 2.5vw, 25px);
+  }
+}
+
+/* =========================================
+   Mobile
+========================================= */
+
+@media (max-width: 640px) {
+  .pt-dsc {
+    min-height: 108px;
+
+    gap: 9px;
+    padding: 13px 10px;
+
+    border-radius: 14px;
+  }
+
+  .pt-dsc-accent {
+    left: 12px;
+    width: 32px;
+  }
+
+  .pt-dsc-icon {
+    flex-basis: 34px;
+
+    width: 34px;
+    height: 34px;
+
+    border-radius: 10px;
+
+    font-size: 17px;
+  }
+
+  .pt-dsc-body {
+    gap: 4px;
+  }
+
+  .pt-dsc-label {
+    font-size: 9px;
+    letter-spacing: 0.045em;
+  }
+
+  .pt-dsc-value {
+    font-size: clamp(18px, 4.5vw, 23px);
+    letter-spacing: -0.035em;
+  }
+
+  .pt-dsc-subs {
+    gap: 2px;
+    margin-top: 2px;
+  }
+
+  .pt-dsc-sub {
+    gap: 4px;
+    font-size: 10px;
+  }
+
+  .pt-dsc-sub-value {
+    font-size: 10px;
+  }
+
+  .pt-dsc-arrow {
+    flex-basis: 16px;
+
+    width: 16px;
+    height: 20px;
+  }
+
+  .pt-dsc-arrow svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* =========================================
+   Extra Narrow Mobile
+========================================= */
+
+@media (max-width: 380px) {
+  .pt-dsc {
+    min-height: 102px;
+
+    gap: 7px;
+    padding: 12px 8px;
+  }
+
+  .pt-dsc-icon {
+    flex-basis: 30px;
+
+    width: 30px;
+    height: 30px;
+
+    font-size: 15px;
+  }
+
+  .pt-dsc-label {
+    font-size: 8px;
+  }
+
+  .pt-dsc-value {
+    font-size: 18px;
+  }
+
+  .pt-dsc-sub,
+  .pt-dsc-sub-value {
+    font-size: 9px;
+  }
+
+  .pt-dsc-arrow {
+    display: none;
+  }
+}
+
+/* =========================================
+   Reduced Motion Accessibility
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-dsc,
+  .pt-dsc-accent,
+  .pt-dsc-icon,
+  .pt-dsc-arrow,
+  .pt-dsc-value {
+    transition: none;
+  }
+
+  .pt-dsc:hover:not(:disabled),
+  .pt-dsc:active:not(:disabled),
+  .pt-dsc:hover:not(:disabled) .pt-dsc-icon,
+  .pt-dsc:hover:not(:disabled) .pt-dsc-arrow {
+    transform: none;
+  }
 }

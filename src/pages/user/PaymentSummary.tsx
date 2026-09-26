@@ -5,6 +5,7 @@ import { useUserAuth } from '../../context/UserAuthContext';
 import { getApplicableDiscounts } from '../../api/user/turfs';
 import { walletBook, initiateBooking } from '../../api/user/bookings';
 import type { Discount } from '../../types/user/turf';
+import { metaInitiateCheckout, metaPurchase } from '../../lib/metaPixel';
 import './style/PaymentSummary.css';
 import { formatLocalDate } from '../../utils/dateUtils';
 
@@ -203,6 +204,24 @@ const PaymentSummary = () => {
     setIsProcessing(true);
     setShowWalletModal(false);
 
+    // Meta Pixel: Wallet checkout started
+  metaInitiateCheckout({
+    turf_id: turf.id,
+    value: finalAmount,
+    num_slots: selectedSlots.length,
+    payment_model: "wallet",
+  });
+
+  if (import.meta.env.DEV) {
+    console.log("[Meta Pixel] InitiateCheckout → Wallet", {
+      turf_id: turf.id,
+      value: finalAmount,
+      num_slots: selectedSlots.length,
+      payment_model: "wallet",
+    });
+  }
+
+
     try {
       const dateStr = formatLocalDate(bookingData.selectedDate);
 
@@ -227,8 +246,28 @@ const PaymentSummary = () => {
       const response = await walletBook(payload);
 
       if (response.result === 'success' && response.data) {
-        console.log('✅ Wallet booking successful:', response.data);
-        await refreshUserData();
+  console.log('✅ Wallet booking successful:', response.data);
+
+  const confirmedBookingId = response.data.booking_id;
+
+  // Meta Pixel: Wallet booking confirmed → Purchase
+  metaPurchase({
+    booking_id: confirmedBookingId,
+    turf_id: turf.id,
+    value: finalAmount,
+    user_id: user?.id,
+  });
+
+  if (import.meta.env.DEV) {
+    console.log("[Meta Pixel] Purchase → Wallet Booking Confirmed", {
+      booking_id: confirmedBookingId,
+      turf_id: turf.id,
+      value: finalAmount,
+      user_id: user?.id,
+    });
+  }
+
+  await refreshUserData();
         
         // Navigate to success page
         navigate('/booking-success', {
@@ -266,6 +305,23 @@ const PaymentSummary = () => {
   const processOnlinePayment = async () => {
     setIsProcessing(true);
     setShowOnlineModal(false);
+
+    // Meta Pixel: Online/Razorpay checkout started
+  metaInitiateCheckout({
+    turf_id: turf.id,
+    value: finalAmount,
+    num_slots: selectedSlots.length,
+    payment_model: paymentOption === "full" ? "full" : "token",
+  });
+
+  if (import.meta.env.DEV) {
+    console.log("[Meta Pixel] InitiateCheckout → Razorpay", {
+      turf_id: turf.id,
+      value: finalAmount,
+      num_slots: selectedSlots.length,
+      payment_model: paymentOption === "full" ? "full" : "token",
+    });
+  }
 
     try {
       const dateStr = formatLocalDate(bookingData.selectedDate);
@@ -591,11 +647,6 @@ const PaymentSummary = () => {
             <i className="bi bi-credit-card" />
             {isProcessing ? 'Processing...' : `Pay ₹${finalAmount.toFixed(2)} via Online`}
           </button>
-          <div className="payment-summary__payment-methods">
-            <span>UPI</span>
-            <span>Credit/Debit Cards</span>
-            <span>Netbanking</span>
-          </div>
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useUserAuth } from '../../context/UserAuthContext';
 import { listTurfs } from '../../api/user/turfs';
 import type { Turf } from '../../types/user/turf';
+import { metaViewContent } from '../../lib/metaPixel';
 import './style/TurfDetailPage.css';
 
 // ─── Image Slider Component ──────────────────────────────────────────────
@@ -191,6 +192,23 @@ const TurfDetailPage = () => {
     fetchTurfDetail();
   }, [id, location.state]);
 
+  useEffect(() => {
+  if (!turf) return;
+
+  metaViewContent({
+    turf_id: turf.id,
+    turf_name: turf.name,
+    sport: turf.game_type,
+  });
+
+  if (import.meta.env.DEV) {
+    console.log('[Meta Pixel] ViewContent → Turf Detail', {
+      turf_id: turf.id,
+      turf_name: turf.name,
+    });
+  }
+}, [turf]);
+
   const formatTime = (time: string | null): string => {
     if (!time) return 'Not specified';
     try {
@@ -282,7 +300,7 @@ const TurfDetailPage = () => {
         { icon: 'cup-hot', label: 'Drinking water', available: turf.facilities['Drinking water'] },
         { icon: 'wifi', label: 'WiFi', available: turf.facilities.wifi },
         { icon: 'cctv', label: 'CCTV', available: turf.facilities.CCTV },
-      ]
+      ].filter((a) => a.available)
     : [];
 
   return (

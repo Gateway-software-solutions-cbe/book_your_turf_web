@@ -1,50 +1,121 @@
-/* src/pages/user/TurfsPage.css */
+/* =========================================================
+   BOOKYOURTURF · TURFS PAGE
+   Editorial grid · thin type · hairlines · rich interactions
+========================================================= */
 
 .turfs-page {
+  --em-900: #062a1a;
+  --em-700: #0a4a2c;
+  --em-600: #0d7a45;
+  --em-500: #14a45c;
+  --em-400: #3ebd7a;
+  --em-300: #8ad9ab;
+  --em-200: #c9ebd6;
+  --em-100: #e6f5ec;
+  --em-50:  #f2f9f5;
+
+  --ink: #0b1a12;
+  --text: #4c5b53;
+  --muted: #6b7a71;
+  --soft: #8d9a91;
+  --faint: #b8c4bc;
+
+  --line: #e5ece8;
+  --line-soft: #eef4f0;
+
+  --surface: #ffffff;
+
   max-width: 100%;
+  min-width: 0;
+
+  font-family: inherit;
+  color: var(--ink);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
 }
 
-/* ─── Header ───────────────────────────────────────────────────────────── */
+.turfs-page *,
+.turfs-page *::before,
+.turfs-page *::after {
+  box-sizing: border-box;
+}
+
+.turfs-page h1,
+.turfs-page h2,
+.turfs-page h3,
+.turfs-page strong,
+.turfs-page b {
+  font-weight: 400;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
 .turfs-page__header {
   display: flex;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
+  gap: 16px;
+
+  margin-bottom: 26px;
+  padding-bottom: 20px;
+
+  border-bottom: 1px solid var(--line);
+
   flex-wrap: wrap;
-  gap: 8px;
 }
 
 .turfs-page__greeting {
-  font-size: 22px;
-  font-weight: 700;
-  color: #0b1f1a;
-  margin: 0;
+  margin: 0 0 4px;
+
+  font-size: clamp(24px, 2.4vw, 32px);
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+
+  color: var(--ink);
 }
 
 .turfs-page__subtitle {
-  font-size: 14px;
-  color: #6c7a72;
-  margin: 2px 0 0;
+  margin: 0;
+
+  font-size: 13px;
+  font-weight: 400;
+
+  color: var(--muted);
 }
 
 .turfs-page__location-badge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  background: #f4f8f6;
-  border-radius: 20px;
-  font-size: 13px;
-  color: #0b1f1a;
+  gap: 8px;
+
+  padding: 8px 14px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface);
+
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+
   flex-shrink: 0;
 }
 
 .turfs-page__location-badge i {
-  color: #1fa463;
-  font-size: 16px;
+  color: var(--em-500);
+  font-size: 14px;
 }
 
-/* ─── Search Bar ───────────────────────────────────────────────────────── */
+/* =========================================================
+   SEARCH BAR
+========================================================= */
+
 .turfs-page__search-wrapper {
   margin-bottom: 16px;
 }
@@ -52,68 +123,90 @@
 .search-bar {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 12px;
-  padding: 0 16px;
-  border: 2px solid #e8edea;
-  transition: all 0.3s ease;
+  gap: 12px;
+
+  padding: 0 20px;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
+
+  background: var(--surface);
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .search-bar:focus-within {
-  border-color: #1fa463;
-  box-shadow: 0 0 0 4px rgba(31, 164, 99, 0.06);
+  border-color: var(--em-500);
+  box-shadow: 0 0 0 4px rgba(20, 164, 92, 0.09);
 }
 
 .search-bar.has-value {
-  border-color: #1fa463;
+  border-color: var(--em-300);
 }
 
-.search-bar i {
-  color: #9aa8a0;
-  font-size: 18px;
+.search-bar > i {
+  color: var(--soft);
+  font-size: 17px;
   flex-shrink: 0;
 }
 
 .search-bar input {
   flex: 1;
-  border: none;
+  min-width: 0;
+
+  padding: 13px 0;
+
+  border: 0;
   background: transparent;
-  padding: 12px 12px;
+  outline: 0;
+
+  font: inherit;
   font-size: 14px;
-  color: #0b1f1a;
-  outline: none;
+  font-weight: 400;
+  color: var(--ink);
 }
 
 .search-bar input::placeholder {
-  color: #b0bdb5;
+  color: var(--faint);
+  font-weight: 300;
 }
 
 .search-clear {
-  background: none;
-  border: none;
-  color: #b0bdb5;
+  border: 0;
+  background: transparent;
   padding: 4px;
+
+  color: var(--soft);
   cursor: pointer;
-  flex-shrink: 0;
+
+  transition: color 160ms ease;
 }
 
 .search-clear:hover {
-  color: #6c7a72;
+  color: var(--ink);
 }
 
-/* ─── Filters Row ───────────────────────────────────────────────────────── */
+/* =========================================================
+   FILTERS ROW
+========================================================= */
+
 .turfs-page__filters-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 16px;
+
+  margin-bottom: 26px;
+
   flex-wrap: wrap;
-  gap: 12px;
 }
 
 .turfs-page__filters {
   display: flex;
   gap: 8px;
+
   overflow-x: auto;
   padding-bottom: 4px;
   scrollbar-width: none;
@@ -123,445 +216,726 @@
   display: none;
 }
 
+/* Filter pill */
 .sport-filter-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 20px;
-  border: 2px solid transparent;
-  border-radius: 24px;
-  background: #fff;
-  color: #6c7a72;
-  font-size: 13px;
+
+  padding: 9px 18px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface);
+  color: var(--text);
+
+  font: inherit;
+  font-size: 12.5px;
   font-weight: 500;
+
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
 }
 
 .sport-filter-btn i {
-  font-size: 16px;
+  font-size: 15px;
+  color: var(--muted);
+  transition: color 180ms ease;
 }
 
 .sport-filter-btn:hover {
-  border-color: #e8edea;
-  color: #0b1f1a;
+  border-color: var(--em-200);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.sport-filter-btn:hover i {
+  color: var(--em-500);
 }
 
 .sport-filter-btn.active {
-  background: #1fa463;
-  color: #fff;
-  border-color: #1fa463;
-  box-shadow: 0 4px 16px rgba(31, 164, 99, 0.2);
+  border-color: var(--em-700);
+  background: linear-gradient(135deg, var(--em-600), var(--em-700));
+  color: #ffffff;
+  box-shadow: 0 8px 18px -10px rgba(20, 164, 92, 0.6);
+}
+
+.sport-filter-btn.active i {
+  color: #ffffff;
 }
 
 .turfs-page__results-count {
-  font-size: 14px;
-  color: #6c7a72;
+  font-size: 12.5px;
   font-weight: 500;
+  letter-spacing: 0.02em;
+
+  color: var(--muted);
+
   flex-shrink: 0;
 }
 
-/* ─── Error State ──────────────────────────────────────────────────────── */
+/* =========================================================
+   ERROR
+========================================================= */
+
 .turfs-page__error {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  background: #fde8e8;
-  border-radius: 12px;
-  color: #b02a37;
-  margin-bottom: 16px;
+
+  margin-bottom: 20px;
+  padding: 14px 16px;
+
+  border: 1px solid #f4d4d4;
+  border-radius: 14px;
+
+  background: #fdf4f4;
+  color: #b42318;
+
+  font-size: 13px;
+}
+
+.turfs-page__error i {
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .turfs-page__error button {
   margin-left: auto;
-  background: none;
-  border: none;
-  color: #b02a37;
-  font-weight: 600;
+
+  padding: 6px 14px;
+
+  border: 1px solid #e8bcbc;
+  border-radius: 999px;
+
+  background: transparent;
+  color: #b42318;
+
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+
   cursor: pointer;
-  padding: 4px 12px;
-  border-radius: 6px;
-  transition: background 0.2s;
+
+  transition: background 160ms ease;
 }
 
 .turfs-page__error button:hover {
-  background: rgba(176, 42, 55, 0.08);
+  background: #fbe6e6;
 }
 
-/* ─── Turfs Grid ────────────────────────────────────────────────────────── */
+/* =========================================================
+   GRID
+========================================================= */
+
 .turfs-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px 20px;
 }
 
-/* ─── Turf Card ─────────────────────────────────────────────────────────── */
+/* =========================================================
+   TURF CARD
+========================================================= */
+
 .turf-card {
-  background: #fff;
-  border-radius: 12px;
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid var(--line);
+  border-radius: 18px;
+
+  background: var(--surface);
+
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(0, 0, 0, 0.02);
+
+  box-shadow: 0 1px 2px rgba(11, 26, 18, 0.02);
+
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 260ms ease,
+    box-shadow 260ms ease;
 }
 
 .turf-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+  border-color: var(--em-200);
+  box-shadow:
+    0 20px 40px -22px rgba(11, 26, 18, 0.22),
+    0 4px 10px -4px rgba(11, 26, 18, 0.04);
 }
 
-/* ─── Image ─────────────────────────────────────────────────────────────── */
+/* ---------- Image ---------- */
+
 .turf-card__image {
   position: relative;
-  height: 180px;
+  aspect-ratio: 16 / 11;
+
   overflow: hidden;
-  background: #e8edea;
+  background: #e7efe9;
+}
+
+.turf-card__image::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+
+  background: linear-gradient(
+    to top,
+    rgba(6, 42, 26, 0.4),
+    transparent 100%
+  );
+
+  pointer-events: none;
 }
 
 .turf-card__image img {
+  display: block;
   width: 100%;
   height: 100%;
+
   object-fit: cover;
-  transition: transform 0.4s ease;
+
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .turf-card:hover .turf-card__image img {
-  transform: scale(1.03);
+  transform: scale(1.04);
 }
 
-/* ─── Verified Badge ────────────────────────────────────────────────────── */
+/* Verified badge */
 .turf-card__verified-badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  z-index: 2;
+  top: 12px;
+  left: 12px;
+
+  display: grid;
+  place-items: center;
+
   width: 28px;
   height: 28px;
+
   border-radius: 50%;
-  background: rgba(31, 164, 99, 0.92);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+
+  background: linear-gradient(135deg, var(--em-500), var(--em-700));
+  color: #ffffff;
+
+  box-shadow:
+    0 6px 16px -6px rgba(20, 164, 92, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+  backdrop-filter: blur(6px);
 }
 
 .turf-card__verified-badge i {
-  font-size: 16px;
-  color: #fff;
+  font-size: 14px;
 }
 
-/* ─── Favourite Button ──────────────────────────────────────────────────── */
+/* Favourite */
 .turf-card__favourite-wrap {
   position: absolute;
-  top: 10px;
-  right: 10px;
   z-index: 3;
+  top: 12px;
+  right: 12px;
 }
 
 .turf-card__favourite-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+  display: grid;
+  place-items: center;
+
   width: 32px;
   height: 32px;
+
+  border: 0;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(4px);
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--muted);
+
   cursor: pointer;
-  transition: all 0.2s ease;
-  z-index: 2;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+
+  box-shadow: 0 4px 12px -4px rgba(11, 26, 18, 0.24);
+
+  transition:
+    transform 200ms ease,
+    background 200ms ease,
+    color 200ms ease;
 }
 
 .turf-card__favourite-btn:hover {
-  transform: scale(1.1);
+  transform: scale(1.08);
+  background: #ffffff;
 }
 
 .turf-card__favourite-btn i {
-  font-size: 16px;
-  color: #b0bdb5;
-  transition: color 0.2s ease;
+  font-size: 15px;
 }
 
-.turf-card__favourite-btn .bi-heart-fill {
-  color: #dc3545;
-}
-
+.turf-card__favourite-btn .bi-heart-fill,
 .turf-card__favourite-btn:hover i {
-  color: #dc3545;
+  color: #d0432e;
 }
 
-/* ─── Card Body ─────────────────────────────────────────────────────────── */
+/* ---------- Body ---------- */
+
 .turf-card__body {
-  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  padding: 16px 18px 18px;
 }
 
 .turf-card__name {
-  font-size: 16px;
-  font-weight: 600;
-  color: #0b1f1a;
   margin: 0 0 4px;
+
+  font-size: 16.5px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
   line-height: 1.3;
+
+  color: var(--ink);
+
+  overflow-wrap: anywhere;
 }
 
 .turf-card__address {
-  color: #6c7a72;
-  font-size: 13px;
-  margin: 0 0 8px;
-  line-height: 1.3;
+  margin: 0 0 12px;
+
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.5;
+
+  color: var(--muted);
+
+  overflow-wrap: anywhere;
 }
 
+/* Meta row */
 .turf-card__meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 6px;
+
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+
+  border-bottom: 1px solid var(--line-soft);
 }
 
 .turf-card__sport,
 .turf-card__distance {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: #4a5a52;
-  background: #f4f8f6;
-  padding: 3px 12px;
-  border-radius: 12px;
+  gap: 5px;
+
+  padding: 4px 10px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: transparent;
+
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+
+  white-space: nowrap;
 }
 
 .turf-card__sport i,
 .turf-card__distance i {
-  font-size: 12px;
-  color: #6c7a72;
+  font-size: 11px;
+  color: var(--em-500);
 }
 
-/* ─── Action Button ────────────────────────────────────────────────────── */
+/* Action button */
 .turf-card__action-btn {
-  width: 100%;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 8px;
-  background: #1fa463;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-}
-
-.turf-card__action-btn:hover {
-  background: #0f6e42;
-}
-
-.turf-card__action-btn--call {
-  background: #0d6efd;
-}
-
-.turf-card__action-btn--call:hover {
-  background: #0a58ca;
-}
-
-/* ─── Skeleton ──────────────────────────────────────────────────────────── */
-.turf-card--skeleton .skeleton {
-  background: linear-gradient(90deg, #f0f2f1 25%, #e0e5e2 50%, #f0f2f1 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-.turf-card--skeleton .turf-card__image {
-  height: 180px;
-  background: linear-gradient(90deg, #f0f2f1 25%, #e0e5e2 50%, #f0f2f1 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-.turf-card--skeleton .skeleton-text {
-  height: 14px;
-  background: #f0f2f1;
-  border-radius: 4px;
-  margin-bottom: 8px;
-  animation: shimmer 1.5s infinite;
-}
-
-.turf-card--skeleton .skeleton-text:last-child {
-  width: 60% !important;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-/* ─── Empty State ───────────────────────────────────────────────────────── */
-.empty-state {
-  text-align: center;
-  padding: 60px 20px;
-  background: #fff;
-  border-radius: 12px;
-}
-
-.empty-state__icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  gap: 8px;
+
+  width: 100%;
+  min-height: 40px;
+  margin-top: auto;
+  padding: 10px 16px;
+
+  border: 0;
+  border-radius: 11px;
+
+  background: linear-gradient(135deg, var(--em-500), var(--em-700));
+  color: #ffffff;
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+
+  cursor: pointer;
+
+  box-shadow: 0 8px 18px -12px rgba(20, 164, 92, 0.7);
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease;
+}
+
+.turf-card__action-btn i {
+  transition: transform 200ms ease;
+}
+
+.turf-card__action-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 26px -14px rgba(20, 164, 92, 0.85);
+}
+
+.turf-card__action-btn:hover i {
+  transform: translateX(3px);
+}
+
+.turf-card__action-btn--call {
+  background: linear-gradient(135deg, #1d7f4b, #0a5e36);
+}
+
+.turf-card__action-btn--call:hover {
+  box-shadow: 0 14px 26px -14px rgba(13, 122, 69, 0.85);
+}
+
+/* =========================================================
+   SKELETON
+========================================================= */
+
+.turf-card--skeleton {
+  pointer-events: none;
+}
+
+.turf-card--skeleton .turf-card__image,
+.turf-card--skeleton .skeleton {
+  background: linear-gradient(
+    90deg,
+    #f1f4f2 25%,
+    #e6ebe8 50%,
+    #f1f4f2 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+.turf-card--skeleton .skeleton-text {
+  height: 12px;
+  border-radius: 6px;
+
+  background: linear-gradient(
+    90deg,
+    #f1f4f2 25%,
+    #e6ebe8 50%,
+    #f1f4f2 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+
+  margin-bottom: 10px;
+}
+
+.turf-card--skeleton .turf-card__body {
+  gap: 4px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* =========================================================
+   EMPTY STATE
+========================================================= */
+
+.empty-state {
+  padding: 72px 24px;
+
+  border: 1px dashed var(--line);
+  border-radius: 20px;
+
+  background: var(--surface);
+
+  text-align: center;
+}
+
+.empty-state__icon {
+  display: grid;
+  place-items: center;
+
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 18px;
+
   border-radius: 50%;
-  background: #f4f8f6;
-  color: #9aa8a0;
-  font-size: 28px;
-  margin-bottom: 16px;
+  background: var(--em-50);
+
+  color: var(--em-500);
+  font-size: 26px;
 }
 
 .empty-state__title {
-  font-size: 18px;
-  font-weight: 600;
-  color: #0b1f1a;
-  margin: 0 0 6px;
+  margin: 0 0 8px;
+
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: -0.028em;
+
+  color: var(--ink);
 }
 
 .empty-state__desc {
-  color: #6c7a72;
-  font-size: 14px;
-  margin-bottom: 20px;
+  margin: 0 auto 22px;
+  max-width: 400px;
+
+  font-size: 13px;
+  color: var(--muted);
+
+  line-height: 1.6;
 }
 
 .empty-state__btn {
-  padding: 8px 24px;
-  border: 2px solid #1fa463;
-  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 10px 20px;
+
+  border: 1px solid var(--em-600);
+  border-radius: 999px;
+
   background: transparent;
-  color: #1fa463;
-  font-weight: 600;
+  color: var(--em-700);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
+
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
 }
 
 .empty-state__btn:hover {
-  background: #1fa463;
-  color: #fff;
+  background: var(--em-600);
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
-/* ─── Load More ──────────────────────────────────────────────────────────── */
+/* =========================================================
+   LOAD MORE / END
+========================================================= */
+
 .turfs-page__load-trigger {
-  padding: 8px 0;
+  padding: 20px 0 8px;
 }
 
 .turfs-page__loading-more {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 16px 0;
-  color: #6c7a72;
-  font-size: 14px;
+  gap: 10px;
+
+  padding: 18px 0;
+
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.turfs-page__loading-more .spinner-border {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--em-200);
+  border-top-color: var(--em-500);
+  border-radius: 50%;
+  animation: turfs-spin 0.75s linear infinite;
+}
+
+@keyframes turfs-spin {
+  to { transform: rotate(360deg); }
 }
 
 .turfs-page__end-message {
+  padding: 20px 0 8px;
+
   text-align: center;
-  padding: 16px 0;
-  color: #b0bdb5;
-  font-size: 14px;
+
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+
+  color: var(--faint);
 }
 
-/* ─── Responsive ────────────────────────────────────────────────────────── */
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
 @media (max-width: 1200px) {
   .turfs-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
   }
 }
 
-@media (max-width: 768px) {
-  .turfs-grid {
-    grid-template-columns: 1fr;
-    gap: 14px;
+@media (max-width: 900px) {
+  .turfs-page__header {
+    align-items: flex-start;
   }
+}
 
-  .turf-card__image {
-    height: 160px;
-  }
-
+@media (max-width: 640px) {
   .turfs-page__header {
     flex-direction: column;
     align-items: flex-start;
+
+    margin-bottom: 20px;
+    padding-bottom: 18px;
   }
 
   .turfs-page__greeting {
-    font-size: 20px;
+    font-size: 26px;
+  }
+
+  .turfs-page__subtitle {
+    font-size: 12.5px;
+  }
+
+  .turfs-page__location-badge {
+    font-size: 11.5px;
+    padding: 6px 12px;
+  }
+
+  .search-bar {
+    padding: 0 14px;
+    border-radius: 12px;
+  }
+
+  .search-bar input {
+    padding: 12px 0;
+    font-size: 13.5px;
   }
 
   .turfs-page__filters-row {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .turfs-page__filters {
-    overflow-x: auto;
+    gap: 12px;
+    margin-bottom: 22px;
   }
 
   .turfs-page__results-count {
-    text-align: center;
+    text-align: left;
+    padding-left: 2px;
   }
 
   .sport-filter-btn {
-    padding: 6px 14px;
+    padding: 8px 15px;
     font-size: 12px;
   }
 
-  .turfs-page__location-badge {
-    font-size: 12px;
-    padding: 4px 12px;
+  .turfs-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .turf-card__name {
-    font-size: 15px;
+  .turf-card {
+    border-radius: 16px;
   }
-}
 
-@media (max-width: 480px) {
   .turf-card__image {
-    height: 140px;
+    aspect-ratio: 16 / 10;
   }
 
   .turf-card__body {
-    padding: 12px 14px 14px;
+    padding: 14px 16px 16px;
+  }
+
+  .turf-card__name {
+    font-size: 15.5px;
+  }
+
+  .turf-card__address {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .turf-card__meta-row {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+  }
+
+  .turf-card__sport,
+  .turf-card__distance {
+    font-size: 11px;
   }
 
   .turf-card__action-btn {
-    font-size: 12px;
-    padding: 6px 12px;
+    font-size: 12.5px;
+    min-height: 38px;
+  }
+
+  .empty-state {
+    padding: 56px 20px;
+  }
+
+  .empty-state__title {
+    font-size: 18px;
+  }
+
+  .empty-state__desc {
+    font-size: 12.5px;
+  }
+}
+
+@media (max-width: 400px) {
+  .turfs-page__greeting {
+    font-size: 24px;
   }
 
   .turf-card__favourite-btn {
-    width: 28px;
-    height: 28px;
-  }
-
-  .turf-card__favourite-btn i {
-    font-size: 14px;
+    width: 30px;
+    height: 30px;
   }
 
   .turf-card__verified-badge {
-    width: 24px;
-    height: 24px;
+    width: 26px;
+    height: 26px;
   }
+}
 
-  .turf-card__verified-badge i {
-    font-size: 14px;
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .turfs-page *,
+  .turfs-page *::before,
+  .turfs-page *::after,
+  .user-layout *,
+  .user-layout *::before,
+  .user-layout *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

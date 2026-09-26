@@ -4,6 +4,7 @@ import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getTurfCalendar } from "../../api/user/turfs";
 import { useUserAuth } from "../../context/UserAuthContext";
 import type { CalendarSlot } from "../../api/user/turfs";
+import { metaAddToCart } from "../../lib/metaPixel";
 import "./style/BookingPage.css";
 
 // ─── Date Picker ──────────────────────────────────────────────────────────
@@ -399,16 +400,37 @@ const BookingPage = () => {
   // ─── Handlers ──────────────────────────────────────────────────────────
 
   const handleSlotSelect = (slot: CalendarSlot) => {
-    setSelectedSlots((prev) => {
-      const index = prev.findIndex(
-        (s) => s.start_time === slot.start_time && s.date === slot.date,
-      );
-      if (index >= 0) {
-        return prev.filter((_, i) => i !== index);
-      }
-      return [...prev, slot];
+  setSelectedSlots((prev) => {
+    const index = prev.findIndex(
+      (s) => s.start_time === slot.start_time && s.date === slot.date,
+    );
+
+    // If already selected, remove it
+    if (index >= 0) {
+      return prev.filter((_, i) => i !== index);
+    }
+
+    // Meta Pixel: Slot selected → AddToCart
+    metaAddToCart({
+      turf_id: id ?? "",
+      turf_name: turf?.name ?? "",
+      value: parseFloat(slot.price),
+      sport: turf?.game_type ?? "",
     });
-  };
+
+    if (import.meta.env.DEV) {
+      console.log("[Meta Pixel] AddToCart → Slot Selected", {
+        turf_id: id,
+        turf_name: turf?.name,
+        slot_start: slot.start_time,
+        slot_end: slot.end_time,
+        value: slot.price,
+      });
+    }
+
+    return [...prev, slot];
+  });
+};
 
   const handleDateSelect = (date: Date) => {
     const today = new Date();

@@ -1,30 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { partnerTurfsApi, FACILITY_OPTIONS } from "../../../api/partner/turfs";
+import {
+  partnerTurfsApi,
+  FACILITY_OPTIONS,
+} from "../../../api/partner/turfs";
 import type { PartnerTurf } from "../../../types/partner/turf";
 import { usePartnerAuth } from "../../../context/PartnerAuthContext";
 import { useProfileGuard } from "../../../context/ProfileGuardContext";
 import "./style/PartnerVenueDetailPage.css";
 
-const STATUS_META: Record<string, { label: string; cls: string; desc: string }> = {
-  Pending: {
-    label: "Pending Approval",
-    cls: "pt-status-pending",
-    desc: "Your venue is under review. You'll be notified once approved.",
-  },
-  Approved: {
-    label: "Live",
-    cls: "pt-status-approved",
-    desc: "Your venue is live and accepting bookings.",
-  },
-  Rejected: {
-    label: "Rejected",
-    cls: "pt-status-rejected",
-    desc: "Your venue was rejected. Please review and resubmit.",
-  },
-};
-
-const DAYS: { key: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"; short: string }[] = [
+const DAYS: {
+  key: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
+  short: string;
+}[] = [
   { key: "mon", short: "Mon" },
   { key: "tue", short: "Tue" },
   { key: "wed", short: "Wed" },
@@ -34,10 +22,84 @@ const DAYS: { key: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"; short:
   { key: "sun", short: "Sun" },
 ];
 
+const STATUS_META: Record<
+  string,
+  { label: string; description: string; className: string }
+> = {
+  Pending: {
+    label: "Pending Approval",
+    description:
+      "Your venue is under review. You'll be notified once approved.",
+    className: "vdp-status-pending",
+  },
+  Approved: {
+    label: "Live",
+    description: "Your venue is live and accepting bookings.",
+    className: "vdp-status-approved",
+  },
+  Rejected: {
+    label: "Rejected",
+    description: "Your venue was rejected. Please review and resubmit.",
+    className: "vdp-status-rejected",
+  },
+};
+
+const formatTime = (time?: string | null) => {
+  if (!time) return "—";
+  return time.slice(0, 5);
+};
+
+const formatDate = (date?: string | null) => {
+  if (!date) return "—";
+  const parsed = new Date(date);
+  if (Number.isNaN(parsed.getTime())) return "—";
+  return parsed.toLocaleDateString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const formatAmount = (amount?: string | number | null) => {
+  if (amount === undefined || amount === null || amount === "") return "—";
+  return `₹${amount}`;
+};
+
+/**
+ * Standard court data for racket sports. These venues always
+ * follow regulation dimensions, so no custom length/breadth/
+ * height/shape fields are required for them.
+ */
+const getStandardCourt = (sportRaw: string) => {
+  const s = sportRaw.toLowerCase();
+
+  if (s.includes("badminton")) {
+    return {
+      label: "Standard badminton court",
+      lines: [
+        { key: "Singles", value: "13.40 × 6.10 m" },
+        { key: "Doubles", value: "13.40 × 7.60 m" },
+      ],
+    };
+  }
+
+  if (s.includes("pickleball")) {
+    return {
+      label: "Standard pickleball court",
+      lines: [
+        { key: "Doubles", value: "13.41 × 6.10 m" },
+        { key: "Singles", value: "13.41 × 5.18 m" },
+      ],
+    };
+  }
+
+  return null;
+};
+
 const PartnerVenueDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  console.log("[PartnerVenueDetailPage] mounted, id =", id);
   const navigate = useNavigate();
+
   const { isGuest } = usePartnerAuth();
   const { openCompleteProfile } = useProfileGuard();
 
@@ -45,384 +107,503 @@ const PartnerVenueDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeImageIdx, setActiveImageIdx] = useState(0);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
-  // ─── Load ───────────────────────────────────────────────
+  /* ------------- Fetch venue ------------- */
   useEffect(() => {
-    if (!id) return;
-    (async () => {
+    if (!id) {
+      setLoading(false);
+      setError("Venue ID is missing.");
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadVenue = async () => {
+      setLoading(true);
+      setError("");
+
       try {
-        const res = await partnerTurfsApi.detail(id);
-        setTurf(res.data);
+        const response = await partnerTurfsApi.detail(id);
+        if (!cancelled) {
+          setTurf(response.data);
+          setActiveImageIdx(0);
+        }
       } catch (err: any) {
-        setError(err?.response?.data?.message || "Failed to load venue");
+        if (!cancelled) {
+          setError(
+            err?.response?.data?.message ||
+              "Failed to load venue details."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
-    })();
+    };
+
+    loadVenue();
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
+  /* ------------- Redirect non-approved ------------- */
   useEffect(() => {
-  if (turf && turf.status !== "Approved") {
-    navigate("/partner/venues", { replace: true });
-  }
-}, [turf, navigate]);
+    if (turf && turf.status !== "Approved") {
+      navigate("/partner/venues", { replace: true });
+    }
+  }, [turf, navigate]);
 
-  // ─── Guarded actions ────────────────────────────────────
+  /* ------------- Edit guard ------------- */
   const handleEdit = () => {
     if (!turf) return;
-    const go = () => navigate(`/partner/venues/${turf.id}/edit`);
-    if (isGuest) return openCompleteProfile(go);
-    go();
+    const goToEdit = () => {
+      navigate(`/partner/venues/${turf.id}/edit`);
+    };
+    if (isGuest) return openCompleteProfile(goToEdit);
+    goToEdit();
   };
 
-  // const handleDelete = async () => {
-  //   if (!turf) return;
-  //   setDeleting(true);
-  //   try {
-  //     await partnerTurfsApi.remove(turf.id);
-  //     navigate("/partner/venues");
-  //   } catch (err: any) {
-  //     setError(err?.response?.data?.message || "Failed to delete venue");
-  //     setDeleting(false);
-  //     setConfirmDelete(false);
-  //   }
-  // };
+  /* ------------- Gallery ------------- */
+  const images = turf?.images ?? [];
 
-  // ─── Render ─────────────────────────────────────────────
+  const showPreviousImage = () => {
+    if (images.length < 2) return;
+    setActiveImageIdx((c) => (c === 0 ? images.length - 1 : c - 1));
+  };
+
+  const showNextImage = () => {
+    if (images.length < 2) return;
+    setActiveImageIdx((c) => (c === images.length - 1 ? 0 : c + 1));
+  };
+
+  /* ------------- Loading ------------- */
   if (loading) {
-    return <div className="pt-venue-detail-loading">Loading venue...</div>;
-  }
-
-  if (error && !turf) {
     return (
-      <div className="pt-venue-detail">
-        <div className="pt-auth-error">{error}</div>
-        <button className="pt-btn-primary" onClick={() => navigate("/partner/venues")}>
-          Back to Venues
-        </button>
-      </div>
+      <main className="vdp">
+        <div className="vdp-state">
+          <span className="vdp-spinner" />
+          <h2>Loading venue details</h2>
+          <p>Retrieving your venue information…</p>
+        </div>
+      </main>
     );
   }
 
-  if (!turf) return null;
-if (turf.status !== "Approved") {
-  // redirect effect above will fire; render nothing in the meantime
-  return null;
-}
+  /* ------------- Error ------------- */
+  if (error && !turf) {
+    return (
+      <main className="vdp">
+        <div className="vdp-state">
+          <div className="vdp-state-icon">!</div>
+          <h2>Unable to load venue</h2>
+          <p>{error}</p>
+          <button
+            type="button"
+            className="vdp-edit-btn"
+            onClick={() => navigate("/partner/venues")}
+          >
+            ← Back to My Venues
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  if (!turf || turf.status !== "Approved") return null;
 
   const statusMeta = STATUS_META[turf.status] ?? STATUS_META.Pending;
-  const activeAmenities = FACILITY_OPTIONS.filter((f) => turf.facilities[f.key]);
 
-  // Sort timings so court_1_day < court_1_night < court_2_day ...
-  const timingEntries = Object.entries(turf.timings);
+  const activeAmenities = FACILITY_OPTIONS.filter(
+    (facility) => turf.facilities?.[facility.key]
+  );
+
+  const timingEntries = Object.entries(turf.timings ?? {}).sort(
+    ([keyA], [keyB]) => {
+      const order = (key: string) => {
+        const m = key.match(/court_(\d+)_(day|night)/);
+        if (!m) return Number.MAX_SAFE_INTEGER;
+        return Number(m[1]) * 2 + (m[2] === "day" ? 0 : 1);
+      };
+      return order(keyA) - order(keyB);
+    }
+  );
+
+  const locationParts = [turf.district, turf.state, turf.pincode].filter(
+    Boolean
+  );
+  const locationSummary = locationParts.length
+    ? locationParts.join(" · ")
+    : "Location not specified";
+
+  const dimensions = turf.dimension_data;
+
+  /* ------------- Sport-aware dimension logic ------------- */
+  const sportRaw = turf.game_type || "";
+  const standardCourt = getStandardCourt(sportRaw);
+  const isRacketSport = standardCourt !== null;
 
   return (
-    <div className="pt-venue-detail">
-      {/* Header */}
-      <header className="pt-venue-detail-header">
+    <main className="vdp">
+      {/* ============ SLIM TOP RAIL ============ */}
+      <div className="vdp-rail">
         <button
-          className="pt-add-venue-back"
+          type="button"
+          className="vdp-rail-back"
           onClick={() => navigate("/partner/venues")}
-          aria-label="Back"
         >
-          ‹
+          <span aria-hidden="true">←</span>
+          <span>My Venues</span>
+          <span className="vdp-rail-sep" aria-hidden="true">
+            /
+          </span>
+          <span className="vdp-rail-current">Venue Details</span>
         </button>
-        <h1>{turf.name || "Venue"}</h1>
-        <span className={`pt-venue-status ${statusMeta.cls}`}>
-          {statusMeta.label}
-        </span>
-      </header>
 
-      {/* Status banner */}
-      <div className={`pt-venue-detail-status-banner ${statusMeta.cls}`}>
-        {statusMeta.desc}
+        <div className="vdp-rail-actions">
+          <span className={`vdp-status ${statusMeta.className}`}>
+            <span className="vdp-status-dot" />
+            {statusMeta.label}
+          </span>
+          <button
+            type="button"
+            className="vdp-edit-btn"
+            onClick={handleEdit}
+          >
+            Edit Venue
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
       </div>
 
-      {error && <div className="pt-auth-error">{error}</div>}
-
-      {/* Image gallery */}
-      {turf.images.length > 0 && (
-        <section className="pt-venue-detail-gallery">
-          <div className="pt-venue-detail-main-image">
+      {/* ============ COVER ============ */}
+      <section className="vdp-cover">
+        <div className="vdp-cover-media">
+          {images.length > 0 ? (
             <img
-              src={turf.images[activeImageIdx]?.url}
-              alt={turf.name}
+              key={images[activeImageIdx]?.id}
+              src={images[activeImageIdx]?.url}
+              alt={`${turf.name} venue`}
+              className="vdp-cover-image"
             />
+          ) : (
+            <div className="vdp-cover-fallback">
+              <span aria-hidden="true">▧</span>
+              <p>No venue image available</p>
+            </div>
+          )}
+
+          <div className="vdp-cover-counter">
+            {images.length > 0
+              ? `${activeImageIdx + 1} / ${images.length}`
+              : "No images"}
           </div>
-          {turf.images.length > 1 && (
-            <div className="pt-venue-detail-thumbs">
-              {turf.images.map((img, i) => (
+
+          {images.length > 1 && (
+            <>
+              <button
+                type="button"
+                className="vdp-gallery-btn vdp-gallery-prev"
+                onClick={showPreviousImage}
+                aria-label="Previous image"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className="vdp-gallery-btn vdp-gallery-next"
+                onClick={showNextImage}
+                aria-label="Next image"
+              >
+                ›
+              </button>
+            </>
+          )}
+
+          {images.length > 1 && (
+            <div className="vdp-cover-thumbs">
+              {images.map((image, index) => (
                 <button
-                  key={img.id}
-                  className={`pt-venue-detail-thumb ${i === activeImageIdx ? "pt-active" : ""}`}
-                  onClick={() => setActiveImageIdx(i)}
+                  key={image.id}
+                  type="button"
+                  className={`vdp-cover-thumb ${
+                    index === activeImageIdx ? "is-active" : ""
+                  }`}
+                  onClick={() => setActiveImageIdx(index)}
+                  aria-label={`View image ${index + 1}`}
+                  aria-pressed={index === activeImageIdx}
                 >
-                  <img src={img.url} alt={`${turf.name} ${i + 1}`} />
+                  <img
+                    src={image.url}
+                    alt={`${turf.name} thumbnail ${index + 1}`}
+                  />
                 </button>
               ))}
             </div>
           )}
-        </section>
-      )}
+        </div>
 
-      {/* Sport + code */}
-      <section className="pt-venue-detail-section">
-        <div className="pt-venue-detail-row">
-          <span className="pt-venue-detail-label">Sport</span>
-          <span className="pt-venue-detail-value">{turf.game_type}</span>
-        </div>
-        <div className="pt-venue-detail-row">
-          <span className="pt-venue-detail-label">Turf Code</span>
-          <span className="pt-venue-detail-value">{turf.turf_code}</span>
-        </div>
-        <div className="pt-venue-detail-row">
-          <span className="pt-venue-detail-label">Courts</span>
-          <span className="pt-venue-detail-value">{turf.courts}</span>
-        </div>
-        <div className="pt-venue-detail-row">
-          <span className="pt-venue-detail-label">Max Persons</span>
-          <span className="pt-venue-detail-value">{turf.max_persons}</span>
-        </div>
+        <aside className="vdp-cover-aside">
+          <span className="vdp-eyebrow">Partner Venue</span>
+
+          <h1 className="vdp-cover-title">{turf.name || "Venue"}</h1>
+
+          <dl className="vdp-cover-facts">
+            {turf.game_type && (
+              <div>
+                <dt>Sport</dt>
+                <dd>{turf.game_type}</dd>
+              </div>
+            )}
+            {turf.courts != null && (
+              <div>
+                <dt>Capacity</dt>
+                <dd>
+                  {turf.courts} court{turf.courts === 1 ? "" : "s"}
+                  {turf.max_persons != null
+                    ? ` · up to ${turf.max_persons} people`
+                    : ""}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt>Hours</dt>
+              <dd>
+                {formatTime(turf.open_time)} – {formatTime(turf.close_time)}
+              </dd>
+            </div>
+            <div>
+              <dt>Location</dt>
+              <dd>{locationSummary}</dd>
+            </div>
+            {turf.address && (
+              <div className="vdp-cover-facts-full">
+                <dt>Address</dt>
+                <dd>{turf.address}</dd>
+              </div>
+            )}
+          </dl>
+        </aside>
       </section>
 
-      {/* Location */}
-      <section className="pt-venue-detail-section">
-        <h3 className="pt-venue-detail-section-title">📍 Location</h3>
-        <p className="pt-venue-detail-address">{turf.address}</p>
-        <div className="pt-venue-detail-grid-2">
-          <div>
-            <span className="pt-venue-detail-label">State</span>
-            <span className="pt-venue-detail-value">{turf.state || "—"}</span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">District</span>
-            <span className="pt-venue-detail-value">{turf.district || "—"}</span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Pincode</span>
-            <span className="pt-venue-detail-value">{turf.pincode || "—"}</span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Coordinates</span>
-            <span className="pt-venue-detail-value">
-              {turf.latitude && turf.longitude
-                ? `${Number(turf.latitude).toFixed(4)}, ${Number(turf.longitude).toFixed(4)}`
-                : "—"}
-            </span>
-          </div>
-        </div>
-      </section>
+      {/* ============  SPECIFICATION ============ */}
+      <section className="vdp-section">
+        <header className="vdp-section-head">
+          <h2 className="vdp-section-title">
+            {isRacketSport ? "Court specification" : "Venue dimensions"}
+          </h2>
+        </header>
 
-      {/* Business info */}
-      {(turf.description || turf.achievements) && (
-        <section className="pt-venue-detail-section">
-          <h3 className="pt-venue-detail-section-title">🏢 Business Info</h3>
-          {turf.description && (
-            <p className="pt-venue-detail-paragraph">{turf.description}</p>
-          )}
-          {turf.achievements && (
-            <p className="pt-venue-detail-paragraph">
-              <strong>Achievements:</strong> {turf.achievements}
-            </p>
-          )}
-        </section>
-      )}
-
-      {/* Operating hours */}
-      <section className="pt-venue-detail-section">
-        <h3 className="pt-venue-detail-section-title">⏰ Operating Hours</h3>
-        <div className="pt-venue-detail-grid-2">
-          <div>
-            <span className="pt-venue-detail-label">Opens</span>
-            <span className="pt-venue-detail-value">
-              {turf.open_time.slice(0, 5)}
-            </span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Closes</span>
-            <span className="pt-venue-detail-value">
-              {turf.close_time.slice(0, 5)}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* Dimensions */}
-      <section className="pt-venue-detail-section">
-        <h3 className="pt-venue-detail-section-title">📐 Dimensions</h3>
-        <div className="pt-venue-detail-grid-2">
-          <div>
-            <span className="pt-venue-detail-label">Length</span>
-            <span className="pt-venue-detail-value">
-              {turf.dimension_data.length} {turf.dimension_data.unit}
-            </span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Breadth</span>
-            <span className="pt-venue-detail-value">
-              {turf.dimension_data.breadth} {turf.dimension_data.unit}
-            </span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Height</span>
-            <span className="pt-venue-detail-value">
-              {turf.dimension_data.height || "—"} {turf.dimension_data.unit}
-            </span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Shape</span>
-            <span className="pt-venue-detail-value">
-              {turf.dimension_data.turf_shape}
-            </span>
-          </div>
-        </div>
-      </section>
-
-      {/* Amenities */}
-      {activeAmenities.length > 0 && (
-        <section className="pt-venue-detail-section">
-          <h3 className="pt-venue-detail-section-title">✨ Amenities</h3>
-          <div className="pt-venue-detail-amenities">
-            {activeAmenities.map((a) => (
-              <span key={a.key as string} className="pt-venue-detail-amenity">
-                <span>{a.icon}</span>
-                <span>{a.label}</span>
+        <div className="vdp-section-body">
+          {isRacketSport && standardCourt ? (
+            <div className="vdp-standard">
+              <span className="vdp-standard-eyebrow">
+                {standardCourt.label}
               </span>
-            ))}
-          </div>
-        </section>
-      )}
 
-      {/* Timings & prices */}
-      {timingEntries.length > 0 && (
-        <section className="pt-venue-detail-section">
-          <h3 className="pt-venue-detail-section-title">💸 Timings & Prices</h3>
-          {timingEntries.map(([key, shift]) => {
-            // key looks like "court_1_day" or "court_1_night"
-            const [courtPart, shiftPart] = key.split("_").slice(-2);
-            const courtLabel = key.match(/court_(\d+)/)?.[1];
-            return (
-              <div key={key} className="pt-venue-detail-shift">
-                <div className="pt-venue-detail-shift-header">
-                  <span>
-                    Court {courtLabel} —{" "}
-                    {shiftPart === "night" ? "🌙 Night" : "☀ Day"}
+              <div className="vdp-standard-grid">
+                {standardCourt.lines.map((line) => (
+                  <div key={line.key} className="vdp-standard-line">
+                    <span className="vdp-standard-key">{line.key}</span>
+                    <span className="vdp-standard-value">
+                      {line.value}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="vdp-facts-row">
+              <div className="vdp-fact">
+                <span className="vdp-fact-label">Length</span>
+                <span className="vdp-fact-value">
+                  {dimensions?.length ?? "—"}
+                  {dimensions?.unit ? ` ${dimensions.unit}` : ""}
+                </span>
+              </div>
+              <div className="vdp-fact">
+                <span className="vdp-fact-label">Breadth</span>
+                <span className="vdp-fact-value">
+                  {dimensions?.breadth ?? "—"}
+                  {dimensions?.unit ? ` ${dimensions.unit}` : ""}
+                </span>
+              </div>
+              <div className="vdp-fact">
+                <span className="vdp-fact-label">Height</span>
+                <span className="vdp-fact-value">
+                  {dimensions?.height ?? "—"}
+                  {dimensions?.unit ? ` ${dimensions.unit}` : ""}
+                </span>
+              </div>
+              <div className="vdp-fact">
+                <span className="vdp-fact-label">Shape</span>
+                <span className="vdp-fact-value">
+                  {dimensions?.turf_shape || "—"}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ============  AMENITIES ============ */}
+      <section className="vdp-section">
+        <header className="vdp-section-head">
+          <h2 className="vdp-section-title">
+            Amenities
+          </h2>
+        </header>
+
+        <div className="vdp-section-body">
+          {activeAmenities.length > 0 ? (
+            <div className="vdp-pills">
+              {activeAmenities.map((a) => (
+                <span key={a.key as string} className="vdp-pill">
+                  <span className="vdp-pill-icon" aria-hidden="true">
+                    {a.icon}
                   </span>
-                  <span className="pt-venue-detail-shift-time">
-                    {shift.start_time} → {shift.end_time}
-                  </span>
-                </div>
-                <div className="pt-venue-detail-prices">
-                  {DAYS.map((d) => (
-                    <div key={d.key} className="pt-venue-detail-price">
-                      <span className="pt-venue-detail-price-day">{d.short}</span>
-                      <span className="pt-venue-detail-price-val">
-                        ₹{shift.prices[d.key] ?? "—"}
+                  {a.label}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="vdp-empty">No amenities specified.</p>
+          )}
+        </div>
+      </section>
+
+      {/* ============ PRICING ============ */}
+      <section className="vdp-section">
+        <header className="vdp-section-head">
+          <h2 className="vdp-section-title">Timings &amp; prices</h2>
+        </header>
+
+        <div className="vdp-section-body">
+          {timingEntries.length > 0 ? (
+            <div className="vdp-pricing">
+              {timingEntries.map(([key, shift]) => {
+                const courtNumber =
+                  key.match(/court_(\d+)/)?.[1] || "—";
+                const isNight = key.endsWith("_night");
+
+                return (
+                  <div key={key} className="vdp-price-row">
+                    <div className="vdp-price-meta">
+                      <span className="vdp-price-court">
+                        Court {courtNumber}
+                      </span>
+                      <span className="vdp-price-session">
+                        {isNight ? "Night session" : "Day session"}
+                      </span>
+                      <span className="vdp-price-time">
+                        {formatTime(shift.start_time)}–
+                        {formatTime(shift.end_time)}
                       </span>
                     </div>
-                  ))}
+
+                    <div className="vdp-price-days">
+                      {DAYS.map((day) => (
+                        <div key={day.key} className="vdp-price-day">
+                          <span className="vdp-price-day-label">
+                            {day.short}
+                          </span>
+                          <span className="vdp-price-day-value">
+                            {formatAmount(shift.prices?.[day.key])}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="vdp-empty">
+              No court pricing information is available.
+            </p>
+          )}
+        </div>
+      </section>
+
+      {/* ============ HOURS & POLICY ============ */}
+      <section className="vdp-section vdp-section-last">
+        <header className="vdp-section-head">
+          <h2 className="vdp-section-title">Hours &amp; policy</h2>
+        </header>
+
+        <div className="vdp-section-body">
+          <div className="vdp-policy-groups">
+            <div className="vdp-policy-group">
+              <span className="vdp-policy-group-label">
+                Operating hours
+              </span>
+              <div className="vdp-facts-row vdp-facts-row-4">
+                <div className="vdp-fact">
+                  <span className="vdp-fact-label">Opening time</span>
+                  <span className="vdp-fact-value">
+                    {formatTime(turf.open_time)}
+                  </span>
+                </div>
+                <div className="vdp-fact">
+                  <span className="vdp-fact-label">Closing time</span>
+                  <span className="vdp-fact-value">
+                    {formatTime(turf.close_time)}
+                  </span>
                 </div>
               </div>
-            );
-          })}
-        </section>
-      )}
+            </div>
 
-      {/* Policy — advance, commission, min slots */}
-      <section className="pt-venue-detail-section">
-        <h3 className="pt-venue-detail-section-title">📋 Policy</h3>
-        <div className="pt-venue-detail-grid-2">
-          <div>
-            <span className="pt-venue-detail-label">Advance</span>
-            <span className="pt-venue-detail-value">
-              {turf.advance_type === "percentage"
-                ? `${turf.advance_value}%`
-                : `₹${turf.advance_value}`}
-            </span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Commission</span>
-            <span className="pt-venue-detail-value">
-              {turf.commission_type === "percentage"
-                ? `${turf.commission_value}%`
-                : `₹${turf.commission_value}`}
-            </span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Min Slots</span>
-            <span className="pt-venue-detail-value">{turf.min_slots}</span>
-          </div>
-          <div>
-            <span className="pt-venue-detail-label">Created</span>
-            <span className="pt-venue-detail-value">
-              {new Date(turf.created_at).toLocaleDateString()}
-            </span>
+            <div className="vdp-policy-group">
+              <span className="vdp-policy-group-label">
+                Booking policy
+              </span>
+              <div className="vdp-facts-row vdp-facts-row-4">
+                <div className="vdp-fact">
+                  <span className="vdp-fact-label">Advance payment</span>
+                  <span className="vdp-fact-value">
+                    {turf.advance_type === "percentage"
+                      ? `${turf.advance_value}%`
+                      : formatAmount(turf.advance_value)}
+                  </span>
+                </div>
+                <div className="vdp-fact">
+                  <span className="vdp-fact-label">Commission</span>
+                  <span className="vdp-fact-value">
+                    {turf.commission_type === "percentage"
+                      ? `${turf.commission_value}%`
+                      : formatAmount(turf.commission_value)}
+                  </span>
+                </div>
+                <div className="vdp-fact">
+                  <span className="vdp-fact-label">Minimum slots</span>
+                  <span className="vdp-fact-value">
+                    {turf.min_slots ?? "—"}
+                  </span>
+                </div>
+                <div className="vdp-fact">
+                  <span className="vdp-fact-label">Created on</span>
+                  <span className="vdp-fact-value">
+                    {formatDate(turf.created_at)}
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Actions */}
-      <div className="pt-venue-detail-actions">
+      {/* ============ FOOT ============ */}
+      <div className="vdp-foot">
+        <p>Need to update something?</p>
         <button
-          className="pt-btn-primary pt-venue-detail-edit"
+          type="button"
+          className="vdp-edit-btn"
           onClick={handleEdit}
         >
-          ✏ Edit Venue
+          Edit Venue
+          <span aria-hidden="true">→</span>
         </button>
-        {/* <button
-          className="pt-venue-detail-delete"
-          onClick={() => setConfirmDelete(true)}
-        >
-          🗑 Delete
-        </button> */}
       </div>
-
-      {/* Delete confirmation */}
-      {/* {confirmDelete && (
-        <div
-          className="pt-map-modal-overlay"
-          onClick={() => !deleting && setConfirmDelete(false)}
-        >
-          <div
-            className="pt-map-modal"
-            style={{ maxWidth: 400 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header className="pt-map-modal-header">
-              <h3>Delete Venue?</h3>
-            </header>
-            <div className="pt-map-modal-body">
-              <p style={{ margin: 0, fontSize: 14, color: "#4b5563" }}>
-                This will permanently delete <strong>{turf.name}</strong>. This
-                action cannot be undone.
-              </p>
-            </div>
-            <footer
-              className="pt-map-modal-footer"
-              style={{ gap: 10 }}
-            >
-              <button
-                className="pt-btn-outline-otp"
-                onClick={() => setConfirmDelete(false)}
-                disabled={deleting}
-              >
-                Cancel
-              </button>
-              <button
-                className="pt-btn-primary"
-                style={{ background: "#dc2626" }}
-                onClick={handleDelete}
-                disabled={deleting}
-              >
-                {deleting ? "Deleting..." : "Yes, Delete"}
-              </button>
-            </footer>
-          </div>
-        </div>
-      )} */}
-    </div>
+    </main>
   );
 };
 

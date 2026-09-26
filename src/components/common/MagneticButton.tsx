@@ -58,6 +58,7 @@ const MagneticButton = ({
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={{ x: springX, y: springY, display: 'inline-block' }}
+      whileTap={{ scale: 0.97 }}
     >
       {Content}
     </motion.div>

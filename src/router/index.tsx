@@ -12,6 +12,7 @@ import { commonRoutes } from "./common.routes";
 import { adminRoutes } from "./admin.routes";
 import { userRoutes } from "./user.routes";
 import { partnerRoutes } from "./partner.routes";
+import { useMetaPageView } from "../hooks/useMetaPageView";
 
 const PageLoader = () => (
   <div className="auth-loading">
@@ -29,7 +30,11 @@ const allRoutes: RouteObject[] = [
 ];
 
 // Inner component so useRoutes has a Router context above it.
-const AppRoutes: React.FC = () => useRoutes(allRoutes);
+const AppRoutes: React.FC = () => {
+  
+  useMetaPageView();
+
+  return useRoutes(allRoutes);}
 
 const AppRouter: React.FC = () => {
   return (

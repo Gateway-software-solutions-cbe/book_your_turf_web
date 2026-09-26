@@ -1,3 +1,4 @@
+
 import React from "react";
 import "./DashboardStatCard.css";
 
@@ -16,28 +17,59 @@ const DashboardStatCard: React.FC<Props> = ({
   subLines,
   onClick,
 }) => {
+  const hasSubLines = Boolean(subLines && subLines.length > 0);
+
   return (
     <button
       type="button"
       className="pt-dsc"
       onClick={onClick}
       disabled={!onClick}
+      aria-label={`${label}: ${value}. View details`}
     >
-      <div className="pt-dsc-icon">{icon}</div>
-      <div className="pt-dsc-body">
+      {/* Top accent */}
+      <span className="pt-dsc-accent" aria-hidden="true" />
+
+      {/* Icon */}
+      <span className="pt-dsc-icon" aria-hidden="true">
+        {icon}
+      </span>
+
+      {/* Main content */}
+      <span className="pt-dsc-body">
         <span className="pt-dsc-label">{label}</span>
+
         <span className="pt-dsc-value">{value}</span>
-        {subLines && subLines.length > 0 && (
-          <div className="pt-dsc-subs">
-            {subLines.map((s) => (
+
+        {hasSubLines && (
+          <span className="pt-dsc-subs">
+            {subLines!.map((s) => (
               <span key={s.label} className="pt-dsc-sub">
-                {s.label} <strong>{s.value}</strong>
+                <span className="pt-dsc-sub-label">{s.label}</span>
+                <span className="pt-dsc-sub-value">{s.value}</span>
               </span>
             ))}
-          </div>
+          </span>
         )}
-      </div>
-      <span className="pt-dsc-arrow">›</span>
+      </span>
+
+      {/* Navigation indicator */}
+      <span className="pt-dsc-arrow" aria-hidden="true">
+        <svg
+          viewBox="0 0 20 20"
+          width="17"
+          height="17"
+          fill="none"
+        >
+          <path
+            d="M7.5 4.5L13 10L7.5 15.5"
+            stroke="currentColor"
+            strokeWidth="1.7"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </span>
     </button>
   );
 };
