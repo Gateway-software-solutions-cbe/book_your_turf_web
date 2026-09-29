@@ -13,6 +13,7 @@ import BookingsFiltersModal, {
   BookingsFilters,
 } from "./components/BookingsFiltersModal";
 import PaymentCollectModal from "./components/PaymentCollectModal";
+import { metaSlotUnblocked } from "../../../lib/metaPixel";
 import "./BookingsListPage.css";
 
 type TabKey = "bookings" | "blocks";
@@ -219,13 +220,27 @@ const BookingsListPage: React.FC = () => {
   };
 
   const handleRemoveBlock = async (blockId: number) => {
-    try {
-      await partnerSlotsApi.unblock({ block_id: blockId });
-      await loadBlocks();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || "Failed to remove block");
+  // Capture the block details before removal — the pixel needs the
+  // turf/date/time context that's on the block record.
+  const block = blocks.find((b) => b.id === blockId);
+
+  try {
+    await partnerSlotsApi.unblock({ block_id: blockId });
+    await loadBlocks();
+
+    // ─── Meta Pixel: slot_unblocked ─────────────────────────────
+    if (block) {
+      metaSlotUnblocked({
+        turf_id: block.turf,
+        court_number: block.court_number,
+        slot_datetime: `${block.date}T${block.start_time}`,
+        block_ids: [blockId],
+      });
     }
-  };
+  } catch (err: any) {
+    setError(err?.response?.data?.message || "Failed to remove block");
+  }
+};
 
   const activeFilterCount = useMemo(() => {
   let n = 0;

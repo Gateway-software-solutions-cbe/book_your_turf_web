@@ -17,6 +17,10 @@ export interface WalletBookingRequest {
   amount_to_pay?: string;
   admin_discount_id?: number;
   partner_discount_id?: number;
+
+  meta_checkout_event_id?: string;
+  meta_purchase_event_id?: string;
+  meta_user_id?: string | number;
 }
 
 export interface WalletBookingResponse {
@@ -33,6 +37,9 @@ export interface InitiateBookingRequest {
   advance_amount: string;
   admin_discount_id?: number;
   partner_discount_id?: number;
+
+  meta_checkout_event_id?: string;
+  meta_user_id?: string | number;
 }
 
 export interface InitiateBookingResponse {
@@ -63,6 +70,10 @@ export interface ConfirmBookingRequest {
   slots: BookingSlot[];
   total_amount: string;
   advance_amount: string;
+
+  meta_checkout_event_id?: string;
+  meta_purchase_event_id?: string;
+  meta_user_id?: string | number;
 }
 
 export interface ConfirmBookingResponse {
@@ -151,6 +162,10 @@ export interface ConfirmBalanceRequest {
   razorpay_payment_id: string;
   razorpay_order_id: string;
   booking_id: number;
+
+  meta_checkout_event_id?: string;
+  meta_purchase_event_id?: string;
+  meta_user_id?: string | number;
 }
 
 export interface ConfirmBalanceResponse {

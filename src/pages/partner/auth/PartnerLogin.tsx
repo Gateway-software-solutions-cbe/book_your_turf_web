@@ -1,6 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { usePartnerAuth } from '../../../context/PartnerAuthContext';
+import {
+  metaPartnerLoginStarted,
+  metaPartnerLoginSuccess,
+} from "../../../lib/metaPixel";
 import './style/PartnerLogin.css'; // reuse styles if compatible
 
 const PartnerLogin: React.FC = () => {
@@ -12,6 +16,13 @@ const PartnerLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const loginStartedFiredRef = useRef(false);
+
+  useEffect(() => {
+    if (loginStartedFiredRef.current) return;
+    loginStartedFiredRef.current = true;
+    metaPartnerLoginStarted({ method: 'email' });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,6 +30,20 @@ const PartnerLogin: React.FC = () => {
     setLoading(true);
     try {
       await login(loginId, password);
+
+      // Read from auth context after login (context updates synchronously
+      // for `setSession`, but the state setter is async; the partner will
+      // be available on the next tick, so this reads from localStorage).
+      let partnerId = loginId;
+      try {
+        const raw = localStorage.getItem('partner_profile');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.id) partnerId = parsed.id;
+        }
+      } catch { /* silent */ }
+
+      metaPartnerLoginSuccess({ partner_id: partnerId });
       navigate("/partner/dashboard");
     } catch (err: any) {
       setError(err?.response?.data?.message || "Login failed");

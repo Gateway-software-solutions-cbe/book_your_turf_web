@@ -1,5 +1,7 @@
+import { useEffect, useRef } from 'react';
 // src/pages/user/BookingSuccess.tsx
 import { useLocation, useNavigate } from 'react-router-dom';
+import { metaConfirmationViewed } from '../../lib/metaPixel';
 import './style/BookingSuccess.css';
 
 const BookingSuccess = () => {
@@ -12,7 +14,29 @@ const BookingSuccess = () => {
     return null;
   }
 
+  // 👇 Hook first — before any conditional return
+  const confirmationFiredRef = useRef(false);
+  useEffect(() => {
+    if (confirmationFiredRef.current) return;
+    if (!state?.bookingId) return;
+
+    confirmationFiredRef.current = true;
+    metaConfirmationViewed({
+      booking_id: String(state.bookingId),
+      amount: state.amount,
+      payment_method: state.paymentMethod,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state?.bookingId]);
+
+  if (!state) {
+    navigate('/turfs');
+    return null;
+  }
   const { bookingId, amount, discount, paymentMethod, paymentOption } = state;
+
+  
+
 
   return (
     <div className="booking-success">

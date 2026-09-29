@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
+import { metaBookingAcknowledged } from "../../../../lib/metaPixel";
 import "./BookingConfirmedModal.css";
 
 interface Props {
@@ -7,7 +8,11 @@ interface Props {
   customerMobile: string;
   turfName: string;
   date: string;
-  slots: { start_time_12h: string; end_time_12h: string; is_next_day: boolean }[];
+  slots: {
+    start_time_12h: string;
+    end_time_12h: string;
+    is_next_day: boolean;
+  }[];
   totalAmount: string;
   paidAmount: string;
   onClose: () => void;
@@ -45,55 +50,60 @@ const BookingConfirmedModal: React.FC<Props> = ({
   paidAmount,
   onClose,
 }) => {
-  const balance = Math.max(
-    0,
-    Number(totalAmount) - Number(paidAmount || 0),
-  );
+  const ackFiredRef = useRef(false);
+  useEffect(() => {
+    if (ackFiredRef.current) return;
+    ackFiredRef.current = true;
+    metaBookingAcknowledged({ booking_id: bookingId });
+  }, [bookingId]);
+
+  const balance = Math.max(0, Number(totalAmount) - Number(paidAmount || 0));
 
   const paymentStatus = computePaymentStatus(totalAmount, paidAmount);
   const slotLines = slots
-  .slice()
-  .sort((a, b) => {
-    if (a.is_next_day !== b.is_next_day) return a.is_next_day ? 1 : -1;
-    return a.start_time_12h.localeCompare(b.start_time_12h);
-  })
-  .map((s) =>
-    `${s.start_time_12h} - ${s.end_time_12h}${s.is_next_day ? " (Next Day)" : ""}`,
-  );
+    .slice()
+    .sort((a, b) => {
+      if (a.is_next_day !== b.is_next_day) return a.is_next_day ? 1 : -1;
+      return a.start_time_12h.localeCompare(b.start_time_12h);
+    })
+    .map(
+      (s) =>
+        `${s.start_time_12h} - ${s.end_time_12h}${s.is_next_day ? " (Next Day)" : ""}`,
+    );
 
   const handleWhatsApp = () => {
-  const lines = [
-    `🚨 *BOOK YOUR TURF - BOOKING CONFIRMATION*`,
-    ``,
-    `📋 *Booking ID:* ${bookingId}`,
-    ``,
-    `👤 *Customer Details:*`,
-    `· *Name:* ${customerName}`,
-    `· *Mobile:* ${customerMobile}`,
-    ``,
-    `📍 *Venue Details:*`,
-    `· *Turf:* ${turfName}`,
-    `· *Date:* ${formatWhatsAppDate(date)}`,
-    ``,
-    `⏰ *Time Slots:*`,
-    ...slotLines.map((s) => `· ${s}`),
-    ``,
-    `💰 *Payment Summary:*`,
-    `· *Total Amount:* ₹${totalAmount}`,
-    `· *Paid Amount:* ₹${paidAmount}`,
-    `· *Balance:* ₹${balance.toFixed(2)}`,
-    `· *Status:* ${paymentStatus}`,
-    ``,
-    `✅ *Booking Confirmed!*`,
-    `Thank you for choosing Book Your Turf!`,
-  ];
+    const lines = [
+      `🚨 *BOOK YOUR TURF - BOOKING CONFIRMATION*`,
+      ``,
+      `📋 *Booking ID:* ${bookingId}`,
+      ``,
+      `👤 *Customer Details:*`,
+      `· *Name:* ${customerName}`,
+      `· *Mobile:* ${customerMobile}`,
+      ``,
+      `📍 *Venue Details:*`,
+      `· *Turf:* ${turfName}`,
+      `· *Date:* ${formatWhatsAppDate(date)}`,
+      ``,
+      `⏰ *Time Slots:*`,
+      ...slotLines.map((s) => `· ${s}`),
+      ``,
+      `💰 *Payment Summary:*`,
+      `· *Total Amount:* ₹${totalAmount}`,
+      `· *Paid Amount:* ₹${paidAmount}`,
+      `· *Balance:* ₹${balance.toFixed(2)}`,
+      `· *Status:* ${paymentStatus}`,
+      ``,
+      `✅ *Booking Confirmed!*`,
+      `Thank you for choosing Book Your Turf!`,
+    ];
 
-  const text = encodeURIComponent(lines.join("\n"));
-  const phone = customerMobile.replace(/\D/g, "");
-  const waNumber = phone.length === 10 ? `91${phone}` : phone;
-  window.open(`https://wa.me/${waNumber}?text=${text}`, "_blank");
-  onClose(); // dismiss after firing
-};
+    const text = encodeURIComponent(lines.join("\n"));
+    const phone = customerMobile.replace(/\D/g, "");
+    const waNumber = phone.length === 10 ? `91${phone}` : phone;
+    window.open(`https://wa.me/${waNumber}?text=${text}`, "_blank");
+    onClose(); // dismiss after firing
+  };
 
   return (
     <div className="pt-bc-overlay" onClick={onClose}>

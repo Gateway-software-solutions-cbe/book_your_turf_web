@@ -80,7 +80,7 @@ export const partnerTurfsApi = {
 
   create: async (payload: CreateTurfPayload) => {
     const fd = buildTurfFormData(payload);
-    const { data } = await client.post<ApiResponse>(`${TURFS_BASE}/`, fd, {
+    const { data } = await client.post<ApiResponse<PartnerTurf>>(`${TURFS_BASE}/`, fd, {
       headers: { "Content-Type": "multipart/form-data" },
     });
     return data;

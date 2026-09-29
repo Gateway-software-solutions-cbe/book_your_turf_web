@@ -3,7 +3,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { phoneSendOtp, phoneVerifyOtp } from '../../../api/user/userAuth';
 import { useUserAuth } from '../../../context/UserAuthContext';
-import { metaCompleteRegistration } from '../../../lib/metaPixel';
+import {
+  metaOtpVerified,
+  metaOtpFailed,
+  setUserContext,
+} from '../../../lib/metaPixel';
 import './auth.css';
 
 interface LocationState {
@@ -29,6 +33,7 @@ const VerifyOtp = () => {
 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const attemptCountRef = useRef(0);
 
   useEffect(() => {
     if (!state?.number) {
@@ -114,20 +119,37 @@ const VerifyOtp = () => {
         const data = response.data.data;
         console.log('📥 Verify response:', data);
 
-        // Meta Pixel: New user registration completed after OTP verification
-  if (!state.is_registered) {
-    metaCompleteRegistration({
-      user_id: data.user.id,
-      new_user: true,
-    });
+        // Successful verify resets the attempt counter for future sessions
+        attemptCountRef.current = 0;
 
-    if (import.meta.env.DEV) {
-      console.log('[Meta Pixel] CompleteRegistration → New User', {
-        user_id: data.user.id,
-      });
-    }
-  }
+        // ─── Meta Pixel: OTP verified (custom funnel step) ─────────────
+        // This is NOT the same as registration completion — the user is
+        // a guest until they fill in name + email on CompleteProfile.
+        metaOtpVerified({
+          user_id: data.user.id,
+          method: 'sms',
+          is_new_user: !state.is_registered,
+        });
 
+        // ─── Seed user context so EVERY subsequent event carries ──────
+        //     user_id and the right user_type. City/area/pincode get
+        //     filled in later by the location flow on TurfsPage.
+        const profileComplete = !!(data.user.name && data.user.email);
+
+        setUserContext({
+          user_id: data.user.id,
+          user_type: profileComplete ? 'registered_not_booked' : 'guest',
+        });
+
+        if (import.meta.env.DEV) {
+          console.log('[Meta Pixel] OTPVerified → context seeded', {
+            user_id: data.user.id,
+            user_type: profileComplete ? 'registered_not_booked' : 'guest',
+            is_new_user: !state.is_registered,
+          });
+        }
+
+        // ─── Persist session ───────────────────────────────────────────
         localStorage.setItem('user_phone', state.number);
         localStorage.setItem('user_access_token', data.access);
         localStorage.setItem('user_data', JSON.stringify(data.user));
@@ -148,10 +170,24 @@ const VerifyOtp = () => {
         // Always navigate to Turfs — profile completion only at booking time
         navigate('/turfs');
       } else {
+        // ─── Meta Pixel: otp_failed ────────────────────────────────
+        attemptCountRef.current += 1;
+        metaOtpFailed({
+          reason: 'wrong',
+          attempt_no: attemptCountRef.current,
+        });
+
         setError(response.data.message || 'Invalid OTP');
       }
     } catch (err: any) {
       console.error('❌ Verification error:', err);
+      // ─── Meta Pixel: otp_failed ──────────────────────────────────
+      attemptCountRef.current += 1;
+      const isDeliveryFailure = !err.response;
+      metaOtpFailed({
+        reason: isDeliveryFailure ? 'delivery_fail' : 'wrong',
+        attempt_no: attemptCountRef.current,
+      });
       setError(err.response?.data?.message || 'Verification failed');
     } finally {
       setLoading(false);

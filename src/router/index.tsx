@@ -1,5 +1,5 @@
 // src/router/index.tsx
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { BrowserRouter, useRoutes, RouteObject } from "react-router-dom";
 import { AuthProvider } from "../context/AuthContext";
 import { UserAuthProvider } from "../context/UserAuthContext";
@@ -13,6 +13,7 @@ import { adminRoutes } from "./admin.routes";
 import { userRoutes } from "./user.routes";
 import { partnerRoutes } from "./partner.routes";
 import { useMetaPageView } from "../hooks/useMetaPageView";
+import { metaDeeplinkReceived, setUserContext } from '../lib/metaPixel';
 
 const PageLoader = () => (
   <div className="auth-loading">
@@ -33,6 +34,10 @@ const allRoutes: RouteObject[] = [
 const AppRoutes: React.FC = () => {
   
   useMetaPageView();
+  useEffect(() => {
+    setUserContext({});
+    metaDeeplinkReceived();
+  }, []);
 
   return useRoutes(allRoutes);}
 

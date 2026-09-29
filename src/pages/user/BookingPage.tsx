@@ -1,10 +1,14 @@
 // src/pages/user/BookingPage.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { getTurfCalendar } from "../../api/user/turfs";
 import { useUserAuth } from "../../context/UserAuthContext";
 import type { CalendarSlot } from "../../api/user/turfs";
-import { metaAddToCart } from "../../lib/metaPixel";
+import {
+  metaAddToCart,
+  metaSlotGridViewed,
+  metaSlotDeselected,
+} from "../../lib/metaPixel";
 import "./style/BookingPage.css";
 
 // ─── Date Picker ──────────────────────────────────────────────────────────
@@ -22,18 +26,8 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
 
   const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const monthNames = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
   ];
 
   const today = new Date();
@@ -72,21 +66,15 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
     return d >= today && d <= maxDate;
   };
 
-  const isToday = (date: Date) => {
-    return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
-    );
-  };
+  const isToday = (date: Date) =>
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear();
 
-  const isSelected = (date: Date) => {
-    return (
-      date.getDate() === selectedDate.getDate() &&
-      date.getMonth() === selectedDate.getMonth() &&
-      date.getFullYear() === selectedDate.getFullYear()
-    );
-  };
+  const isSelected = (date: Date) =>
+    date.getDate() === selectedDate.getDate() &&
+    date.getMonth() === selectedDate.getMonth() &&
+    date.getFullYear() === selectedDate.getFullYear();
 
   const changeMonth = (delta: number) => {
     const newMonth = new Date(currentMonth);
@@ -110,9 +98,7 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
 
       <div className="date-picker__days-of-week">
         {daysOfWeek.map((day) => (
-          <span key={day} className="date-picker__day-label">
-            {day}
-          </span>
+          <span key={day} className="date-picker__day-label">{day}</span>
         ))}
       </div>
 
@@ -126,10 +112,10 @@ const DatePicker = ({ selectedDate, onDateSelect }: DatePickerProps) => {
           return (
             <button
               key={index}
-              className={`date-picker__day 
-                ${!isInRange ? "disabled" : ""} 
-                ${isSelectedDate ? "selected" : ""} 
-                ${isTodayDate ? "today" : ""} 
+              className={`date-picker__day
+                ${!isInRange ? "disabled" : ""}
+                ${isSelectedDate ? "selected" : ""}
+                ${isTodayDate ? "today" : ""}
                 ${!isCurrentMonth ? "other-month" : ""}`}
               onClick={() => isInRange && onDateSelect(date)}
               disabled={!isInRange}
@@ -170,10 +156,7 @@ const SlotCard = ({ slot, isSelected, onSelect }: SlotCardProps) => {
       Unavailable: "unavailable",
     };
 
-    if (slot.status && statusMap[slot.status]) {
-      return statusMap[slot.status];
-    }
-
+    if (slot.status && statusMap[slot.status]) return statusMap[slot.status];
     if (slot.is_next_day) return "next-day";
     return "available";
   };
@@ -183,14 +166,11 @@ const SlotCard = ({ slot, isSelected, onSelect }: SlotCardProps) => {
     return slot.status.toUpperCase();
   };
 
-  const isDisabled = (): boolean => {
-    return (
-      slot.status === "Booked" ||
-      slot.status === "Blocked" ||
-      slot.status === "Reserved" ||
-      slot.status === "Unavailable"
-    );
-  };
+  const isDisabled = (): boolean =>
+    slot.status === "Booked" ||
+    slot.status === "Blocked" ||
+    slot.status === "Reserved" ||
+    slot.status === "Unavailable";
 
   const disabled = isDisabled();
   const statusClass = getStatusClass();
@@ -201,9 +181,7 @@ const SlotCard = ({ slot, isSelected, onSelect }: SlotCardProps) => {
       onClick={() => !disabled && onSelect()}
     >
       <div className="slot-card__time">
-        <span>
-          {formatTime(slot.start_time)} – {formatTime(slot.end_time)}
-        </span>
+        <span>{formatTime(slot.start_time)} – {formatTime(slot.end_time)}</span>
         {slot.is_next_day && statusClass !== "booked" && (
           <span className="slot-card__next-day-badge">Next Day</span>
         )}
@@ -221,34 +199,20 @@ const SlotCard = ({ slot, isSelected, onSelect }: SlotCardProps) => {
 // ─── Legend ──────────────────────────────────────────────────────────────
 const Legend = () => (
   <div className="legend">
-    <div className="legend__item">
-      <span className="legend__dot legend__dot--available"></span>
-      <span>Available</span>
-    </div>
-    <div className="legend__item">
-      <span className="legend__dot legend__dot--selected"></span>
-      <span>Selected</span>
-    </div>
-    <div className="legend__item">
-      <span className="legend__dot legend__dot--booked"></span>
-      <span>Booked</span>
-    </div>
-    <div className="legend__item">
-      <span className="legend__dot legend__dot--reserved"></span>
-      <span>Reserved</span>
-    </div>
-    <div className="legend__item">
-      <span className="legend__dot legend__dot--blocked"></span>
-      <span>Blocked</span>
-    </div>
-    <div className="legend__item">
-      <span className="legend__dot legend__dot--unavailable"></span>
-      <span>Unavailable</span>
-    </div>
-    <div className="legend__item">
-      <span className="legend__dot legend__dot--next-day"></span>
-      <span>Next Day</span>
-    </div>
+    {[
+      ["available", "Available"],
+      ["selected", "Selected"],
+      ["booked", "Booked"],
+      ["reserved", "Reserved"],
+      ["blocked", "Blocked"],
+      ["unavailable", "Unavailable"],
+      ["next-day", "Next Day"],
+    ].map(([k, label]) => (
+      <div key={k} className="legend__item">
+        <span className={`legend__dot legend__dot--${k}`} />
+        <span>{label}</span>
+      </div>
+    ))}
   </div>
 );
 
@@ -342,7 +306,14 @@ const BookingPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const turf = location.state?.turf;
+
+  // Read both turf and nearest_turf_km from navigation state
+  const navState = location.state as
+    | { turf?: any; nearest_turf_km?: number }
+    | null;
+  const turf = navState?.turf;
+  const nearestTurfKm = navState?.nearest_turf_km;
+
   const { user } = useUserAuth();
 
   const [slots, setSlots] = useState<CalendarSlot[]>([]);
@@ -353,12 +324,12 @@ const BookingPage = () => {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   });
   const [selectedSlots, setSelectedSlots] = useState<CalendarSlot[]>([]);
-  const [paymentOption, setPaymentOption] = useState<"full" | "advance">(
-    "full",
-  );
+  const [paymentOption, setPaymentOption] = useState<"full" | "advance">("full");
   const [selectedCourt, setSelectedCourt] = useState<number>(1);
 
-  // ─── Check if profile is complete ──────────────────────────────────
+  const slotPickTimesRef = useRef<Record<string, number>>({});
+  const slotGridSignatureRef = useRef<string>('');
+
   const isProfileComplete = !!(
     user?.name &&
     user?.name.trim() !== "" &&
@@ -367,14 +338,13 @@ const BookingPage = () => {
   );
 
   const formatDateForAPI = (date: Date) => {
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}-${month}-${year}`;
+  };
 
   // ─── Fetch Slots ──────────────────────────────────────────────────────
-
   useEffect(() => {
     const fetchSlots = async () => {
       if (!id) return;
@@ -382,7 +352,11 @@ const BookingPage = () => {
       setError(null);
       try {
         const formattedDate = formatDateForAPI(selectedDate);
-        const response = await getTurfCalendar(parseInt(id), formattedDate, selectedCourt);
+        const response = await getTurfCalendar(
+          parseInt(id),
+          formattedDate,
+          selectedCourt
+        );
         if (response.result === "success") {
           setSlots(response.data);
         } else {
@@ -397,25 +371,110 @@ const BookingPage = () => {
     fetchSlots();
   }, [id, selectedDate, selectedCourt]);
 
-  // ─── Handlers ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (loading || slots.length === 0) return;
 
-  const handleSlotSelect = (slot: CalendarSlot) => {
-  setSelectedSlots((prev) => {
-    const index = prev.findIndex(
-      (s) => s.start_time === slot.start_time && s.date === slot.date,
+    const dateStr = formatDateForAPI(selectedDate);
+    const signature = `${id}|${dateStr}|${selectedCourt}|${slots.length}`;
+    if (slotGridSignatureRef.current === signature) return;
+    slotGridSignatureRef.current = signature;
+
+    const freeSlots = slots.filter((s) => s.status === 'Available').length;
+    const bookedSlots = slots.filter((s) => s.status === 'Booked').length;
+    const blockedSlots = slots.filter(
+      (s) => s.status === 'Blocked' || s.status === 'Reserved' || s.status === 'Unavailable'
+    ).length;
+
+    // days ahead — how far in advance the user is browsing
+    const todayMidnight = new Date();
+    todayMidnight.setHours(0, 0, 0, 0);
+    const viewing = new Date(selectedDate);
+    viewing.setHours(0, 0, 0, 0);
+    const daysAhead = Math.max(
+      0,
+      Math.round((viewing.getTime() - todayMidnight.getTime()) / 86_400_000)
     );
 
-    // If already selected, remove it
-    if (index >= 0) {
-      return prev.filter((_, i) => i !== index);
+    metaSlotGridViewed({
+      turf_id: id ?? '',
+      date: dateStr,
+      free_slots: freeSlots,
+      booked_slots: bookedSlots,
+      blocked_slots: blockedSlots,
+      days_ahead: daysAhead,
+    });
+
+    if (import.meta.env.DEV) {
+      console.log('[Meta Pixel] slot_grid_viewed', {
+        turf_id: id,
+        date: dateStr,
+        free_slots: freeSlots,
+        booked_slots: bookedSlots,
+        blocked_slots: blockedSlots,
+        days_ahead: daysAhead,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, slots.length, selectedDate, selectedCourt, id]);
+
+  // ─── Handlers ──────────────────────────────────────────────────────────
+
+    const handleSlotSelect = (slot: CalendarSlot) => {
+    const slotKey = `${slot.date ?? ''}|${slot.start_time}`;
+
+    const isAlreadySelected = selectedSlots.some(
+      (s) => s.start_time === slot.start_time && s.date === slot.date
+    );
+
+    if (isAlreadySelected) {
+      // ─── Meta Pixel: slot_deselected ──────────────────────────────
+      const pickedAt = slotPickTimesRef.current[slotKey];
+      const secondsHeld = pickedAt
+        ? Math.round((Date.now() - pickedAt) / 1000)
+        : 0;
+
+      metaSlotDeselected({
+        turf_id: id ?? '',
+        slot_datetime: slot.date
+          ? `${slot.date}T${slot.start_time}`
+          : slot.start_time,
+        seconds_held: secondsHeld,
+      });
+
+      if (import.meta.env.DEV) {
+        console.log('[Meta Pixel] slot_deselected', {
+          turf_id: id,
+          slot_datetime: slotKey,
+          seconds_held: secondsHeld,
+        });
+      }
+
+      // Clean up the pick-time record
+      delete slotPickTimesRef.current[slotKey];
+
+      setSelectedSlots((prev) =>
+        prev.filter(
+          (s) => !(s.start_time === slot.start_time && s.date === slot.date)
+        )
+      );
+      return;
     }
 
-    // Meta Pixel: Slot selected → AddToCart
+    // Add — fire pixel ONCE, outside the state updater
+    const slotDateTime = slot.date
+      ? `${slot.date}T${slot.start_time}`
+      : undefined;
+
+    // Record when this slot was picked (for seconds_held on deselect)
+    slotPickTimesRef.current[slotKey] = Date.now();
+
     metaAddToCart({
       turf_id: id ?? "",
       turf_name: turf?.name ?? "",
       value: parseFloat(slot.price),
+      slot_datetime: slotDateTime,
       sport: turf?.game_type ?? "",
+      nearest_turf_km: nearestTurfKm,
     });
 
     if (import.meta.env.DEV) {
@@ -428,9 +487,8 @@ const BookingPage = () => {
       });
     }
 
-    return [...prev, slot];
-  });
-};
+    setSelectedSlots((prev) => [...prev, slot]);
+  };
 
   const handleDateSelect = (date: Date) => {
     const today = new Date();
@@ -438,23 +496,17 @@ const BookingPage = () => {
     const selected = new Date(date);
     selected.setHours(0, 0, 0, 0);
 
-    if (selected < today) {
-      setSelectedDate(new Date(today));
-    } else {
-      setSelectedDate(date);
-    }
+    setSelectedDate(selected < today ? new Date(today) : date);
     setSelectedSlots([]);
   };
 
-  const isSlotSelected = (slot: CalendarSlot) => {
-    return selectedSlots.some(
-      (s) => s.start_time === slot.start_time && s.date === slot.date,
+  const isSlotSelected = (slot: CalendarSlot) =>
+    selectedSlots.some(
+      (s) => s.start_time === slot.start_time && s.date === slot.date
     );
-  };
 
-  // ─── Handle Proceed to Payment / Profile ──────────────────────────────
+  // ─── Handle Proceed to Payment ────────────────────────────────────────
   const handleProceed = () => {
-    // ─── Proceed to payment summary ────────────────────────────────────
     console.log("Proceeding to payment:", {
       turfId: id,
       slots: selectedSlots,
@@ -464,44 +516,43 @@ const BookingPage = () => {
       finalAmount: paymentOption === "full" ? totalAmount : advanceAmount,
     });
 
-    // Navigate to payment summary page
-    navigate('/payment-summary', {
-    state: {
-      turf: turf,
-      selectedSlots: selectedSlots,
-      paymentOption: paymentOption,
-      totalAmount: totalAmount,
-      advanceAmount: advanceAmount,
-      finalAmount: paymentOption === 'full' ? totalAmount : advanceAmount,
-      selectedDate: selectedDate,
-      courtNumber: selectedCourt,
-    }
-  });
-};
+    navigate("/payment-summary", {
+      state: {
+        turf: turf,
+        selectedSlots: selectedSlots,
+        paymentOption: paymentOption,
+        totalAmount: totalAmount,
+        advanceAmount: advanceAmount,
+        finalAmount: paymentOption === "full" ? totalAmount : advanceAmount,
+        selectedDate: selectedDate,
+        courtNumber: selectedCourt,
+        nearest_turf_km: nearestTurfKm,
+      },
+    });
+  };
 
-  // ─── Handle Back Navigation ──────────────────────────────────────────
   const handleBack = () => {
     if (turf) {
-      navigate(`/turfs/${id}`, { state: { turf } });
+      navigate(`/turfs/${id}`, {
+        state: { turf, nearest_turf_km: nearestTurfKm },
+      });
     } else {
       navigate(`/turfs/${id}`);
     }
   };
 
   // ─── Calculations ─────────────────────────────────────────────────────
-
   const totalAmount = selectedSlots.reduce(
     (sum, slot) => sum + parseFloat(slot.price),
-    0,
+    0
   );
   const advanceAmount = selectedSlots.reduce(
     (sum, slot) => sum + parseFloat(slot.required_advance),
-    0,
+    0
   );
   const minSlots = turf?.min_slots || 1;
 
-  // ─── Loading ──────────────────────────────────────────────────────────
-
+  // ─── Loading / Error ──────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="booking-page__loading">
@@ -510,8 +561,6 @@ const BookingPage = () => {
       </div>
     );
   }
-
-  // ─── Error ────────────────────────────────────────────────────────────
 
   if (error || !turf) {
     return (
@@ -530,10 +579,8 @@ const BookingPage = () => {
   }
 
   // ─── Render ────────────────────────────────────────────────────────────
-
   return (
     <div className="booking-page">
-      {/* ─── Header ────────────────────────────────────────────────────── */}
       <div className="booking-page__header">
         <button className="booking-page__back-btn" onClick={handleBack}>
           <i className="bi bi-arrow-left" />
@@ -552,32 +599,32 @@ const BookingPage = () => {
       </div>
 
       <div className="booking-page__content">
-        {/* ─── Left Column: Calendar ──────────────────────────────────── */}
         <div className="booking-page__calendar-wrapper">
           <div className="booking-page__calendar-card">
             <DatePicker
               selectedDate={selectedDate}
               onDateSelect={handleDateSelect}
             />
-            {/* ✅ ADD: Court selector */}
             {turf?.courts && turf.courts > 1 && (
               <div className="booking-page__court-selector">
                 <h4 className="booking-page__court-title">Select Turf/Court</h4>
                 <div className="booking-page__court-buttons">
-                  {Array.from({ length: turf.courts }, (_, i) => i + 1).map((courtNum) => (
-                    <button
-                      key={courtNum}
-                      className={`booking-page__court-btn ${
-                        selectedCourt === courtNum ? 'active' : ''
-                      }`}
-                      onClick={() => {
-                        setSelectedCourt(courtNum);
-                        setSelectedSlots([]); // Clear selection on court change
-                      }}
-                    >
-                      Turf {courtNum}
-                    </button>
-                  ))}
+                  {Array.from({ length: turf.courts }, (_, i) => i + 1).map(
+                    (courtNum) => (
+                      <button
+                        key={courtNum}
+                        className={`booking-page__court-btn ${
+                          selectedCourt === courtNum ? "active" : ""
+                        }`}
+                        onClick={() => {
+                          setSelectedCourt(courtNum);
+                          setSelectedSlots([]);
+                        }}
+                      >
+                        Turf {courtNum}
+                      </button>
+                    )
+                  )}
                 </div>
               </div>
             )}
@@ -585,7 +632,6 @@ const BookingPage = () => {
           </div>
         </div>
 
-        {/* ─── Right Column: Slots ───────────────────────────────────── */}
         <div className="booking-page__slots-wrapper">
           <div className="booking-page__slots-header">
             <h3 className="booking-page__slots-title">
@@ -617,7 +663,6 @@ const BookingPage = () => {
         </div>
       </div>
 
-      {/* ─── Payment Summary ──────────────────────────────────────────── */}
       <PaymentSummary
         selectedSlots={selectedSlots}
         totalAmount={totalAmount}

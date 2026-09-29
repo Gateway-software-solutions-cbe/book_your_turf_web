@@ -87,6 +87,10 @@ export interface LoginUser {
   game_coins: number;
   referral_code: string;
   profile_image_url?: string; 
+
+  city?: string;
+  area?: string;
+  pincode?: string;
 }
 
 export interface LoginData {

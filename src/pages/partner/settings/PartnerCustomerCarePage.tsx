@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { metaOwnerSupportContacted } from "../../../lib/metaPixel";
 import "./PartnerCustomerCarePage.css";
 
 const SUPPORT_PHONE = "+91 9940663099";
@@ -11,10 +12,14 @@ const PartnerCustomerCarePage: React.FC = () => {
   const navigate = useNavigate();
 
   const handleCall = () => {
+    // ─── Meta Pixel: owner_support_contacted ────────────────────
+    metaOwnerSupportContacted({ channel: 'call' });
     window.location.href = `tel:${SUPPORT_PHONE.replace(/\s/g, "")}`;
   };
 
   const handleEmail = () => {
+    // ─── Meta Pixel: owner_support_contacted ────────────────────
+    metaOwnerSupportContacted({ channel: 'email' });
     window.location.href = `mailto:${SUPPORT_EMAIL}`;
   };
 

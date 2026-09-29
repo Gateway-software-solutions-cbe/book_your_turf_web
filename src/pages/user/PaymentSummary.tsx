@@ -5,7 +5,12 @@ import { useUserAuth } from '../../context/UserAuthContext';
 import { getApplicableDiscounts } from '../../api/user/turfs';
 import { walletBook, initiateBooking } from '../../api/user/bookings';
 import type { Discount } from '../../types/user/turf';
-import { metaInitiateCheckout, metaPurchase } from '../../lib/metaPixel';
+import {
+  metaInitiateCheckout,
+  metaPurchase,
+  metaProfileGateHit,
+  metaPaymentStarted,
+} from '../../lib/metaPixel';
 import './style/PaymentSummary.css';
 import { formatLocalDate } from '../../utils/dateUtils';
 
@@ -179,25 +184,36 @@ const PaymentSummary = () => {
 
   // ─── Handle Wallet Payment ────────────────────────────────────────────
   const handleWalletPayClick = () => {
-    if (!isProfileComplete) {
-      navigate('/complete-profile', {
-        state: { returnTo: '/payment-summary', bookingData }
-      });
-      return;
-    }
-    setShowWalletModal(true);
-  };
+  if (!isProfileComplete) {
+    const stage = paymentOption === 'advance' ? 'pay_advance' : 'pay_full';
+    metaProfileGateHit(stage, '/payment-summary');
+    navigate('/complete-profile', {
+      state: {
+        returnTo: '/payment-summary',
+        bookingData,
+        gateStage: stage,
+      }
+    });
+    return;
+  }
+  setShowWalletModal(true);
+};
 
-  // ─── Handle Online Payment ────────────────────────────────────────────
-  const handleOnlinePayClick = () => {
-    if (!isProfileComplete) {
-      navigate('/complete-profile', {
-        state: { returnTo: '/payment-summary', bookingData }
-      });
-      return;
-    }
-    setShowOnlineModal(true);
-  };
+const handleOnlinePayClick = () => {
+  if (!isProfileComplete) {
+    const stage = paymentOption === 'advance' ? 'pay_advance' : 'pay_full';
+    metaProfileGateHit(stage, '/payment-summary');
+    navigate('/complete-profile', {
+      state: {
+        returnTo: '/payment-summary',
+        bookingData,
+        gateStage: stage,
+      }
+    });
+    return;
+  }
+  setShowOnlineModal(true);
+};
 
   // ─── Process Wallet Payment ───────────────────────────────────────────
   const processWalletPayment = async () => {
@@ -221,6 +237,8 @@ const PaymentSummary = () => {
     });
   }
 
+  // ─── Meta Pixel: payment_started (AddPaymentInfo) ────────────────
+  metaPaymentStarted({ method: 'wallet', gateway: 'wallet' });
 
     try {
       const dateStr = formatLocalDate(bookingData.selectedDate);
@@ -231,6 +249,9 @@ const PaymentSummary = () => {
         price: slot.price,
       }));
 
+      const metaCheckoutEventId =
+        sessionStorage.getItem('byt_checkout_event_id') ?? undefined;
+
       const payload = {
         turf_id: turf.id,
         court_number: bookingData.courtNumber || 1,
@@ -239,6 +260,8 @@ const PaymentSummary = () => {
         total_amount: totalAmount.toFixed(2),
         amount_to_pay: finalAmount.toFixed(2),
         ...(appliedDiscount && { admin_discount_id: appliedDiscount.id }),
+        meta_checkout_event_id: metaCheckoutEventId,
+        meta_user_id: user?.id,
       };
 
       console.log('💳 Wallet payment payload:', payload);
@@ -290,9 +313,15 @@ const PaymentSummary = () => {
       console.error('❌ Wallet payment failed:', error);
       
       if (error.response?.data?.data?.code === 'PROFILE_INCOMPLETE') {
-        navigate('/complete-profile', {
-          state: { returnTo: '/payment-summary', bookingData }
-        });
+        const stage = paymentOption === 'advance' ? 'pay_advance' : 'pay_full';
+    metaProfileGateHit(stage, '/payment-summary');
+    navigate('/complete-profile', {
+      state: {
+        returnTo: '/payment-summary',
+        bookingData,
+        gateStage: stage,
+      }
+    });
       } else {
         alert(error.response?.data?.message || 'Payment failed. Please try again.');
       }
@@ -323,6 +352,12 @@ const PaymentSummary = () => {
     });
   }
 
+   // ─── Meta Pixel: payment_started (AddPaymentInfo) ────────────────
+  metaPaymentStarted({
+    method: 'razorpay',
+    gateway: 'razorpay',
+  });
+
     try {
       const dateStr = formatLocalDate(bookingData.selectedDate);
 
@@ -332,6 +367,9 @@ const PaymentSummary = () => {
         price: slot.price,
       }));
 
+      const metaCheckoutEventId =
+        sessionStorage.getItem('byt_checkout_event_id') ?? undefined;
+
       const payload = {
         turf_id: turf.id,
         court_number: bookingData.courtNumber || 1,
@@ -340,6 +378,9 @@ const PaymentSummary = () => {
         total_amount: totalAmount.toFixed(2),
         advance_amount: finalAmount.toFixed(2),
   ...(appliedDiscount && { admin_discount_id: appliedDiscount.id }),
+
+  meta_checkout_event_id: metaCheckoutEventId,
+        meta_user_id: user?.id,
       };
 
       console.log('💳 Initiate online payment payload:', payload);
@@ -372,15 +413,21 @@ const PaymentSummary = () => {
       }
     } catch (error: any) {
       console.error('❌ Online payment failed:', error);
-      
-      if (error.response?.data?.data?.code === 'PROFILE_INCOMPLETE') {
-        navigate('/complete-profile', {
-          state: { returnTo: '/payment-summary', bookingData }
-        });
-      } else {
-        alert(error.response?.data?.message || 'Failed to initiate payment. Please try again.');
+
+  if (error.response?.data?.data?.code === 'PROFILE_INCOMPLETE') {
+    const stage = paymentOption === 'advance' ? 'pay_advance' : 'pay_full';
+    metaProfileGateHit(stage, '/payment-summary');
+    navigate('/complete-profile', {
+      state: {
+        returnTo: '/payment-summary',
+        bookingData,
+        gateStage: stage,
       }
-    } finally {
+    });
+  } else {
+    alert(error.response?.data?.message || 'Failed to initiate payment. Please try again.');
+  }
+} finally {
       setIsProcessing(false);
     }
   };

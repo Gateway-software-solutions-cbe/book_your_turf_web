@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserAuth } from '../../context/UserAuthContext';
 import { confirmBalance } from '../../api/user/bookings';
+import { metaPaymentStarted } from '../../lib/metaPixel';
 import './style/RazorpayPayment.css';
 
 declare global {
@@ -51,11 +52,22 @@ const RazorpayBalancePayment = () => {
   const confirmBalanceOnBackend = async (resp: any) => {
     if (!state) return;
     setConfirming(true);
+    // ─── Meta Pixel: payment_started (AddPaymentInfo) ──────────────
+    metaPaymentStarted({
+      method: 'razorpay',
+      gateway: 'razorpay',
+      order_id: resp.razorpay_order_id || state.orderData.razorpay_order_id,
+    });
     try {
+      const metaCheckoutEventId =
+        sessionStorage.getItem('byt_checkout_event_id') ?? undefined;
+      
       const res = await confirmBalance({
         razorpay_payment_id: resp.razorpay_payment_id,
         razorpay_order_id: resp.razorpay_order_id || state.orderData.razorpay_order_id,
         booking_id: state.orderData.booking_id,
+        meta_checkout_event_id: metaCheckoutEventId,
+        meta_user_id: user?.id,
       });
       if (res.result === 'success') {
         await refreshUserData();

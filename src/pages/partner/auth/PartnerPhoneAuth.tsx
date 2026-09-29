@@ -1,7 +1,11 @@
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { partnerAuthApi } from "../../../api/partner/auth";
+import {
+  metaPartnerOtpSent,
+  metaPartnerLoginStarted,
+} from "../../../lib/metaPixel";
 import "./style/PartnerPhoneAuth.css";
 
 const PartnerPhoneAuth: React.FC = () => {
@@ -10,6 +14,13 @@ const PartnerPhoneAuth: React.FC = () => {
   const [number, setNumber] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const loginStartedFiredRef = useRef(false);
+  useEffect(() => {
+    if (loginStartedFiredRef.current) return;
+    loginStartedFiredRef.current = true;
+    metaPartnerLoginStarted({ method: 'phone' });
+  }, []);
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,6 +36,9 @@ const PartnerPhoneAuth: React.FC = () => {
     try {
       const res = await partnerAuthApi.phoneSendOtp({ number });
       const data = res.data;
+
+      // ─── Meta Pixel: OTP dispatched ─────────────────────────────
+      metaPartnerOtpSent({ method: 'sms', attempt_no: 1 });
 
       navigate("/partner/phone-verify", {
         state: {

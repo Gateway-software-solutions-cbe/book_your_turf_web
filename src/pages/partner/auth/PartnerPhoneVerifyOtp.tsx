@@ -3,6 +3,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { partnerAuthApi } from "../../../api/partner/auth";
 import { usePartnerAuth } from "../../../context/PartnerAuthContext";
+import {
+  metaPartnerOtpVerified,
+  metaPartnerOtpFailed,
+} from "../../../lib/metaPixel";
 import "./style/PartnerPhoneVerifyOtp.css";
 
 const OTP_LENGTH = 6;
@@ -32,6 +36,7 @@ const PartnerPhoneVerifyOtp: React.FC = () => {
   const [seconds, setSeconds] = useState(RESEND_SECONDS);
 
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+  const attemptCountRef = useRef(0);
 
   // Redirect if the user opens this page without a phone number.
   useEffect(() => {
@@ -152,10 +157,25 @@ const PartnerPhoneVerifyOtp: React.FC = () => {
 
       await setSession(access, partner);
 
+      // ─── Meta Pixel: partner OTP verified ───────────────────────
+      attemptCountRef.current = 0;
+      metaPartnerOtpVerified({
+        partner_id: partner.id,
+        business_name: partner.business_name,
+        is_new_partner: !isRegistered,
+      });
+
       navigate("/partner/dashboard", {
         replace: true,
       });
     } catch (err: any) {
+      // ─── Meta Pixel: OTP failed ─────────────────────────────────
+      attemptCountRef.current += 1;
+      const isDeliveryFailure = !err.response;
+      metaPartnerOtpFailed({
+        reason: isDeliveryFailure ? 'delivery_fail' : 'wrong',
+        attempt_no: attemptCountRef.current,
+      });
       setError(
         err?.response?.data?.message ||
           "Invalid OTP. Please check the code and try again."

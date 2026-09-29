@@ -9,7 +9,7 @@ import './style/TurfDetailPage.css';
 
 // ─── Image Slider Component ──────────────────────────────────────────────
 interface ImageSliderProps {
-  images: string[];      // ✅ Turf.images is string[]
+  images: string[];
   name: string;
 }
 
@@ -27,7 +27,9 @@ const ImageSlider = ({ images, name }: ImageSliderProps) => {
   useEffect(() => {
     if (isAutoPlaying && imageList.length > 1) {
       autoPlayRef.current = setInterval(() => {
-        setCurrentIndex((prev) => (prev === imageList.length - 1 ? 0 : prev + 1));
+        setCurrentIndex((prev) =>
+          prev === imageList.length - 1 ? 0 : prev + 1
+        );
       }, 4000);
     }
     return () => {
@@ -45,7 +47,9 @@ const ImageSlider = ({ images, name }: ImageSliderProps) => {
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => (prev === imageList.length - 1 ? 0 : prev + 1));
+    setCurrentIndex((prev) =>
+      prev === imageList.length - 1 ? 0 : prev + 1
+    );
     setIsAutoPlaying(false);
     setTimeout(() => setIsAutoPlaying(true), 5000);
   };
@@ -109,7 +113,7 @@ const ImageSlider = ({ images, name }: ImageSliderProps) => {
   );
 };
 
-// ─── Amenity Item Component ──────────────────────────────────────────────
+// ─── Amenity Item ────────────────────────────────────────────────────────
 interface AmenityItemProps {
   icon: string;
   label: string;
@@ -123,7 +127,7 @@ const AmenityItem = ({ icon, label, available }: AmenityItemProps) => (
   </div>
 );
 
-// ─── Stat Item Component ──────────────────────────────────────────────────
+// ─── Stat Item ───────────────────────────────────────────────────────────
 interface StatItemProps {
   label: string;
   value: string | number;
@@ -140,7 +144,7 @@ const StatItem = ({ label, value, icon }: StatItemProps) => (
   </div>
 );
 
-// ─── Main Component ──────────────────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────────
 
 const TurfDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -151,6 +155,13 @@ const TurfDetailPage = () => {
   const [turf, setTurf] = useState<Turf | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const viewContentFiredRef = useRef(false);
+
+  // Read nearest_turf_km passed from TurfsPage via navigation state
+  const navState = location.state as
+    | { turf?: Turf; nearest_turf_km?: number }
+    | null;
+  const nearestTurfKm = navState?.nearest_turf_km;
 
   useEffect(() => {
     const fetchTurfDetail = async () => {
@@ -160,24 +171,23 @@ const TurfDetailPage = () => {
       setError(null);
 
       try {
-        const state = location.state as { turf?: Turf } | null;
-        if (state?.turf && state.turf.id === parseInt(id)) {
-          console.log('📥 Using turf data from navigation state');
-          setTurf(state.turf);
+        if (navState?.turf && navState.turf.id === parseInt(id)) {
+          setTurf(navState.turf);
           setLoading(false);
           return;
         }
 
-        console.log('📤 Fetching turf details from API...');
-        const response = await listTurfs({ search: String(id), page_size: 50 });
+        const response = await listTurfs({
+          search: String(id),
+          page_size: 50,
+        });
 
         if (response.result === 'success' && response.data) {
-          const foundTurf = response.data.results.find((t) => t.id === parseInt(id));
-          if (foundTurf) {
-            setTurf(foundTurf);
-          } else {
-            setError('Turf not found');
-          }
+          const foundTurf = response.data.results.find(
+            (t) => t.id === parseInt(id)
+          );
+          if (foundTurf) setTurf(foundTurf);
+          else setError('Turf not found');
         } else {
           setError(response.message || 'Failed to load turf details');
         }
@@ -190,24 +200,39 @@ const TurfDetailPage = () => {
     };
 
     fetchTurfDetail();
-  }, [id, location.state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
+  /**
+   * ViewContent — the single source of truth for the turf-view event.
+   *
+   * ⚠️ Only fires ONCE per turf (ref-guarded). The TurfsPage tap handler
+   * no longer fires this event, so there's no double-fire. The nearest_turf_km
+   * value is passed through navigation state.
+   */
   useEffect(() => {
-  if (!turf) return;
+    if (!turf) return;
+    if (viewContentFiredRef.current) return;
 
-  metaViewContent({
-    turf_id: turf.id,
-    turf_name: turf.name,
-    sport: turf.game_type,
-  });
+    viewContentFiredRef.current = true;
 
-  if (import.meta.env.DEV) {
-    console.log('[Meta Pixel] ViewContent → Turf Detail', {
+    metaViewContent({
       turf_id: turf.id,
       turf_name: turf.name,
+      sport: turf.game_type,
+      city: turf.district,
+      nearest_turf_km: nearestTurfKm,
     });
-  }
-}, [turf]);
+
+    if (import.meta.env.DEV) {
+      console.log('[Meta Pixel] ViewContent → Turf Detail', {
+        turf_id: turf.id,
+        turf_name: turf.name,
+        nearest_turf_km: nearestTurfKm,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [turf]);
 
   const formatTime = (time: string | null): string => {
     if (!time) return 'Not specified';
@@ -305,12 +330,14 @@ const TurfDetailPage = () => {
 
   return (
     <div className="turf-detail">
-      <button className="turf-detail__back-btn" onClick={() => navigate('/turfs')}>
+      <button
+        className="turf-detail__back-btn"
+        onClick={() => navigate('/turfs')}
+      >
         <i className="bi bi-arrow-left" />
         Back to Turfs
       </button>
 
-      {/* ✅ turf.images is string[] */}
       <ImageSlider images={turf.images} name={turf.name} />
 
       <div className="turf-detail__content">
@@ -352,7 +379,9 @@ const TurfDetailPage = () => {
           <div className="turf-detail__hours">
             <div className="turf-detail__hours-item">
               <span className="turf-detail__hours-label">Opening Time</span>
-              <span className="turf-detail__hours-value">{formatTime(turf.open_time)}</span>
+              <span className="turf-detail__hours-value">
+                {formatTime(turf.open_time)}
+              </span>
             </div>
             <div className="turf-detail__hours-item">
               <span className="turf-detail__hours-label">Closing Time</span>
@@ -406,7 +435,11 @@ const TurfDetailPage = () => {
         <div className="turf-detail__book-section">
           <button
             className="turf-detail__book-btn"
-            onClick={() => navigate(`/booking/${turf.id}`, { state: { turf } })}
+            onClick={() =>
+              navigate(`/booking/${turf.id}`, {
+                state: { turf, nearest_turf_km: nearestTurfKm },
+              })
+            }
           >
             <i className="bi bi-calendar-plus" />
             Book Now

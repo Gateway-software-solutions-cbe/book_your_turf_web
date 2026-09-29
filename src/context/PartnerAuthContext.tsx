@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { partnerAuthApi } from "../api/partner/auth";
 import type { PartnerProfile } from "../types/partner/partnerAuth";
+import { setPartnerContext } from "../lib/metaPixel";
 
 interface PartnerAuthContextValue {
   partner: PartnerProfile | null;
@@ -75,11 +76,20 @@ export const PartnerAuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const fullProfile = profileRes.data;
       localStorage.setItem(PROFILE_KEY, JSON.stringify(fullProfile));
       setPartner(fullProfile);
+       // ─── Meta Pixel: seed partner context on login ─────────────────
+    setPartnerContext({
+      partner_id: fullProfile.id,
+      business_name: fullProfile.business_name,
+    });
     } catch {
       // Fallback to whatever the login endpoint returned
       const fallback = res.data.partner;
       localStorage.setItem(PROFILE_KEY, JSON.stringify(fallback));
       setPartner(fallback);
+      setPartnerContext({
+        partner_id: fallback.id,
+        business_name: fallback.business_name,
+      });
     }
   };
 
@@ -95,6 +105,12 @@ export const PartnerAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // Optimistic set so the UI can react immediately
     localStorage.setItem(PROFILE_KEY, JSON.stringify(initialPartner));
     setPartner(initialPartner);
+
+    // ─── Meta Pixel: seed partner context on login ─────────────────
+    setPartnerContext({
+      partner_id: initialPartner.id,
+      business_name: initialPartner.business_name,
+    });
 
     // Then fetch the authoritative profile
     try {
@@ -113,6 +129,9 @@ export const PartnerAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem(PROFILE_KEY);
     setToken(null);
     setPartner(null);
+    try {
+      sessionStorage.removeItem('byt_partner_ctx');
+    } catch { /* silent */ }
   };
 
   // ─── manual profile update (from modal) ───────────────────────

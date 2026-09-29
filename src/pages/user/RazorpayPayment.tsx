@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUserAuth } from '../../context/UserAuthContext';
 import { confirmBooking } from '../../api/user/bookings';
-import { metaPurchase } from '../../lib/metaPixel';
+import { metaPurchase, metaPaymentStarted } from '../../lib/metaPixel';
 import './style/RazorpayPayment.css';
 import { formatLocalDate } from '../../utils/dateUtils';
 
@@ -93,6 +93,13 @@ const RazorpayPayment = () => {
 
     setConfirming(true);
 
+    // ─── Meta Pixel: payment_started (AddPaymentInfo) ──────────────
+    metaPaymentStarted({
+      method: 'razorpay',
+      gateway: 'razorpay',
+      order_id: razorpayResponse.razorpay_order_id || orderData.razorpay_order_id,
+    });
+
     try {
       const dateStr = formatLocalDate(bookingData.selectedDate);
 
@@ -116,6 +123,10 @@ const RazorpayPayment = () => {
         throw new Error('Missing razorpay_payment_id — cannot confirm booking');
       }
 
+      const metaCheckoutEventId =
+        sessionStorage.getItem('byt_checkout_event_id') ?? undefined;
+      
+
       const payload = {
         razorpay_payment_id: razorpayPaymentId,
         razorpay_order_id: razorpayOrderId,
@@ -125,6 +136,10 @@ const RazorpayPayment = () => {
         slots,
         total_amount: bookingData.totalAmount.toFixed(2),
         advance_amount: bookingData.finalAmount.toFixed(2),
+
+        // Meta Conversions API dedup
+        meta_checkout_event_id: metaCheckoutEventId,
+        meta_user_id: user?.id,
       };
 
       console.log('📤 Confirming booking:', payload);

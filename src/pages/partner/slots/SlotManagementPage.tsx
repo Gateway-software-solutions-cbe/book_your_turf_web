@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { partnerTurfsApi } from "../../../api/partner/turfs";
 import { partnerSlotsApi } from "../../../api/partner/slots";
@@ -11,6 +11,11 @@ import CustomerDetailsForm, {
   CustomerDetails,
 } from "./components/CustomerDetailsForm";
 import BlockSlotsModal, { BlockConfig } from "./components/BlockSlotsModal";
+import {
+  metaCalendarViewed,
+  metaSlotBlocked,
+  metaSlotUnblocked,
+} from "../../../lib/metaPixel";
 import "./SlotManagementPage.css";
 
 // ─── Helpers ───────────────────────────────────────────────
@@ -63,6 +68,8 @@ const SlotManagementPage: React.FC = () => {
     message: string;
   } | null>(null);
 
+  const calendarSignatureRef = useRef<string>('');
+
   // ─── Load turfs (Approved only) ─────────────────────────
   useEffect(() => {
     (async () => {
@@ -106,6 +113,22 @@ const SlotManagementPage: React.FC = () => {
       }
     })();
   }, [selectedTurfId, selectedCourt, selectedDate]);
+
+  // ─── Meta Pixel: calendar_viewed (once per turf/court/date) ─────
+  useEffect(() => {
+    if (loading || slots.length === 0) return;
+    if (selectedTurfId == null || selectedCourt == null) return;
+
+    const signature = `${selectedTurfId}|${selectedCourt}|${selectedDate}`;
+    if (calendarSignatureRef.current === signature) return;
+    calendarSignatureRef.current = signature;
+
+    metaCalendarViewed({
+      turf_id: selectedTurfId,
+      court_number: selectedCourt,
+      date: selectedDate,
+    });
+  }, [loading, slots.length, selectedTurfId, selectedCourt, selectedDate]);
 
   // Reset customer details when leaving book mode
   useEffect(() => {
@@ -249,6 +272,24 @@ const SlotManagementPage: React.FC = () => {
         title: "Block Successful",
         message: `${selectedSlots.length} slot(s) blocked for ${config.repeatCount} ${unitLabel.toLowerCase()}${config.repeatCount > 1 ? "s" : ""}!`,
       });
+      // ─── Meta Pixel: slot_blocked ───────────────────────────────
+      if (selectedTurfId != null) {
+        const firstSlot = selectedSlots[0];
+        const slotDateTime = firstSlot
+          ? `${firstSlot.date}T${firstSlot.start_time}`
+          : selectedDate;
+
+        metaSlotBlocked({
+          turf_id: selectedTurfId,
+          court_number: selectedCourt ?? undefined,
+          slot_datetime: slotDateTime,
+          method: 'app',
+          reason: config.reason,
+          repeat_type: config.repeatType,
+          repeat_count: config.repeatCount,
+          slots_count: selectedSlots.length,
+        });
+      }
       setSelectedKeys(new Set());
 
       // Reload calendar
@@ -295,6 +336,15 @@ const SlotManagementPage: React.FC = () => {
         title: "Unblock Successful",
         message: `${blockIds.length} block(s) removed. Slot(s) available again!`,
       });
+      // ─── Meta Pixel: slot_unblocked ─────────────────────────────
+      if (selectedTurfId != null && selectedSlots[0]) {
+        metaSlotUnblocked({
+          turf_id: selectedTurfId,
+          court_number: selectedCourt ?? undefined,
+          slot_datetime: `${selectedSlots[0].date}T${selectedSlots[0].start_time}`,
+          block_ids: blockIds,
+        });
+      }
       setSelectedKeys(new Set());
 
       if (selectedTurfId != null && selectedCourt != null) {

@@ -1,10 +1,11 @@
 // src/pages/user/auth/PhoneAuth.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserAuth } from '../../../context/UserAuthContext';
 import { phoneSendOtp } from '../../../api/user/userAuth';
 import type { PhoneSendOtpResponse } from '../../../types/user/userAuth';
 import logo from '../../../asset/logo.png';
+import { metaLoginStarted, metaOtpSent } from '../../../lib/metaPixel';
 import './auth.css';
 
 const PhoneAuth = () => {
@@ -47,6 +48,15 @@ const PhoneAuth = () => {
     }
   }, []);
 
+  // ─── Meta Pixel: login_started ────────────────────────────────────
+  const loginStartedFiredRef = useRef(false);
+  useEffect(() => {
+    if (loginStartedFiredRef.current) return;
+    loginStartedFiredRef.current = true;
+    metaLoginStarted({ trigger: 'book' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // ─── Handle OTP Send ──────────────────────────────────────────────
   const handleSendOtp = async () => {
     const cleanNumber = phoneNumber.replace(/\D/g, '');
@@ -68,6 +78,9 @@ const PhoneAuth = () => {
         const data = response.data.data;
         localStorage.setItem('user_phone', cleanNumber);
         console.log('📥 OTP response:', data);
+
+        // ─── Meta Pixel: otp_sent ──────────────────────────────────
+        metaOtpSent({ method: 'sms', attempt_no: 1 });
 
         navigate('/verify-otp', {
           state: {

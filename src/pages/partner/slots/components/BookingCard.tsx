@@ -1,5 +1,6 @@
 import React from "react";
 import type { PartnerBooking } from "../../../../types/partner/slot";
+import { metaBookingAcknowledged } from "../../../../lib/metaPixel";
 import "./BookingCard.css";
 
 interface Props {
@@ -48,9 +49,19 @@ const BookingCard: React.FC<Props> = ({ booking, onCollect, onCancel }) => {
   const canCancel = !booking.is_cancelled && booking.booking_type === "Offline";
   const canCollect =
     !booking.is_cancelled && Number(booking.pending_amount) > 0;
+  
+  const handleCardClick = () => {
+    // ─── Meta Pixel: booking_acknowledged ───────────────────────
+    if (!booking.is_cancelled) {
+      metaBookingAcknowledged({
+        booking_id: booking.booking_id,
+      });
+    }
+  };
 
   return (
-    <div className={`pt-bkc-card ${booking.is_cancelled ? "pt-bkc-cancelled" : ""}`}>
+    <div className={`pt-bkc-card ${booking.is_cancelled ? "pt-bkc-cancelled" : ""}`}
+    onClick={handleCardClick}>
       {/* Top row: customer + sport + booking type */}
       <div className="pt-bkc-top">
         <div className="pt-bkc-customer">

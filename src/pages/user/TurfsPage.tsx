@@ -5,6 +5,14 @@ import { useUserAuth } from '../../context/UserAuthContext';
 import { listTurfs } from '../../api/user/turfs';
 import type { Turf, ListTurfsParams } from '../../types/user/turf';
 import FavoriteButton from '../../components/user/FavoriteButton';
+import {
+  setUserContext,
+  metaLocationSet,
+  metaTurfListViewed,
+  metaFilterApplied,
+  metaPermissionPrompt,
+  metaEmptyState,
+} from '../../lib/metaPixel';
 import './style/TurfsPage.css';
 
 // ─── Sport Filter ──────────────────────────────────────────────────────────
@@ -210,6 +218,7 @@ const TurfsPage = () => {
 
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const locationSetupDoneRef = useRef(false);
 
   const sports = [
     { label: 'All', icon: 'grid' },
@@ -224,48 +233,102 @@ const TurfsPage = () => {
     Badminton: 'badminton',
   };
 
-  const getUserLocation = useCallback(async (): Promise<{ lat: number; lng: number }> => {
-    if (user?.latitude && user?.longitude) {
-      return {
-        lat: parseFloat(user.latitude),
-        lng: parseFloat(user.longitude),
-      };
-    }
+    const getUserLocation = useCallback(
+    async (): Promise<{
+      lat: number;
+      lng: number;
+      method: 'gps' | 'picker' | 'default';
+    }> => {
+      // 1. Prefer the backend-provided coords (already set in profile)
+      if (user?.latitude && user?.longitude) {
+        return {
+          lat: parseFloat(user.latitude),
+          lng: parseFloat(user.longitude),
+          method: 'picker',
+        };
+      }
 
-    const storedLat = localStorage.getItem('user_lat');
-    const storedLng = localStorage.getItem('user_lng');
-    if (storedLat && storedLng) {
-      return { lat: parseFloat(storedLat), lng: parseFloat(storedLng) };
-    }
+      // 2. Then anything stored from a prior session
+      const storedLat = localStorage.getItem('user_lat');
+      const storedLng = localStorage.getItem('user_lng');
+      if (storedLat && storedLng) {
+        return {
+          lat: parseFloat(storedLat),
+          lng: parseFloat(storedLng),
+          method: 'gps',
+        };
+      }
 
-    try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 60000,
+      // 3. Then try to prompt the browser for GPS
+      try {
+        const position = await new Promise<GeolocationPosition>(
+          (resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 60000,
+            });
+          }
+        );
+
+        // User granted permission
+        metaPermissionPrompt({
+          permission: 'location',
+          result: 'granted',
         });
-      });
-      const coords = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      };
-      localStorage.setItem('user_lat', String(coords.lat));
-      localStorage.setItem('user_lng', String(coords.lng));
-      return coords;
-    } catch {
-      console.log('Using default location: Chennai');
-      return { lat: 13.0827, lng: 80.2707 };
-    }
-  }, [user]);
+
+        const coords = {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        };
+        localStorage.setItem('user_lat', String(coords.lat));
+        localStorage.setItem('user_lng', String(coords.lng));
+        return { ...coords, method: 'gps' as const };
+      } catch (err: any) {
+        // Permission denied (code 1) or otherwise failed
+        const result = err?.code === 1 ? 'denied' : 'later';
+        metaPermissionPrompt({
+          permission: 'location',
+          result,
+        });
+
+        console.log('Using default location: Chennai');
+        return { lat: 13.0827, lng: 80.2707, method: 'default' as const };
+      }
+    },
+    [user]
+  );
 
   useEffect(() => {
+    // StrictMode guard — this effect fires twice in dev without the ref.
+    // The ref ensures geolocation + pixel fires only happen once per mount.
+    if (locationSetupDoneRef.current) return;
+    locationSetupDoneRef.current = true;
+
     const loadLocation = async () => {
       const loc = await getUserLocation();
-      setUserLocation(loc);
+      setUserLocation({ lat: loc.lat, lng: loc.lng });
       setLocationLoaded(true);
+
+      // Push city/area/pincode into the Meta user context
+      setUserContext({
+        city: user?.city,
+        area: user?.area,
+        pincode: user?.pincode,
+      });
+
+      // Fire location_set with everything we know so far
+      metaLocationSet({
+        method: loc.method,
+        city: user?.city,
+        area: user?.area,
+        pincode: user?.pincode,
+        lat: Math.round(loc.lat * 1000) / 1000,
+        lng: Math.round(loc.lng * 1000) / 1000,
+      });
     };
     loadLocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getUserLocation]);
 
   useEffect(() => {
@@ -293,10 +356,26 @@ const TurfsPage = () => {
     [location.pathname, location.search, navigate]
   );
 
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleSearchChange = (value: string) => {
     setSearchQuery(value);
     setIsSearching(!!value.trim());
     updateSearchParam(value);
+
+    // Debounce so we don't fire on every keystroke
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    const trimmed = value.trim();
+    if (trimmed.length >= 2) {
+      searchDebounceRef.current = setTimeout(() => {
+        metaFilterApplied({
+          filter_type: 'search',
+          value: trimmed,
+          results_count: totalCount,
+        });
+      }, 800);
+    }
   };
 
   const handleClearSearch = () => {
@@ -468,6 +547,60 @@ const TurfsPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchQuery, selectedSport, locationLoaded, userLocation]);
 
+  // ─── Meta Pixel: turf_list_viewed ──────────────────────────────────────
+  // Fires once per successful list load (not per pagination append).
+  // Uses a ref so re-renders don't re-fire when the array identity changes.
+  const lastListSignatureRef = useRef<string>('');
+  useEffect(() => {
+    if (loading || loadingMore) return;
+
+    // Signature changes on search / sport / initial fetch — not on append
+    const signature = `${searchQuery}|${selectedSport ?? 'all'}|${turfs.length}`;
+    if (lastListSignatureRef.current === signature) return;
+    lastListSignatureRef.current = signature;
+
+    const hasFilters = !!selectedSport || searchQuery.trim().length > 0;
+    const isEmpty = turfs.length === 0;
+
+    // Compute rough distance stats if user location is known
+    let turfsWithin8km: number | undefined;
+    let nearestTurfKm: number | undefined;
+
+    if (userLocation && turfs.length > 0) {
+      const distances = turfs
+        .map((t) => t.distance_km)
+        .filter((d): d is number => d !== null && d !== undefined);
+
+      if (distances.length > 0) {
+        nearestTurfKm = Math.round(Math.min(...distances) * 100) / 100;
+        turfsWithin8km = distances.filter((d) => d <= 8).length;
+      }
+    }
+
+    metaTurfListViewed({
+      turfs_shown: turfs.length,
+      turfs_with_slot_today: turfs.filter((t) => t.is_bookable !== false).length,
+      sort: 'distance',
+      filters_active: hasFilters,
+      empty_state: isEmpty,
+    });
+
+    // ─── Meta Pixel: empty_state_shown ──────────────────────────────
+    // Fires only when the list came back empty AND the user wasn't
+    // already filtering (filters returning zero is a different signal).
+    if (isEmpty && !hasFilters) {
+      metaEmptyState(user?.city, user?.pincode);
+
+      if (import.meta.env.DEV) {
+        console.log('[Meta Pixel] empty_state_shown', {
+          city: user?.city,
+          pincode: user?.pincode,
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, loadingMore, turfs.length, searchQuery, selectedSport]);
+
   useEffect(() => {
     if (loading || !hasMore || !locationLoaded) return;
 
@@ -492,11 +625,29 @@ const TurfsPage = () => {
 
   const handleSportSelect = (sport: string) => {
     setSelectedSport(sport === 'All' ? null : sport);
+
+    metaFilterApplied({
+      filter_type: 'sport',
+      value: sport,
+      // results_count is filled with the previous count — updated next render
+      results_count: totalCount,
+    });
   };
 
   const handleTurfClick = (turf: Turf) => {
-    navigate(`/turfs/${turf.id}`, { state: { turf } });
-  };
+     const rawDistance = turf.distance_km;
+
+  const nearestTurfKm =
+    rawDistance !== null &&
+    rawDistance !== undefined &&
+    rawDistance > 0.001
+      ? Math.round(rawDistance * 100) / 100
+      : undefined;
+
+  navigate(`/turfs/${turf.id}`, {
+    state: { turf, nearest_turf_km: nearestTurfKm },
+  });
+};
 
   const handleRetry = () => {
     fetchTurfs(true);

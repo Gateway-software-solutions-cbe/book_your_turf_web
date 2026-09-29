@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { usePartnerAuth } from "../../context/PartnerAuthContext";
 import { useProfileGuard } from "../../context/ProfileGuardContext";
@@ -13,6 +13,10 @@ import type {
 import type { PartnerBooking } from "../../types/partner/slot";
 import DashboardStatCard from "../../components/partner/DashboardStatCard";
 import welcomeHeroImage from "../../asset/welcome_with_yellow.png";
+import {
+  metaPartnerDashboardViewed,
+  setPartnerContext,
+} from "../../lib/metaPixel";
 import "./PartnerDashboardPage.css";
 
 const currency = (v: string | number): string => {
@@ -40,6 +44,7 @@ const PartnerDashboardPage: React.FC = () => {
   const [recentBookings, setRecentBookings] = useState<PartnerBooking[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const dashboardViewedFiredRef = useRef(false);
 
   // Auto-prompt guest once per session
   useEffect(() => {
@@ -86,6 +91,32 @@ const PartnerDashboardPage: React.FC = () => {
     })();
   }, []);
 
+  useEffect(() => {
+    if (dashboardViewedFiredRef.current) return;
+    if (!partner) return;
+
+    dashboardViewedFiredRef.current = true;
+
+    const partnerType: 'owner_new' | 'owner_active' =
+      (stats?.approved_venues_count ?? 0) > 0
+        ? 'owner_active'
+        : 'owner_new';
+
+    // Seed partner_type + venues_count into the context
+    setPartnerContext({
+      partner_id: partner.id,
+      business_name: partner.business_name,
+      partner_type: partnerType,
+      venues_count: stats?.approved_venues_count ?? 0,
+    });
+
+    metaPartnerDashboardViewed({
+      partner_type: partnerType,
+      venues_count: stats?.approved_venues_count ?? 0,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partner, stats?.approved_venues_count]);
+
   const displayName = partner?.name?.trim() || "Partner";
 
   // Total bookings (completed + upcoming)
@@ -119,7 +150,6 @@ const PartnerDashboardPage: React.FC = () => {
           className="pt-dash-hero-image"
           src={welcomeHeroImage}
           alt="BookYourTurf sports welcome banner featuring football players"
-          fetchPriority="high"
         />
       </section>
 

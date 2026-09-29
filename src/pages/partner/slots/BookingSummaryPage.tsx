@@ -1,8 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { partnerSlotsApi } from "../../../api/partner/slots";
 import type { CalendarSlot } from "../../../types/partner/slot";
 import BookingConfirmedModal from "./components/BookingConfirmedModal";
+import {
+  metaPartnerOfflineBookingConfirmed,
+  metaSettlementViewed,
+} from "../../../lib/metaPixel";
 import "./BookingSummaryPage.css";
 
 interface SummaryState {
@@ -43,6 +47,18 @@ const BookingSummaryPage: React.FC = () => {
     totalAmount: string;
     paidAmount: string;
   } | null>(null);
+
+  const settlementViewedFiredRef = useRef(false);
+
+  useEffect(() => {
+    if (settlementViewedFiredRef.current) return;
+    settlementViewedFiredRef.current = true;
+    metaSettlementViewed({
+      booking_id: undefined,
+      period: state?.date ?? '',
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   if (!state) {
     return (
@@ -106,6 +122,17 @@ const BookingSummaryPage: React.FC = () => {
         customerMobile: customer.mobile,
         totalAmount: totalAmount.toFixed(2),
         paidAmount: paid.toFixed(2),
+      });
+      // ─── Meta Pixel: partner offline booking confirmed ──────────
+      metaPartnerOfflineBookingConfirmed({
+        booking_id: res.data.booking_id,
+        turf_id: turfId,
+        court_number: courtNumber,
+        customer_name: customer.name,
+        total_amount: totalAmount.toFixed(2),
+        paid_amount: paid.toFixed(2),
+        balance_amount: balance.toFixed(2),
+        slots_count: slots.length,
       });
     } catch (err: any) {
       setError(

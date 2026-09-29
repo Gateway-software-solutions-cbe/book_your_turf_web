@@ -19,7 +19,10 @@ import OperatingHoursSection from "./sections/OperatingHoursSection";
 import DimensionsSection from "./sections/DimensionsSection";
 import AmenitiesSection from "./sections/AmenitiesSection";
 import CourtShiftSection from "./sections/CourtShiftSection";
-
+import {
+  metaSlotsPublished,
+  metaPriceUpdated,
+} from "../../../lib/metaPixel";
 import "./style/AddVenuePage.css";
 
 interface FormState {
@@ -240,6 +243,7 @@ const AddVenuePage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const errorRef = useRef<HTMLDivElement | null>(null);
+  const originalCourtShiftsRef = useRef<string | null>(null);
 
   const isEdit = Boolean(id) && id !== "new";
   const preselectedSport = searchParams.get("sport") ?? "";
@@ -286,6 +290,10 @@ const AddVenuePage: React.FC = () => {
           facilities: t.facilities,
           court_shifts: rebuildCourtShifts(t),
         });
+        // Snapshot court_shifts so we can detect price changes on save
+originalCourtShiftsRef.current = JSON.stringify(
+  rebuildCourtShifts(t)
+);
       } catch (err: any) {
         setError(err?.response?.data?.message || "Failed to load venue");
       } finally {
@@ -547,6 +555,19 @@ const AddVenuePage: React.FC = () => {
           ? form.imagesToDelete
           : undefined,
       });
+      // ─── Meta Pixel: price_updated (only if shifts actually changed) ──
+      const currentShifts = JSON.stringify(form.court_shifts);
+      const shiftsChanged =
+        originalCourtShiftsRef.current !== null &&
+        originalCourtShiftsRef.current !== currentShifts;
+
+      if (shiftsChanged) {
+        metaPriceUpdated({
+          turf_id: Number(id),
+          court_number: undefined,
+          slot_type: undefined,
+        });
+      }
       setSuccessMsg("Turf updated successfully");
       setForm(buildInitialState(form.game_type));
       setTimeout(() => navigate("/partner/venues"), 1200);
@@ -571,7 +592,18 @@ const AddVenuePage: React.FC = () => {
         court_shifts: form.court_shifts,
         images: form.images,
       };
-      await partnerTurfsApi.create(payload);
+      const res = await partnerTurfsApi.create(payload);
+
+      // ─── Meta Pixel: slots_published ────────────────────────────
+      const newTurfId = res.data?.id;
+      metaSlotsPublished({
+        turf_id: newTurfId,
+        turf_name: form.name,
+        sport: form.game_type,
+        courts_count: form.courts,
+        city: form.district,
+        slots_count: form.courts * 2, // day + night per court
+      });
       setSuccessMsg(
         "Venue submitted for approval. You'll be notified once it's approved.",
       );

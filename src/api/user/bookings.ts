@@ -74,6 +74,15 @@ export const confirmBooking = async (
       ...(payload.advance_amount !== undefined && {
         advance_amount: payload.advance_amount,
       }),
+
+      // Meta Conversions API dedup fields
+      ...(payload.meta_checkout_event_id && {
+        meta_checkout_event_id: payload.meta_checkout_event_id,
+      }),
+      ...(payload.meta_purchase_event_id && {
+        meta_purchase_event_id: payload.meta_purchase_event_id,
+      }),
+      ...(payload.meta_user_id && { meta_user_id: payload.meta_user_id }),
     }
   );
   return response.data;
@@ -158,6 +167,17 @@ export const confirmBalance = async (
   formData.append('razorpay_payment_id', payload.razorpay_payment_id);
   formData.append('razorpay_order_id', payload.razorpay_order_id);
   formData.append('booking_id', String(payload.booking_id));
+
+  // Meta Conversions API dedup fields
+  if (payload.meta_checkout_event_id) {
+    formData.append('meta_checkout_event_id', payload.meta_checkout_event_id);
+  }
+  if (payload.meta_purchase_event_id) {
+    formData.append('meta_purchase_event_id', payload.meta_purchase_event_id);
+  }
+  if (payload.meta_user_id) {
+    formData.append('meta_user_id', String(payload.meta_user_id));
+  }
 
   const response = await apiClient.post<ApiResponse<ConfirmBalanceResponse>>(
     '/api/user/bookings/confirm-balance/',

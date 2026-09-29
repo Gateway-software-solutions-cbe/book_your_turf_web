@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Outlet,
   NavLink,
@@ -11,7 +11,7 @@ import { usePartnerAuth } from "../../../context/PartnerAuthContext";
 import { useProfileGuard } from "../../../context/ProfileGuardContext";
 import { useRegisterPartnerDevice } from "../../../hooks/useRegisterPartnerDevice";
 import PartnerNotificationBell from "../PartnerNotificationBell";
-
+import { metaOwnerAppOpen } from "../../../lib/metaPixel";
 import "./PartnerLayout.css";
 
 const PartnerLayout: React.FC = () => {
@@ -24,7 +24,7 @@ const PartnerLayout: React.FC = () => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-
+  const ownerAppOpenFiredRef = useRef(false);
   useRegisterPartnerDevice();
 
   useEffect(() => {
@@ -48,6 +48,13 @@ const PartnerLayout: React.FC = () => {
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // ─── Meta Pixel: owner_app_open (fire once per shell mount) ──────
+  useEffect(() => {
+    if (ownerAppOpenFiredRef.current) return;
+    ownerAppOpenFiredRef.current = true;
+    metaOwnerAppOpen();
   }, []);
 
   const handleLogout = () => {
