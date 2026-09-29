@@ -91,6 +91,8 @@ export interface LoginUser {
   city?: string;
   area?: string;
   pincode?: string;
+  latitude?: string | null;
+  longitude?: string | null;
 }
 
 export interface LoginData {

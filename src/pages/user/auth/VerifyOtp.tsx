@@ -164,6 +164,7 @@ const VerifyOtp = () => {
             wallet_balance: data.user.wallet_balance,
             game_coins: data.user.game_coins,
             referral_code: data.user.referral_code,
+            is_number_verified: data.user.is_number_verified ?? true,
           },
         });
 
