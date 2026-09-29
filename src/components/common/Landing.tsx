@@ -683,6 +683,13 @@ const Landing = () => {
           <span>
             &copy; {new Date().getFullYear()} BookYourTurf. All rights reserved.
           </span>
+          <div className="byt-footer__bottom-links">
+            <Link to="/privacy">Privacy Policy</Link>
+            <span className="byt-footer__bottom-sep" aria-hidden="true">
+              ·
+            </span>
+            <Link to="/terms">Terms &amp; Conditions</Link>
+          </div>
         </div>
       </footer>
     </div>
