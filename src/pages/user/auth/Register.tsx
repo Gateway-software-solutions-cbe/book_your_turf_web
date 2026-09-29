@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { registerSchema, type RegisterFormValues } from '../../../validations/auth.schema';
-import { sendOtp } from '../../../api/user/userAuth';
+import { sendRegistrationOtp } from '../../../api/user/userAuth';
 import { useApiState } from '../../../hooks/useApiState';
 import type { VerificationMethod } from '../../../types/user/userAuth';
 import './auth.css';
@@ -12,7 +12,7 @@ import './auth.css';
 const Register = () => {
   const navigate = useNavigate();
   const [method, setMethod] = useState<VerificationMethod>('email');
-  const { run: sendOtpRun, loading, error } = useApiState(sendOtp);
+  const { run: sendOtpRun, loading, error } = useApiState(sendRegistrationOtp);
 
   const {
     register,
