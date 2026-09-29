@@ -1,0 +1,268 @@
+.pt-bsm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+  animation: pt-bsm-fade 0.15s ease;
+}
+
+.pt-bsm-modal {
+  background: #fff;
+  border-radius: 22px;
+  padding: 26px 24px 22px;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: pt-bsm-pop 0.22s ease;
+}
+
+/* Header */
+.pt-bsm-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.pt-bsm-header-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #fee2e2;
+  color: #dc2626;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.pt-bsm-header h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0;
+}
+
+/* Selected slots preview */
+.pt-bsm-selected {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.pt-bsm-selected-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #14532d;
+  margin-bottom: 10px;
+}
+
+.pt-bsm-selected-title strong {
+  color: #16a34a;
+}
+
+.pt-bsm-selected-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pt-bsm-selected-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.pt-bsm-clock {
+  font-size: 12px;
+  color: #16a34a;
+}
+
+/* Blocks */
+.pt-bsm-block {
+  margin-bottom: 18px;
+}
+
+.pt-bsm-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 700;
+  color: #14532d;
+  margin-bottom: 8px;
+}
+
+/* Segmented control */
+.pt-bsm-segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.pt-bsm-seg-btn {
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+
+.pt-bsm-seg-btn:hover:not(:disabled) {
+  border-color: #86efac;
+}
+
+.pt-bsm-seg-btn.pt-active {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+
+.pt-bsm-seg-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Chips */
+.pt-bsm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pt-bsm-chip {
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+
+.pt-bsm-chip:hover:not(:disabled) {
+  border-color: #86efac;
+}
+
+.pt-bsm-chip.pt-active {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+
+.pt-bsm-chip:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Textarea */
+.pt-bsm-textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1f2937;
+  resize: vertical;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.pt-bsm-textarea:focus {
+  border-color: #22c55e;
+  background: #fff;
+}
+
+.pt-bsm-textarea::placeholder {
+  color: #9ca3af;
+}
+
+/* Confirmation text */
+.pt-bsm-confirm-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: #14532d;
+  text-align: left;
+  margin: 4px 0 20px;
+}
+
+/* Actions */
+.pt-bsm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pt-bsm-btn {
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.pt-bsm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pt-bsm-btn-cancel {
+  background: #f3f4f6;
+  color: #4b5563;
+}
+.pt-bsm-btn-cancel:hover:not(:disabled) {
+  background: #e5e7eb;
+}
+
+.pt-bsm-btn-block {
+  background: #ef4444;
+  color: #fff;
+}
+.pt-bsm-btn-block:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+@keyframes pt-bsm-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pt-bsm-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

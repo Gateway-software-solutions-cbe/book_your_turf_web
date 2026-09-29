@@ -1,8 +1,8 @@
 // src/pages/admin/PartnerFormPage.tsx
 import React, { useEffect, useState, type FormEvent } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPartner, createPartner, updatePartner } from '../../api/partners';
-import type { CreatePartnerRequest, UpdatePartnerRequest } from '../../types/partner';
+import { getPartner, createPartner, updatePartner } from '../../api/admin/partners';
+import type { CreatePartnerRequest, UpdatePartnerRequest } from '../../types/admin/partner';
 
 // ─── Form State ────────────────────────────────────────────────────────────────
 

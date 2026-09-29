@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getAppVersion } from '../../api/appversion';
-import type { AppType, AppPlatform } from '../../types/appversion';
+import { getAppVersion } from '../../api/admin/appversion';
+import type { AppType, AppPlatform } from '../../types/admin/appversion';
 
 // ─── Tab: App Version ──────────────────────────────────────────────────────────
 const AppVersion: React.FC = () => {
   const [appType, setAppType] = useState<AppType>('user');
   const [platform, setPlatform] = useState<AppPlatform>('android');
-  const [version, setVersion] = useState<import('../../types/appversion').AppVersion | null>(null);
+  const [version, setVersion] = useState<import('../../types/admin/appversion').AppVersion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

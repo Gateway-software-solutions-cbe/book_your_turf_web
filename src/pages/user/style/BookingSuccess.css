@@ -1,0 +1,517 @@
+/* =========================================================
+   BOOKYOURTURF · BOOKING SUCCESS
+   Editorial celebration · thin type · emerald accents
+========================================================= */
+
+.booking-success {
+  --em-900: #062a1a;
+  --em-700: #0a4a2c;
+  --em-600: #0d7a45;
+  --em-500: #14a45c;
+  --em-400: #3ebd7a;
+  --em-300: #8ad9ab;
+  --em-200: #c9ebd6;
+  --em-100: #e6f5ec;
+  --em-50:  #f2f9f5;
+
+  --ink: #0b1a12;
+  --text: #4c5b53;
+  --muted: #6b7a71;
+  --soft: #8d9a91;
+  --faint: #b8c4bc;
+
+  --line: #e5ece8;
+  --line-soft: #eef4f0;
+
+  --surface: #ffffff;
+
+  position: relative;
+  isolation: isolate;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 100vh;
+  padding: 32px 20px;
+
+  background:
+    radial-gradient(
+      ellipse 800px 600px at 82% -10%,
+      rgba(20, 164, 92, 0.08),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 700px 500px at 15% 110%,
+      rgba(20, 164, 92, 0.05),
+      transparent 60%
+    ),
+    linear-gradient(180deg, #fbfdfc 0%, #f4f9f6 100%);
+
+  overflow: hidden;
+
+  color: var(--ink);
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  box-sizing: border-box;
+}
+
+.booking-success *,
+.booking-success *::before,
+.booking-success *::after {
+  box-sizing: border-box;
+}
+
+/* Thin type — nothing above 500 */
+.booking-success h1,
+.booking-success strong,
+.booking-success b {
+  font-weight: 400;
+}
+
+.booking-success h1 {
+  font-weight: 300;
+}
+
+/* ---------- Court rings background ---------- */
+
+.booking-success::before,
+.booking-success::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+.booking-success::before {
+  top: -220px;
+  right: -240px;
+
+  width: 740px;
+  height: 740px;
+
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0,
+    transparent 74px,
+    rgba(13, 122, 69, 0.06) 74px,
+    rgba(13, 122, 69, 0.06) 75px
+  );
+
+  opacity: 0.75;
+}
+
+.booking-success::after {
+  bottom: -260px;
+  left: -260px;
+
+  width: 660px;
+  height: 660px;
+
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0,
+    transparent 66px,
+    rgba(13, 122, 69, 0.045) 66px,
+    rgba(13, 122, 69, 0.045) 67px
+  );
+
+  opacity: 0.6;
+}
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.booking-success__card {
+  position: relative;
+
+  width: 100%;
+  max-width: 440px;
+
+  padding: 32px 28px 26px;
+
+  border: 1px solid var(--line);
+  border-radius: 22px;
+
+  background: var(--surface);
+
+  box-shadow:
+    0 1px 2px rgba(11, 26, 18, 0.02),
+    0 30px 60px -34px rgba(11, 26, 18, 0.22);
+
+  text-align: center;
+
+  animation: bs-slide-up 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Gradient accent line on top */
+.booking-success__card::before {
+  content: "";
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  height: 3px;
+
+  border-radius: 22px 22px 0 0;
+
+  background: linear-gradient(
+    90deg,
+    var(--em-400) 0%,
+    var(--em-500) 45%,
+    var(--em-700) 100%
+  );
+}
+
+@keyframes bs-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   SUCCESS ICON
+========================================================= */
+
+.booking-success__icon {
+  position: relative;
+
+  display: grid;
+  place-items: center;
+
+  width: 68px;
+  height: 68px;
+
+  margin: 0 auto 20px;
+
+  border-radius: 20px;
+
+  background: linear-gradient(135deg, var(--em-500), var(--em-700));
+  color: #ffffff;
+
+  font-size: 30px;
+
+  box-shadow:
+    0 20px 40px -16px rgba(20, 164, 92, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+
+  animation: bs-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.booking-success__icon i {
+  font-size: 30px;
+  line-height: 1;
+}
+
+/* Soft pulsing halo */
+.booking-success__icon::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+
+  border-radius: 26px;
+
+  background: radial-gradient(
+    circle,
+    rgba(20, 164, 92, 0.28),
+    transparent 65%
+  );
+
+  opacity: 0;
+  animation: bs-halo 2.4s ease-in-out infinite;
+
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes bs-pop {
+  0%   { transform: scale(0.7); opacity: 0; }
+  60%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes bs-halo {
+  0%, 100% { opacity: 0;    transform: scale(0.9); }
+  50%      { opacity: 0.9;  transform: scale(1.08); }
+}
+
+/* =========================================================
+   TITLE
+========================================================= */
+
+.booking-success__title {
+  margin: 0 0 16px;
+
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.032em;
+
+  color: var(--ink);
+
+  /* Strip default emoji font-size inconsistencies */
+  font-variant-emoji: text;
+}
+
+/* =========================================================
+   AMOUNT
+========================================================= */
+
+.booking-success__amount {
+  margin-bottom: 6px;
+
+  font-size: clamp(34px, 7vw, 44px);
+  font-weight: 300;
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+
+  color: var(--em-700);
+
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   DISCOUNT
+========================================================= */
+
+.booking-success__discount {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-bottom: 18px;
+  padding: 5px 12px;
+
+  border: 1px solid var(--em-200);
+  border-radius: 999px;
+
+  background: var(--em-50);
+  color: var(--em-700);
+
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+/* =========================================================
+   MESSAGE
+========================================================= */
+
+.booking-success__message {
+  margin: 0 0 20px;
+
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.6;
+
+  color: var(--muted);
+}
+
+/* =========================================================
+   BOOKING ID
+========================================================= */
+
+.booking-success__booking-id {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin-bottom: 22px;
+  padding: 11px 16px;
+
+  border: 1px solid var(--line);
+  border-radius: 11px;
+
+  background: var(--em-50);
+
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+
+  color: var(--soft);
+}
+
+.booking-success__booking-id strong {
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+
+  color: var(--ink);
+
+  font-variant-numeric: tabular-nums;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.booking-success__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.booking-success__btn {
+  flex: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  min-height: 46px;
+  padding: 12px 16px;
+
+  border: 1px solid transparent;
+  border-radius: 12px;
+
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  cursor: pointer;
+
+  transition:
+    transform 200ms ease,
+    box-shadow 200ms ease,
+    background 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease;
+}
+
+.booking-success__btn:focus-visible {
+  outline: 2px solid var(--em-500);
+  outline-offset: 3px;
+}
+
+/* Outline — Go Home */
+.booking-success__btn--outline {
+  border-color: var(--line);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.booking-success__btn--outline:hover {
+  transform: translateY(-1px);
+  border-color: var(--em-300);
+  background: var(--em-50);
+  color: var(--em-700);
+}
+
+/* Primary — View Bookings */
+.booking-success__btn--primary {
+  border-color: transparent;
+
+  background: linear-gradient(135deg, var(--em-500), var(--em-700));
+  color: #ffffff;
+
+  box-shadow: 0 12px 26px -14px rgba(20, 164, 92, 0.7);
+}
+
+.booking-success__btn--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px -16px rgba(20, 164, 92, 0.9);
+}
+
+.booking-success__btn--primary:active {
+  transform: translateY(0);
+}
+
+/* =========================================================
+   RESPONSIVE · MOBILE (<= 480px)
+========================================================= */
+
+@media (max-width: 480px) {
+  .booking-success {
+    padding: 20px 14px;
+    align-items: flex-start;
+  }
+
+  .booking-success__card {
+    margin-top: 12px;
+    padding: 26px 20px 22px;
+    border-radius: 20px;
+  }
+
+  .booking-success__icon {
+    width: 60px;
+    height: 60px;
+    font-size: 26px;
+    border-radius: 18px;
+    margin-bottom: 18px;
+  }
+
+  .booking-success__icon i {
+    font-size: 26px;
+  }
+
+  .booking-success__title {
+    font-size: 20px;
+    margin-bottom: 14px;
+  }
+
+  .booking-success__amount {
+    font-size: 32px;
+  }
+
+  .booking-success__discount {
+    font-size: 11px;
+    padding: 4px 10px;
+    margin-bottom: 16px;
+  }
+
+  .booking-success__message {
+    font-size: 12.5px;
+    margin-bottom: 18px;
+  }
+
+  .booking-success__booking-id {
+    font-size: 11px;
+    padding: 10px 14px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+
+  .booking-success__actions {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .booking-success__btn {
+    width: 100%;
+    min-height: 44px;
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .booking-success *,
+  .booking-success *::before,
+  .booking-success *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

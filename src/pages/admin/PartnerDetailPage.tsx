@@ -1,8 +1,8 @@
 // src/pages/admin/PartnerDetailPage.tsx
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getPartner, updatePartner, getPartnerTurfs } from '../../api/partners';
-import type { Partner } from '../../types/partner';
+import { getPartner, updatePartner, getPartnerTurfs } from '../../api/admin/partners';
+import type { Partner } from '../../types/admin/partner';
 import { usePermission, PERMISSIONS } from '../../hooks/usePermission';
 
 const formatDate = (iso: string) =>

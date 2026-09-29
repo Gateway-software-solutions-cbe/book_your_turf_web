@@ -1,7 +1,7 @@
 // src/pages/admin/CountsSummaryPage.tsx
 import React, { useEffect, useState, useCallback, useRef } from 'react';
-import { listUserFcmTokens, listPartnerFcmTokens } from '../../api/fcm';
-import type { UserFcmToken, PartnerFcmToken, FcmPlatform } from '../../types/fcm';
+import { listUserFcmTokens, listPartnerFcmTokens } from '../../api/admin/fcm';
+import type { UserFcmToken, PartnerFcmToken, FcmPlatform } from '../../types/admin/fcm';
 import { exportData, sanitizeForExport, formatDateForExport } from '../../utils/exportUtils';
 import * as XLSX from 'xlsx';
 
@@ -501,7 +501,7 @@ const CountsSummaryPage: React.FC = () => {
       });
       setUserData(data.results ?? []);
       setUserTotalCount(data.count ?? 0);
-    } catch {
+    } catch (err) {
       setUserError('Failed to load logged-in user devices.');
       setUserData([]);
       setUserTotalCount(0);
@@ -523,7 +523,7 @@ const CountsSummaryPage: React.FC = () => {
       });
       setPartnerData(data.results ?? []);
       setPartnerTotalCount(data.count ?? 0);
-    } catch {
+    } catch (err) {
       setPartnerError('Failed to load logged-in partner devices.');
       setPartnerData([]);
       setPartnerTotalCount(0);
@@ -531,6 +531,191 @@ const CountsSummaryPage: React.FC = () => {
       setPartnerIsLoading(false);
     }
   }, [partnerPage, partnerSearch, partnerPlatform]);
+
+  // ── Fetch all data for export ───────────────────────────────────────────────
+  const fetchAllDataForExport = useCallback(async (
+    type: 'users' | 'partners',
+    search?: string,
+    platform?: FcmPlatform | ''
+  ) => {
+    let page = 1;
+    let allResults: any[] = [];
+    let hasMore = true;
+    const maxPageSize = 100; // Adjust based on your API's max page size
+
+    while (hasMore) {
+      try {
+        const params: any = {
+          page,
+          page_size: maxPageSize,
+          ...(search ? { search } : {}),
+          ...(platform ? { platform } : {}),
+        };
+
+        let data;
+        if (type === 'users') {
+          data = await listUserFcmTokens(params);
+        } else {
+          data = await listPartnerFcmTokens(params);
+        }
+
+        const results = data.results ?? [];
+        allResults = [...allResults, ...results];
+        hasMore = data.next !== null && results.length > 0;
+        page++;
+
+        // Safety check to prevent infinite loops
+        if (page > 100) break;
+      } catch (error) {
+        console.error(`Error fetching ${type} for export:`, error);
+        break;
+      }
+    }
+
+    return allResults;
+  }, []);
+
+  // ── Get User Export Data ─────────────────────────────────────────────────────
+  const getUserExportData = useCallback((data: UserFcmToken[]) => {
+    return sanitizeForExport(
+      data.map(t => ({
+        'User Name': t.user_name || '',
+        'User Email': t.user_email || '',
+        'User Phone': t.user_phone || '',
+        'Device Name': t.device_name || '',
+        'Device ID': t.device_id || '',
+        'Platform': t.platform || '',
+        'OS Version': t.os_version || '',
+        'Location': t.location || '',
+        'Token': t.token || '',
+        'Last Seen': formatDateForExport(t.updated_at),
+        'Created Date': formatDateForExport(t.created_at),
+      }))
+    );
+  }, []);
+
+  // ── Get Partner Export Data ──────────────────────────────────────────────────
+  const getPartnerExportData = useCallback((data: PartnerFcmToken[]) => {
+    return sanitizeForExport(
+      data.map(t => ({
+        'Partner Name': t.partner_name || '',
+        'Partner Email': t.partner_email || '',
+        'Partner Business': t.partner_business || '',
+        'Device Name': t.device_name || '',
+        'Device ID': t.device_id || '',
+        'Platform': t.platform || '',
+        'OS Version': t.os_version || '',
+        'Location': t.location || '',
+        'Token': t.token || '',
+        'Last Seen': formatDateForExport(t.updated_at),
+        'Created Date': formatDateForExport(t.created_at),
+      }))
+    );
+  }, []);
+
+  // ── Export Combined ──────────────────────────────────────────────────────────
+  const handleExportCombined = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      const [allUsers, allPartners] = await Promise.all([
+        fetchAllDataForExport('users', userSearch, userPlatform),
+        fetchAllDataForExport('partners', partnerSearch, partnerPlatform)
+      ]);
+
+      if (allUsers.length === 0 && allPartners.length === 0) {
+        alert('No data to export.');
+        setIsExporting(false);
+        return;
+      }
+
+      const workbook = XLSX.utils.book_new();
+      
+      if (allUsers.length > 0) {
+        const userExportData = getUserExportData(allUsers);
+        const userSheet = XLSX.utils.json_to_sheet(userExportData);
+        XLSX.utils.book_append_sheet(workbook, userSheet, 'Users');
+      }
+      
+      if (allPartners.length > 0) {
+        const partnerExportData = getPartnerExportData(allPartners);
+        const partnerSheet = XLSX.utils.json_to_sheet(partnerExportData);
+        XLSX.utils.book_append_sheet(workbook, partnerSheet, 'Partners');
+      }
+      
+      const summaryData = [
+        { 'Type': 'Users', 'Active Devices': allUsers.length },
+        { 'Type': 'Partners', 'Active Devices': allPartners.length },
+        { 'Type': 'Total', 'Active Devices': allUsers.length + allPartners.length },
+      ];
+      const summarySheet = XLSX.utils.json_to_sheet(summaryData);
+      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
+      
+      XLSX.writeFile(workbook, `active_sessions_export_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export data. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // ── Export Users Only ────────────────────────────────────────────────────────
+  const handleExportUsers = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      const allUsers = await fetchAllDataForExport('users', userSearch, userPlatform);
+      
+      if (allUsers.length === 0) {
+        alert('No user data to export.');
+        setIsExporting(false);
+        return;
+      }
+
+      const exportDataArray = getUserExportData(allUsers);
+      exportData(exportDataArray, {
+        fileName: `user_sessions_export_${new Date().toISOString().split('T')[0]}`,
+        format: 'excel',
+        sheetName: 'Users',
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export data. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // ── Export Partners Only ─────────────────────────────────────────────────────
+  const handleExportPartners = async () => {
+    setIsExporting(true);
+    setShowExportMenu(false);
+    
+    try {
+      const allPartners = await fetchAllDataForExport('partners', partnerSearch, partnerPlatform);
+      
+      if (allPartners.length === 0) {
+        alert('No partner data to export.');
+        setIsExporting(false);
+        return;
+      }
+
+      const exportDataArray = getPartnerExportData(allPartners);
+      exportData(exportDataArray, {
+        fileName: `partner_sessions_export_${new Date().toISOString().split('T')[0]}`,
+        format: 'excel',
+        sheetName: 'Partners',
+      });
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export data. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   // ── Fetch both on mount ──────────────────────────────────────────────────────
   useEffect(() => {
@@ -546,133 +731,6 @@ const CountsSummaryPage: React.FC = () => {
   useEffect(() => {
     fetchPartners();
   }, [fetchPartners]);
-
-  // ── Get User Export Data ─────────────────────────────────────────────────────
-  const getUserExportData = useCallback(() => {
-    return sanitizeForExport(
-      userData.map(t => ({
-        'User Name': t.user_name || '',
-        'User Email': t.user_email || '',
-        'User Phone': t.user_phone || '',
-        'Device Name': t.device_name || '',
-        'Device ID': t.device_id || '',
-        'Platform': t.platform || '',
-        'OS Version': t.os_version || '',
-        'Location': t.location || '',
-        'Token': t.token || '',
-        'Last Seen': formatDateForExport(t.updated_at),
-        'Created Date': formatDateForExport(t.created_at),
-      }))
-    );
-  }, [userData]);
-
-  // ── Get Partner Export Data ──────────────────────────────────────────────────
-  const getPartnerExportData = useCallback(() => {
-    return sanitizeForExport(
-      partnerData.map(t => ({
-        'Partner Name': t.partner_name || '',
-        'Partner Email': t.partner_email || '',
-        'Partner Business': t.partner_business || '',
-        'Device Name': t.device_name || '',
-        'Device ID': t.device_id || '',
-        'Platform': t.platform || '',
-        'OS Version': t.os_version || '',
-        'Location': t.location || '',
-        'Token': t.token || '',
-        'Last Seen': formatDateForExport(t.updated_at),
-        'Created Date': formatDateForExport(t.created_at),
-      }))
-    );
-  }, [partnerData]);
-
-  // ── Export Combined ──────────────────────────────────────────────────────────
-  const handleExportCombined = () => {
-    if (userData.length === 0 && partnerData.length === 0) {
-      alert('No data to export.');
-      return;
-    }
-
-    setIsExporting(true);
-    setShowExportMenu(false);
-    try {
-      const workbook = XLSX.utils.book_new();
-      
-      if (userData.length > 0) {
-        const userExportData = getUserExportData();
-        const userSheet = XLSX.utils.json_to_sheet(userExportData);
-        XLSX.utils.book_append_sheet(workbook, userSheet, 'Users');
-      }
-      
-      if (partnerData.length > 0) {
-        const partnerExportData = getPartnerExportData();
-        const partnerSheet = XLSX.utils.json_to_sheet(partnerExportData);
-        XLSX.utils.book_append_sheet(workbook, partnerSheet, 'Partners');
-      }
-      
-      const summaryData = [
-        { 'Type': 'Users', 'Active Devices': userData.length },
-        { 'Type': 'Partners', 'Active Devices': partnerData.length },
-        { 'Type': 'Total', 'Active Devices': userData.length + partnerData.length },
-      ];
-      const summarySheet = XLSX.utils.json_to_sheet(summaryData);
-      XLSX.utils.book_append_sheet(workbook, summarySheet, 'Summary');
-      
-      XLSX.writeFile(workbook, `active_sessions_export_${new Date().toISOString().split('T')[0]}.xlsx`);
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Failed to export data. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // ── Export Users Only ────────────────────────────────────────────────────────
-  const handleExportUsers = () => {
-    if (userData.length === 0) {
-      alert('No user data to export.');
-      return;
-    }
-
-    setIsExporting(true);
-    setShowExportMenu(false);
-    try {
-      const exportDataArray = getUserExportData();
-      exportData(exportDataArray, {
-        fileName: `user_sessions_export_${new Date().toISOString().split('T')[0]}`,
-        format: 'excel',
-        sheetName: 'Users',
-      });
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Failed to export data. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // ── Export Partners Only ─────────────────────────────────────────────────────
-  const handleExportPartners = () => {
-    if (partnerData.length === 0) {
-      alert('No partner data to export.');
-      return;
-    }
-
-    setIsExporting(true);
-    setShowExportMenu(false);
-    try {
-      const exportDataArray = getPartnerExportData();
-      exportData(exportDataArray, {
-        fileName: `partner_sessions_export_${new Date().toISOString().split('T')[0]}`,
-        format: 'excel',
-        sheetName: 'Partners',
-      });
-    } catch (error) {
-      console.error('Export failed:', error);
-      alert('Failed to export data. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   // ── Close dropdown when clicking outside ────────────────────────────────────
   useEffect(() => {
@@ -751,7 +809,7 @@ const CountsSummaryPage: React.FC = () => {
                   <i className="bi bi-people me-2 text-primary fs-5"></i>
                   <div className="text-start">
                     <div className="small fw-semibold">Users Only</div>
-                    <div className="text-secondary small">{userData.length} active devices</div>
+                    <div className="text-secondary small">{userTotalCount} active devices</div>
                   </div>
                 </button>
                 <button
@@ -762,7 +820,7 @@ const CountsSummaryPage: React.FC = () => {
                   <i className="bi bi-person-badge me-2 text-warning fs-5"></i>
                   <div className="text-start">
                     <div className="small fw-semibold">Partners Only</div>
-                    <div className="text-secondary small">{partnerData.length} active devices</div>
+                    <div className="text-secondary small">{partnerTotalCount} active devices</div>
                   </div>
                 </button>
               </div>
@@ -781,7 +839,7 @@ const CountsSummaryPage: React.FC = () => {
               style={{ fontWeight: 500, transition: 'all 0.2s ease' }}
             >
               <i className="bi bi-people me-1"></i> Logged-in Users
-              <span className="badge bg-light text-dark ms-1 rounded-pill">{userData.length}</span>
+              <span className="badge bg-light text-dark ms-1 rounded-pill">{userTotalCount}</span>
             </button>
             <button
               className={`btn flex-fill rounded-pill py-2 justify-content-center ${activeTab === 'partners' ? 'btn-success text-white shadow-sm' : 'btn-outline-secondary'}`}
@@ -789,7 +847,7 @@ const CountsSummaryPage: React.FC = () => {
               style={{ fontWeight: 500, transition: 'all 0.2s ease' }}
             >
               <i className="bi bi-person-badge me-1"></i> Logged-in Partners
-              <span className="badge bg-light text-dark ms-1 rounded-pill">{partnerData.length}</span>
+              <span className="badge bg-light text-dark ms-1 rounded-pill">{partnerTotalCount}</span>
             </button>
           </div>
         </div>

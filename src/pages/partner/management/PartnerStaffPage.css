@@ -1,0 +1,248 @@
+.pt-staff-page {
+  padding: 20px 24px 40px;
+  background: #f6f8f7;
+  min-height: 100%;
+}
+
+.pt-staff-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.pt-staff-back {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  font-size: 22px;
+  color: #14532d;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pt-staff-header h1 {
+  flex: 1;
+  font-size: 20px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0;
+}
+
+.pt-staff-header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.pt-staff-add,
+.pt-staff-refresh {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #16a34a;
+  font-size: 20px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pt-staff-add:hover,
+.pt-staff-refresh:hover {
+  background: #f0fdf4;
+}
+
+/* Tabs */
+.pt-staff-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  margin-bottom: 14px;
+}
+
+.pt-staff-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+.pt-staff-tab.pt-active {
+  background: #22c55e;
+  color: #fff;
+}
+
+/* Filter row */
+.pt-staff-filter-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.pt-staff-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 12px;
+}
+.pt-staff-search-icon {
+  color: #16a34a;
+}
+.pt-staff-search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1f2937;
+}
+.pt-staff-search input::placeholder {
+  color: #9ca3af;
+}
+
+/* Role dropdown */
+.pt-staff-role-select {
+  position: relative;
+}
+
+.pt-staff-role-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: #14532d;
+  font-weight: 600;
+  text-align: left;
+}
+.pt-staff-role-icon {
+  color: #16a34a;
+  font-size: 14px;
+}
+.pt-staff-role-btn > span:nth-child(2) {
+  flex: 1;
+}
+.pt-staff-caret {
+  color: #16a34a;
+  font-size: 12px;
+}
+
+.pt-staff-role-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  padding: 6px;
+  z-index: 20;
+  list-style: none;
+  margin: 0;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.pt-staff-role-item {
+  width: 100%;
+  padding: 11px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 13px;
+  color: #1f2937;
+  border-radius: 8px;
+  font-weight: 500;
+}
+.pt-staff-role-item:hover {
+  background: #f0fdf4;
+}
+.pt-staff-role-item.pt-active {
+  background: #dcfce7;
+  color: #14532d;
+  font-weight: 700;
+}
+
+/* Active / Inactive */
+.pt-staff-active-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.pt-staff-active-btn {
+  padding: 12px;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+.pt-staff-active-btn:hover {
+  border-color: #86efac;
+}
+.pt-staff-active-btn.pt-active {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+
+/* List */
+.pt-staff-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.pt-staff-loading,
+.pt-staff-empty {
+  text-align: center;
+  padding: 60px 20px;
+  color: #6b7280;
+}
+.pt-staff-empty-icon {
+  font-size: 48px;
+  color: #d1d5db;
+  margin-bottom: 10px;
+}
+.pt-staff-empty p {
+  font-size: 13px;
+  margin: 0;
+}

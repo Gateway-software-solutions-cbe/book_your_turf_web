@@ -1,0 +1,475 @@
+
+/* =========================================
+   BookYourTurf - Partner Dashboard
+   Premium sports-inspired green theme
+========================================= */
+
+.pt-dash {
+  --pt-green: #159447;
+  --pt-green-deep: #11783a;
+  --pt-ink: #24332b;
+  --pt-muted: #748078;
+  --pt-line: #e7eee9;
+
+  width: 100%;
+  max-width: 1440px;
+  min-height: 100%;
+  margin: 0 auto;
+  padding: clamp(16px, 2.4vw);
+
+  color: var(--pt-ink);
+  background: #f7faf8;
+
+  box-sizing: border-box;
+}
+
+/* =========================================
+   Error Message
+========================================= */
+
+.pt-dash .pt-auth-error {
+  margin: 0 0 18px;
+  padding: 12px 16px;
+
+  border: 1px solid #f4caca;
+  border-radius: 12px;
+
+  background: #fff5f5;
+  color: #b42318;
+
+  font-size: 14px;
+}
+
+/* =========================================
+   Welcome Hero
+========================================= */
+
+.pt-dash-hero {
+  position: relative;
+  width: 100%;
+  height: clamp(300px, 20vw, 200px);
+
+  margin: 0 0 clamp(20px, 2.2vw, 30px);
+
+  overflow: hidden;
+  border: 1px solid rgba(18, 112, 55, 0.08);
+  border-radius: clamp(16px, 2vw, 26px);
+
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(28, 74, 48, 0.07);
+
+  isolation: isolate;
+
+  transition:
+    box-shadow 220ms ease,
+    transform 220ms ease;
+}
+
+.pt-dash-hero:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 36px rgba(28, 74, 48, 0.11);
+}
+
+/* Image styling */
+.pt-dash-hero-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+  object-position: center 25%;
+
+  image-rendering: auto;
+}
+
+
+/* =========================================
+   Dashboard Statistics Grid
+========================================= */
+
+.pt-dash-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  grid-auto-rows: 1fr;
+
+  align-items: stretch;
+
+  gap: clamp(12px, 1.3vw, 18px);
+
+  margin: 0 0 clamp(30px, 4vw, 56px);
+}
+
+.pt-dash-grid > * {
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+}
+
+/* =========================================
+   Loading State
+========================================= */
+
+.pt-dash-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 180px;
+  margin-bottom: 28px;
+
+  border: 1px solid var(--pt-line);
+  border-radius: 18px;
+
+  background: #fff;
+  color: var(--pt-muted);
+
+  font-size: 14px;
+}
+
+/* =========================================
+   Dashboard Card Interactions
+========================================= */
+
+.pt-dash-grid > * {
+  min-width: 0;
+
+  border-radius: 20px;
+
+  box-shadow: 0 8px 22px rgba(31, 90, 55, 0.08);
+
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    filter 180ms ease;
+}
+
+.pt-dash-grid > *:hover {
+  transform: translateY(-3px);
+
+  box-shadow: 0 14px 30px rgba(31, 90, 55, 0.13);
+
+  filter: saturate(1.04);
+}
+
+/* =========================================
+   Recent Bookings
+========================================= */
+
+.pt-dash-recent {
+  margin-top: clamp(34px, 5vw, 72px);
+}
+
+.pt-dash-recent-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 16px;
+}
+
+.pt-dash-recent-header h3 {
+  margin: 0;
+
+  color: #24382c;
+
+  font-size: clamp(18px, 1.5vw, 22px);
+  font-weight: 600;
+
+  letter-spacing: -0.025em;
+}
+
+/* =========================================
+   View All Button
+========================================= */
+
+.pt-dash-viewall {
+  flex: 0 0 auto;
+
+  padding: 9px 13px;
+
+  border: 1px solid #dceee2;
+  border-radius: 999px;
+
+  background: #eff9f2;
+  color: var(--pt-green-deep);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.pt-dash-viewall:hover {
+  transform: translateY(-1px);
+
+  border-color: #b8dfc5;
+
+  background: #e2f5e8;
+}
+
+/* =========================================
+   Keyboard Focus Accessibility
+========================================= */
+
+.pt-dash-viewall:focus-visible,
+.pt-dash-recent-item:focus-visible {
+  outline: 3px solid rgba(21, 148, 71, 0.3);
+  outline-offset: 3px;
+}
+
+/* =========================================
+   Recent Booking List
+========================================= */
+
+.pt-dash-recent-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 12px;
+}
+
+.pt-dash-recent-item {
+  display: flex;
+  align-items: center;
+
+  gap: 16px;
+
+  min-width: 0;
+  padding: 16px 18px;
+
+  border: 1px solid var(--pt-line);
+  border-radius: 18px;
+
+  background: #fff;
+
+  box-shadow: 0 5px 18px rgba(34, 67, 47, 0.035);
+
+  cursor: pointer;
+
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease;
+}
+
+.pt-dash-recent-item:hover {
+  transform: translateY(-2px);
+
+  border-color: #cce8d5;
+
+  background: #fcfffd;
+
+  box-shadow: 0 10px 24px rgba(34, 92, 54, 0.09);
+}
+
+/* =========================================
+   Recent Booking Icon
+========================================= */
+
+.pt-dash-recent-icon {
+  display: flex;
+  flex: 0 0 48px;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  border: 1px solid #d9f0e1;
+  border-radius: 14px;
+
+  background: linear-gradient(145deg, #effaf2, #dff4e6);
+
+  color: var(--pt-green);
+
+  font-size: 21px;
+}
+
+/* =========================================
+   Recent Booking Content
+========================================= */
+
+.pt-dash-recent-body {
+  display: flex;
+  flex: 1 1 auto;
+
+  flex-direction: column;
+
+  gap: 5px;
+
+  min-width: 0;
+}
+
+.pt-dash-recent-title {
+  overflow: hidden;
+
+  color: #27392e;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pt-dash-recent-customer {
+  overflow: hidden;
+
+  color: var(--pt-muted);
+
+  font-size: 12px;
+
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pt-dash-recent-date {
+  flex: 0 0 auto;
+
+  color: #68776d;
+
+  font-size: 12px;
+  font-weight: 500;
+
+  white-space: nowrap;
+}
+
+/* =========================================
+   Tablet Layout
+========================================= */
+
+@media (max-width: 1024px) {
+  .pt-dash-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: auto;
+
+    gap: 14px;
+  }
+
+  .pt-dash-hero {
+    height: clamp(200px, 32vw, 300px);
+    border-radius: 20px;
+  }
+
+  .pt-dash-hero-image {
+    object-position: center 25%;
+  }
+}
+
+/* =========================================
+   Mobile Layout
+========================================= */
+
+@media (max-width: 640px) {
+  .pt-dash {
+    padding: 14px 12px 36px;
+  }
+
+  .pt-dash-hero {
+    height: 190px;
+    margin-bottom: 20px;
+    border-radius: 16px;
+  }
+
+  .pt-dash-hero-image {
+    object-position: center 25%;
+  }
+
+  .pt-dash-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+
+    margin-bottom: 30px;
+  }
+
+  .pt-dash-grid > * {
+    border-radius: 15px;
+  }
+
+  .pt-dash-recent {
+    margin-top: 30px;
+  }
+
+  .pt-dash-recent-header {
+    margin-bottom: 12px;
+  }
+
+  .pt-dash-recent-item {
+    gap: 11px;
+
+    padding: 12px;
+
+    border-radius: 15px;
+  }
+
+  .pt-dash-recent-icon {
+    flex-basis: 40px;
+
+    width: 40px;
+    height: 40px;
+
+    border-radius: 12px;
+
+    font-size: 18px;
+  }
+
+  .pt-dash-recent-date {
+    font-size: 11px;
+  }
+}
+
+/* =========================================
+   Extra Narrow Mobile Screens
+========================================= */
+
+@media (max-width: 380px) {
+  .pt-dash-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .pt-dash-recent-item {
+    flex-wrap: wrap;
+  }
+
+  .pt-dash-recent-date {
+    margin-left: 51px;
+  }
+
+  .pt-dash-hero {
+    height: 160px;
+  }
+}
+
+/* =========================================
+   Reduced Motion Accessibility
+========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-dash-hero,
+  .pt-dash-grid > *,
+  .pt-dash-viewall,
+  .pt-dash-recent-item {
+    transition: none;
+  }
+
+  .pt-dash-hero:hover,
+  .pt-dash-grid > *:hover,
+  .pt-dash-viewall:hover,
+  .pt-dash-recent-item:hover {
+    transform: none;
+  }
+}

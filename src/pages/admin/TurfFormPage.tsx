@@ -1,14 +1,14 @@
 // src/pages/admin/TurfFormPage.tsx
 import React, { useEffect, useState, useRef, type FormEvent } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getTurf, createTurf, updateTurf } from '../../api/turfs';
-import { listPartners } from '../../api/partners';
+import { getTurf, createTurf, updateTurf } from '../../api/admin/turfs';
+import { listPartners } from '../../api/admin/partners';
 import MapPicker, { type PickedLocation } from '../admin/MapPicker';
-import type { Partner } from '../../types/partner';
+import type { Partner } from '../../types/admin/partner';
 import type {
   TurfFacilities, TurfDimensionData,
   TurfTimings, DayKey, AdvanceType, CommissionType, GameType,
-} from '../../types/turf';
+} from '../../types/admin/turf';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 
@@ -26,6 +26,9 @@ const FACILITY_ICONS: Record<string, string> = {
   CCTV: '📷', wifi: '📶', parking: '🅿️', 'Rest room': '🚻',
   'Sports kits': '👟', 'Dressing room': '👔', 'Music systems': '🔊', 'Drinking water': '💧',
 };
+
+const MAX_COURTS = 10;
+const MIN_COURTS = 1;
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -118,6 +121,7 @@ const TurfFormPage: React.FC = () => {
   const [existingImages, setExistingImages] = useState<{ id: number; url: string }[]>([]);
   const [newImages, setNewImages] = useState<File[]>([]);
   const [newImagePreviews, setNewImagePreviews] = useState<string[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<number[]>([]);
   const imageInputRef = useRef<HTMLInputElement>(null);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -170,10 +174,60 @@ const TurfFormPage: React.FC = () => {
       .finally(() => setIsLoading(false));
   }, [numericId, isEdit]);
 
-  // ── Rebuild timings when court count changes ───────────────────────────────
+  // ── Rebuild timings when court count changes (used by create / numeric input) ─
   const handleCourtsChange = (n: number) => {
-    setCourts(n);
-    setTimings((prev) => buildTimings(n, prev));
+    const safe = Math.max(MIN_COURTS, Math.min(MAX_COURTS, n || MIN_COURTS));
+    setCourts(safe);
+    setTimings((prev) => buildTimings(safe, prev));
+  };
+
+  // ── Add one court, preserving all existing court timings ───────────────────
+  const addCourt = () => {
+    if (courts >= MAX_COURTS) return;
+    const next = courts + 1;
+
+    setTimings((prevTimings) => {
+      const updated = { ...prevTimings };
+      const dayKey = `court_${next}_day`;
+      const nightKey = `court_${next}_night`;
+
+      if (!updated[dayKey]) {
+        updated[dayKey] = {
+          start_time: openTime || '06:00',
+          end_time: '18:00',
+          prices: emptyPrices(),
+        };
+      }
+      if (!updated[nightKey]) {
+        updated[nightKey] = {
+          start_time: '18:00',
+          end_time: closeTime || '00:00',
+          prices: emptyPrices(),
+        };
+      }
+      return updated;
+    });
+
+    setCourts(next);
+  };
+
+  // ── Remove the last court with confirmation ────────────────────────────────
+  const removeLastCourt = () => {
+    if (courts <= MIN_COURTS) return;
+
+    const confirmed = window.confirm(
+      `Remove Court ${courts}? Any pricing entered for it will be discarded.`
+    );
+    if (!confirmed) return;
+
+    const removing = courts;
+    setTimings((prevTimings) => {
+      const updated = { ...prevTimings };
+      delete updated[`court_${removing}_day`];
+      delete updated[`court_${removing}_night`];
+      return updated;
+    });
+    setCourts(courts - 1);
   };
 
   // ── Timing field update ────────────────────────────────────────────────────
@@ -212,8 +266,19 @@ const TurfFormPage: React.FC = () => {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
     if (!files.length) return;
-    setNewImages((prev) => [...prev, ...files]);
-    const previews = files.map((f) => URL.createObjectURL(f));
+
+    const validFiles = files.filter(file => {
+      if (file.size > 5 * 1024 * 1024) {
+        alert(`File ${file.name} is too large. Maximum size is 5MB.`);
+        return false;
+      }
+      return true;
+    });
+
+    if (validFiles.length === 0) return;
+
+    setNewImages((prev) => [...prev, ...validFiles]);
+    const previews = validFiles.map((f) => URL.createObjectURL(f));
     setNewImagePreviews((prev) => [...prev, ...previews]);
     if (imageInputRef.current) imageInputRef.current.value = '';
   };
@@ -222,6 +287,14 @@ const TurfFormPage: React.FC = () => {
     URL.revokeObjectURL(newImagePreviews[index]);
     setNewImages((prev) => prev.filter((_, i) => i !== index));
     setNewImagePreviews((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const markExistingImageForDeletion = (imageId: number) => {
+    setImagesToDelete((prev) =>
+      prev.includes(imageId)
+        ? prev.filter(id => id !== imageId)
+        : [...prev, imageId]
+    );
   };
 
   // ── Map location callback ──────────────────────────────────────────────────
@@ -247,7 +320,51 @@ const TurfFormPage: React.FC = () => {
     return Object.keys(e).length === 0;
   };
 
-  // ── Submit ─────────────────────────────────────────────────────────────────
+  // ─── Build court_shifts from timings ──────────────────────────────────────
+  const buildCourtShifts = () => {
+    const shifts = [];
+    for (let i = 1; i <= courts; i++) {
+      const dayKey = `court_${i}_day`;
+      const nightKey = `court_${i}_night`;
+      const dayShift = timings[dayKey];
+      const nightShift = timings[nightKey];
+
+      const shift: any = { court_number: i };
+
+      if (dayShift) {
+        const prices: Record<string, string> = {};
+        DAYS.forEach(day => {
+          prices[day] = dayShift.prices?.[day]?.toString() || '0.00';
+        });
+
+        shift.day_shift = {
+          start_time: dayShift.start_time || '06:00',
+          end_time: dayShift.end_time || '18:00',
+          prices: prices,
+        };
+      }
+
+      if (nightShift) {
+        const prices: Record<string, string> = {};
+        DAYS.forEach(day => {
+          prices[day] = nightShift.prices?.[day]?.toString() || '0.00';
+        });
+
+        shift.night_shift = {
+          start_time: nightShift.start_time || '18:00',
+          end_time: nightShift.end_time || '00:00',
+          prices: prices,
+        };
+      }
+
+      if (shift.day_shift || shift.night_shift) {
+        shifts.push(shift);
+      }
+    }
+    return shifts;
+  };
+
+  // ─── Submit ─────────────────────────────────────────────────────────────────
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!validate()) {
@@ -258,6 +375,14 @@ const TurfFormPage: React.FC = () => {
     setIsSaving(true);
     setApiError(null);
 
+    if (!isEdit && newImages.length === 0) {
+      setApiError('At least one image is required. Please upload turf images.');
+      setIsSaving(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    // ─── Build dimension data ────────────────────────────────────────────────
     const dimData: TurfDimensionData | undefined =
       dimLength || dimBreadth || dimHeight
         ? {
@@ -269,74 +394,118 @@ const TurfFormPage: React.FC = () => {
           }
         : undefined;
 
-    const normalisedTimings: TurfTimings = {};
-    Object.entries(timings).forEach(([k, v]) => {
-      normalisedTimings[k] = {
-        start_time: toTimeApi(v.start_time),
-        end_time: toTimeApi(v.end_time),
-        prices: v.prices,
-      };
-    });
+    // ─── Build court shifts ──────────────────────────────────────────────────
+    const courtShifts = buildCourtShifts();
 
     try {
-      const commonFields = {
-        name,
-        game_type: gameType,
-        address,
-        description,
-        achievements,
-        max_persons: Number(maxPersons),
-        courts,
-        min_slots: minSlots,
-        facilities,
-        dimension_data: dimData,
-        open_time: toTimeApi(openTime),
-        close_time: toTimeApi(closeTime),
-        state,
-        district,
-        pincode,
-        latitude,
-        longitude,
-        timings: normalisedTimings,
-        advance_type: advanceType,
-        advance_value: advanceValue,
-        commission_type: commissionType,
-        commission_value: commissionValue,
-      };
+      const formData = new FormData();
 
-      const hasImages = newImages.length > 0;
+      // ─── Basic fields ──────────────────────────────────────────────────────
+      if (!isEdit) {
+        formData.append('partner', String(partnerId));
+      }
+      formData.append('name', name);
+      formData.append('game_type', gameType);
+      formData.append('address', address);
+      formData.append('max_persons', String(maxPersons));
+      formData.append('courts', String(courts));
+      formData.append('open_time', toTimeApi(openTime));
+      formData.append('close_time', toTimeApi(closeTime));
 
-      const buildFormData = (extra: Record<string, unknown> = {}) => {
-        const fd = new FormData();
-        const allFields = { ...commonFields, ...extra };
-        Object.entries(allFields).forEach(([key, val]) => {
-          if (val === undefined || val === null) return;
-          if (typeof val === 'object') fd.append(key, JSON.stringify(val));
-          else fd.append(key, String(val));
-        });
-        newImages.forEach((img) => fd.append('images', img));
-        return fd;
-      };
+      // ─── Optional fields ────────────────────────────────────────────────────
+      if (description) formData.append('description', description);
+      if (achievements) formData.append('achievements', achievements);
+      if (state) formData.append('state', state);
+      if (district) formData.append('district', district);
+      if (pincode) formData.append('pincode', pincode);
+      if (latitude) formData.append('latitude', latitude);
+      if (longitude) formData.append('longitude', longitude);
+      if (minSlots) formData.append('min_slots', String(minSlots));
+
+      // ─── JSON fields ──────────────────────────────────────────────────────
+      formData.append('facilities', JSON.stringify(facilities));
+
+      if (dimData) {
+        formData.append('dimension_data', JSON.stringify(dimData));
+      }
+
+      if (courtShifts.length > 0) {
+        const courtShiftsJson = JSON.stringify(courtShifts);
+        console.log(`📦 Sending ${courtShifts.length} court shift(s):`, courtShiftsJson);
+        formData.append('court_shifts', courtShiftsJson);
+      }
+
+      // ─── Financial fields ──────────────────────────────────────────────────
+      formData.append('advance_type', advanceType);
+      formData.append('advance_value', advanceValue);
+      formData.append('commission_type', commissionType);
+      formData.append('commission_value', commissionValue);
+
+      // ─── Images ─────────────────────────────────────────────────────────────
+      if (isEdit) {
+        if (imagesToDelete.length > 0) {
+          formData.append('delete_images', JSON.stringify(imagesToDelete));
+        }
+      }
+
+      newImages.forEach((img) => {
+        formData.append('new_images', img);
+      });
+
+      // ─── Log the FormData for debugging ────────────────────────────────────
+      console.log('📦 FormData entries:');
+      for (const [key, value] of formData.entries()) {
+        if (value instanceof File) {
+          console.log(`  ${key}: File(${value.name}, ${value.size} bytes)`);
+        } else {
+          console.log(`  ${key}: ${value}`);
+        }
+      }
 
       if (isEdit && numericId) {
-        const payload = hasImages ? buildFormData() : commonFields;
-        await updateTurf(numericId, payload as Parameters<typeof updateTurf>[1]);
+        await updateTurf(numericId, formData as any);
         navigate(`/admin/turfs/${numericId}`);
       } else {
-        const payload = hasImages
-          ? buildFormData({ partner: Number(partnerId) })
-          : { ...commonFields, partner: Number(partnerId) };
-        const created = await createTurf(payload as Parameters<typeof createTurf>[0]);
-        navigate(`/admin/turfs/${created.id}`);
+        const result = await createTurf(formData as any);
+        navigate(`/admin/turfs/${result.id}`);
       }
     } catch (err: unknown) {
-      const data = (err as { response?: { data?: Record<string, unknown> } })?.response
-        ?.data;
-      const msg =
-        (data as { message?: string })?.message ??
-        (data as { detail?: string })?.detail ??
-        'Something went wrong. Please check your inputs.';
-      setApiError(String(msg));
+      console.error('❌ Submit error:', err);
+
+      let errorMessage = 'Something went wrong. Please check your inputs.';
+
+      if (err && typeof err === 'object') {
+        const axiosErr = err as {
+          response?: {
+            data?: {
+              message?: string;
+              detail?: string;
+              data?: any[]
+            }
+          };
+          message?: string;
+        };
+
+        if (axiosErr.response?.data) {
+          const data = axiosErr.response.data;
+          if (data.message) {
+            errorMessage = data.message;
+          } else if (data.detail) {
+            errorMessage = data.detail;
+          } else if (Array.isArray(data.data)) {
+            const validationErrors = data.data.map((e: any) =>
+              Object.values(e).join(', ')
+            ).join('; ');
+            if (validationErrors) {
+              errorMessage = validationErrors;
+            }
+          }
+        } else if (axiosErr.message) {
+          errorMessage = axiosErr.message;
+        }
+      }
+
+      setApiError(errorMessage);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setIsSaving(false);
@@ -458,21 +627,6 @@ const TurfFormPage: React.FC = () => {
               </div>
 
               <div className="col-md-6">
-                <label className="form-label fw-semibold">
-                  Number of Courts <span className="text-danger">*</span>
-                </label>
-                <input
-                  className="form-control"
-                  type="number"
-                  min={1}
-                  max={10}
-                  value={courts}
-                  onChange={(e) => handleCourtsChange(Math.max(1, Math.min(10, Number(e.target.value))))}
-                  disabled={isSaving}
-                />
-              </div>
-
-              <div className="col-md-6">
                 <Field label="Max Persons" required error={errors.maxPersons}>
                   <input
                     className={`form-control ${errors.maxPersons ? 'is-invalid' : ''}`}
@@ -533,19 +687,52 @@ const TurfFormPage: React.FC = () => {
 
             {existingImages.length > 0 && (
               <div className="mb-3">
-                <p className="text-secondary small">Current images — contact your backend team to remove individual images via the API.</p>
+                <p className="text-secondary small">Current images — click on an image to mark it for deletion</p>
                 <div className="d-flex flex-wrap gap-2">
-                  {existingImages.map((img) => (
-                    <div key={img.id} className="position-relative" style={{ width: '100px', height: '80px' }}>
-                      <img
-                        src={img.url}
-                        alt="Turf"
-                        className="w-100 h-100 object-fit-cover rounded-2"
-                      />
-                      <span className="position-absolute top-0 end-0 badge bg-success m-1">Saved</span>
-                    </div>
-                  ))}
+                  {existingImages.map((img) => {
+                    const isMarkedForDeletion = imagesToDelete.includes(img.id);
+                    return (
+                      <div
+                        key={img.id}
+                        className="position-relative"
+                        style={{ width: '120px', height: '100px', cursor: 'pointer' }}
+                        onClick={() => markExistingImageForDeletion(img.id)}
+                      >
+                        <img
+                          src={img.url}
+                          alt="Turf"
+                          className="w-100 h-100 object-fit-cover rounded-2"
+                          style={{
+                            opacity: isMarkedForDeletion ? 0.4 : 1,
+                            border: isMarkedForDeletion ? '2px solid red' : '2px solid transparent'
+                          }}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect fill="%23f8f9fa" width="100" height="100"/%3E%3Ctext x="50" y="50" font-family="Arial" font-size="12" fill="%236c757d" text-anchor="middle" dy=".3em"%3ENo Image%3C/text%3E%3C/svg%3E';
+                          }}
+                        />
+                        {isMarkedForDeletion ? (
+                          <span className="position-absolute top-50 start-50 translate-middle badge bg-danger">
+                            Will Delete
+                          </span>
+                        ) : (
+                          <span className="position-absolute top-0 end-0 badge bg-success m-1">Saved</span>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
+                {imagesToDelete.length > 0 && (
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      className="btn btn-outline-danger btn-sm"
+                      onClick={() => setImagesToDelete([])}
+                    >
+                      <i className="bi bi-x-circle me-1"></i>
+                      Clear selection ({imagesToDelete.length} images marked for deletion)
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -557,7 +744,7 @@ const TurfFormPage: React.FC = () => {
               <div className="text-secondary">
                 <i className="bi bi-cloud-upload fs-1 d-block mb-2"></i>
                 <span className="fw-semibold">Click to upload images</span>
-                <div className="small text-secondary mt-1">JPG, PNG — multiple allowed</div>
+                <div className="small text-secondary mt-1">JPG, PNG — multiple allowed (max 5MB each)</div>
               </div>
             </div>
             <input
@@ -573,7 +760,7 @@ const TurfFormPage: React.FC = () => {
             {newImagePreviews.length > 0 && (
               <div className="d-flex flex-wrap gap-2 mt-3">
                 {newImagePreviews.map((src, i) => (
-                  <div key={i} className="position-relative" style={{ width: '100px', height: '80px' }}>
+                  <div key={i} className="position-relative" style={{ width: '120px', height: '100px' }}>
                     <img
                       src={src}
                       alt={`Upload ${i + 1}`}
@@ -582,7 +769,7 @@ const TurfFormPage: React.FC = () => {
                     <button
                       type="button"
                       className="position-absolute top-0 end-0 btn btn-danger btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                      style={{ width: '22px', height: '22px', padding: 0, fontSize: '12px' }}
+                      style={{ width: '24px', height: '24px', padding: 0, fontSize: '12px' }}
                       onClick={() => removeNewImage(i)}
                     >
                       ✕
@@ -727,13 +914,53 @@ const TurfFormPage: React.FC = () => {
         {/* ─── Court Timings ───────────────────────────────────────────────────── */}
         <div className="card border-0 shadow-sm mb-4">
           <div className="card-body">
-            <h5 className="card-title fw-bold text-secondary mb-3">
-              <i className="bi bi-clock text-success me-2"></i>
-              Court Timings & Pricing ({courts} court{courts !== 1 ? 's' : ''})
-            </h5>
-            <p className="text-secondary small mb-3">
-              Set start/end times and per-day prices for each court period. Use "Apply to all days" to fill a row quickly.
-            </p>
+            {/* Header row with count badge + add/remove buttons */}
+            <div className="d-flex flex-wrap justify-content-between align-items-start mb-3 gap-3">
+              <div>
+                <h5 className="card-title fw-bold text-secondary mb-1">
+                  <i className="bi bi-clock text-success me-2"></i>
+                  Court Timings & Pricing
+                  <span className="badge bg-success-subtle text-success-emphasis ms-2 align-middle">
+                    {courts} court{courts !== 1 ? 's' : ''}
+                  </span>
+                </h5>
+                <p className="text-secondary small mb-0">
+                  Set start/end times and per-day prices for each court period.
+                  Use "Apply to all days" to fill a row quickly.
+                </p>
+              </div>
+
+              <div className="d-flex gap-2">
+                <button
+                  type="button"
+                  className="btn btn-outline-danger btn-sm rounded-pill px-3"
+                  onClick={removeLastCourt}
+                  disabled={isSaving || courts <= MIN_COURTS}
+                  title={
+                    courts <= MIN_COURTS
+                      ? 'At least one court is required'
+                      : `Remove Court ${courts}`
+                  }
+                >
+                  <i className="bi bi-dash-circle me-1"></i>
+                  Remove Court
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-success btn-sm rounded-pill px-3"
+                  onClick={addCourt}
+                  disabled={isSaving || courts >= MAX_COURTS}
+                  title={
+                    courts >= MAX_COURTS
+                      ? `Maximum ${MAX_COURTS} courts allowed`
+                      : 'Add a new court'
+                  }
+                >
+                  <i className="bi bi-plus-circle me-1"></i>
+                  Add Court
+                </button>
+              </div>
+            </div>
 
             {Array.from({ length: courts }, (_, ci) => {
               const courtNum = ci + 1;
@@ -812,6 +1039,15 @@ const TurfFormPage: React.FC = () => {
                 );
               });
             })}
+
+            {/* Bottom hint for admins */}
+            {courts < MAX_COURTS && (
+              <div className="text-secondary small d-flex align-items-center mt-1">
+                <i className="bi bi-info-circle me-1"></i>
+                Need more courts? Click <span className="fw-semibold mx-1">"Add Court"</span>
+                above to append a new court with day &amp; night timings.
+              </div>
+            )}
           </div>
         </div>
 

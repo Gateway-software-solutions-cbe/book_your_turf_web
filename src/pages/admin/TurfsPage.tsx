@@ -1,8 +1,8 @@
 // src/pages/admin/TurfsPage.tsx
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listTurfs } from '../../api/turfs';
-import type { Turf, TurfStatus } from '../../types/turf';
+import { listTurfs } from '../../api/admin/turfs';
+import type { Turf, TurfStatus } from '../../types/admin/turf';
 import { exportData, sanitizeForExport, formatDateForExport } from '../../utils/exportUtils';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────

@@ -1,0 +1,159 @@
+.pt-sr-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.pt-sr-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 22px 22px 18px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 92vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.pt-sr-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+.pt-sr-header h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0;
+}
+.pt-sr-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+.pt-sr-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.pt-sr-select {
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: #f9fafb;
+  font-size: 13px;
+  font-weight: 700;
+  color: #14532d;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.pt-sr-loading,
+.pt-sr-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.pt-sr-table {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #eef2f0;
+}
+
+.pt-sr-row {
+  display: grid;
+  grid-template-columns: 2fr 0.7fr 0.7fr 0.7fr 1fr;
+  gap: 6px;
+  padding: 12px 14px;
+  font-size: 13px;
+  color: #1f2937;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+}
+.pt-sr-row:last-child {
+  border-bottom: none;
+}
+.pt-sr-row-head {
+  background: #f0fdf4;
+  font-size: 11px;
+  font-weight: 800;
+  color: #14532d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.pt-sr-cell-name {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.pt-sr-cell-name strong {
+  font-weight: 800;
+  color: #14532d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pt-sr-cell-name small {
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.pt-sr-cell {
+  text-align: center;
+  font-weight: 700;
+}
+.pt-sr-present {
+  color: #16a34a;
+}
+.pt-sr-half {
+  color: #b45309;
+}
+.pt-sr-absent {
+  color: #b91c1c;
+}
+.pt-sr-payable {
+  color: #14532d;
+  text-align: right;
+  font-weight: 800;
+}
+
+.pt-sr-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  margin-top: 12px;
+  background: #f0fdf4;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #14532d;
+}
+.pt-sr-total-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: #16a34a;
+}
+
+@media (max-width: 640px) {
+  .pt-sr-row {
+    grid-template-columns: 1.7fr 0.6fr 0.6fr 0.6fr 1fr;
+    font-size: 12px;
+    padding: 10px 8px;
+  }
+}

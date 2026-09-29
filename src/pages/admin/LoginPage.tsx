@@ -1,7 +1,7 @@
 import React, { useState, type FormEvent } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import type { LoginRequest } from '../../types/auth';
+import type { LoginRequest } from '../../types/admin/auth';
 
 // ─── LoginPage ─────────────────────────────────────────────────────────────────
 
@@ -16,7 +16,7 @@ const LoginPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   // Already logged in — redirect to where they came from or admin home
-  const from = (location.state as { from?: Location })?.from?.pathname ?? '/admin';
+  const from = (location.state as { from?: Location })?.from?.pathname ?? '/welcome';
   if (!isLoading && isAuthenticated) {
     return <Navigate to={from} replace />;
   }
@@ -27,29 +27,38 @@ const LoginPage: React.FC = () => {
   };
 
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!form.login_id.trim() || !form.password.trim()) {
-      setError('Email/phone and password are required.');
-      return;
-    }
+  e.preventDefault();
+  if (!form.login_id.trim() || !form.password.trim()) {
+    setError('Email/phone and password are required.');
+    return;
+  }
 
-    setIsSubmitting(true);
-    setError(null);
+  setIsSubmitting(true);
+  setError(null);
 
-    try {
-      await login(form);
-      navigate(from, { replace: true });
-    } catch (err: unknown) {
-      const msg =
-        (err as { response?: { data?: { message?: string; detail?: string } } })
-          ?.response?.data?.message
-          ?? (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
-          ?? 'Invalid credentials. Please try again.';
-      setError(msg);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  try {
+    console.log('Attempting login with:', form);
+    
+    await login(form);
+    
+    // After successful login, check what's in localStorage
+    const storedSideNav = localStorage.getItem('admin_sidenav');
+    console.log('Stored sideNav after login:', storedSideNav);
+    
+    // Always redirect to welcome page after login
+    navigate('/welcome', { replace: true });
+  } catch (err: unknown) {
+    console.error('Login error:', err);
+    const msg =
+      (err as { response?: { data?: { message?: string; detail?: string } } })
+        ?.response?.data?.message
+        ?? (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail
+        ?? 'Invalid credentials. Please try again.';
+    setError(msg);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <>

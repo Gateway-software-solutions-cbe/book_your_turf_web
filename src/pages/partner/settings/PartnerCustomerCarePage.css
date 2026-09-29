@@ -1,0 +1,139 @@
+.pt-cc-page {
+  padding: 20px 24px 60px;
+  background: #f6f8f7;
+  min-height: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.pt-cc-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.pt-cc-back {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  font-size: 22px;
+  color: #14532d;
+  cursor: pointer;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pt-cc-header h1 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0 0 2px;
+}
+.pt-cc-header p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.pt-cc-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.pt-cc-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: transform 0.1s ease, background 0.15s ease;
+}
+
+.pt-cc-card:hover {
+  transform: translateY(-1px);
+}
+
+.pt-cc-card-green {
+  background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+}
+.pt-cc-card-blue {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+
+.pt-cc-card-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.pt-cc-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pt-cc-card-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #14532d;
+}
+
+.pt-cc-card-sub {
+  font-size: 13px;
+  color: #4b5563;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.pt-cc-card-arrow {
+  color: #16a34a;
+  font-size: 22px;
+}
+
+.pt-cc-office {
+  background: #fff;
+  border-radius: 16px;
+  padding: 18px 20px;
+  border: 1px solid #eef2f0;
+}
+
+.pt-cc-office h3 {
+  font-size: 13px;
+  font-weight: 800;
+  color: #14532d;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin: 0 0 8px;
+}
+
+.pt-cc-office p {
+  font-size: 13px;
+  color: #4b5563;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pt-cc-footer {
+  text-align: center;
+  font-size: 12px;
+  color: #9ca3af;
+  margin-top: 24px;
+}

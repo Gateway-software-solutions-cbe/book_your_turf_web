@@ -1,0 +1,644 @@
+/* =========================================================
+   BOOKYOURTURF · FAVORITES
+   Editorial grid · thin type · hairlines · emerald
+========================================================= */
+
+.favorites-page {
+  --em-900: #062a1a;
+  --em-700: #0a4a2c;
+  --em-600: #0d7a45;
+  --em-500: #14a45c;
+  --em-400: #3ebd7a;
+  --em-300: #8ad9ab;
+  --em-200: #c9ebd6;
+  --em-100: #e6f5ec;
+  --em-50:  #f2f9f5;
+
+  --ink: #0b1a12;
+  --text: #4c5b53;
+  --muted: #6b7a71;
+  --soft: #8d9a91;
+  --faint: #b8c4bc;
+
+  --line: #e5ece8;
+  --line-soft: #eef4f0;
+
+  --surface: #ffffff;
+
+  --danger: #c0392b;
+  --danger-bg: #fdf4f4;
+
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 20px 96px;
+
+  color: var(--ink);
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  box-sizing: border-box;
+}
+
+.favorites-page *,
+.favorites-page *::before,
+.favorites-page *::after {
+  box-sizing: border-box;
+}
+
+/* Thin type — nothing above 500 */
+.favorites-page h1,
+.favorites-page h3,
+.favorites-page strong,
+.favorites-page b {
+  font-weight: 400;
+}
+
+.favorites-page h1 {
+  font-weight: 300;
+}
+
+.favorites-page h3 {
+  font-weight: 500;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.favorites-page__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+
+  border-bottom: 1px solid var(--line);
+}
+
+.favorites-page__header h1 {
+  margin: 0 0 4px;
+
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+
+  color: var(--ink);
+}
+
+.favorites-page__header p {
+  margin: 0;
+
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.favorites-page__count {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 14px;
+
+  border: 1px solid var(--em-200);
+  border-radius: 999px;
+
+  background: var(--em-50);
+  color: var(--em-700);
+
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   STATES
+========================================================= */
+
+.favorites-page__loading,
+.favorites-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 72px 20px;
+
+  text-align: center;
+
+  color: var(--muted);
+}
+
+.favorites-page__loading .spinner-border {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--em-100);
+  border-top-color: var(--em-500);
+  border-radius: 50%;
+  animation: fp-spin 0.8s linear infinite;
+}
+
+.favorites-page__loading p {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+}
+
+@keyframes fp-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty state */
+.favorites-page__empty-icon {
+  display: grid;
+  place-items: center;
+
+  width: 72px;
+  height: 72px;
+
+  margin: 0 auto 18px;
+
+  border-radius: 20px;
+
+  background: var(--danger-bg);
+  color: var(--danger);
+
+  font-size: 28px;
+
+  box-shadow: 0 12px 26px -14px rgba(192, 57, 43, 0.35);
+}
+
+.favorites-page__empty h3 {
+  margin: 0 0 6px;
+
+  font-size: 20px;
+  font-weight: 300;
+  letter-spacing: -0.028em;
+
+  color: var(--ink);
+}
+
+.favorites-page__empty p {
+  max-width: 340px;
+  margin: 0 auto 22px;
+
+  font-size: 12.5px;
+  line-height: 1.6;
+
+  color: var(--muted);
+}
+
+.favorites-page__empty button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px 22px;
+
+  border: 1px solid var(--em-600);
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--em-700);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.favorites-page__empty button i {
+  font-size: 13px;
+}
+
+.favorites-page__empty button:hover {
+  background: var(--em-600);
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px -14px rgba(20, 164, 92, 0.7);
+}
+
+.favorites-page__empty button:focus-visible {
+  outline: 2px solid var(--em-500);
+  outline-offset: 3px;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.favorites-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+/* =========================================================
+   TURF CARD
+========================================================= */
+
+.fav-turf-card {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+
+  border: 1px solid var(--line);
+  border-radius: 18px;
+
+  background: var(--surface);
+
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+
+  box-shadow: 0 1px 2px rgba(11, 26, 18, 0.02);
+
+  transition:
+    transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 260ms ease,
+    box-shadow 260ms ease;
+}
+
+.fav-turf-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--em-200);
+  box-shadow:
+    0 20px 40px -22px rgba(11, 26, 18, 0.22),
+    0 4px 10px -4px rgba(11, 26, 18, 0.04);
+}
+
+.fav-turf-card:focus-visible {
+  outline: 2px solid var(--em-500);
+  outline-offset: 3px;
+}
+
+/* ---------- Media ---------- */
+
+.fav-turf-card__media {
+  position: relative;
+
+  width: 100%;
+  aspect-ratio: 16 / 10;
+
+  overflow: hidden;
+
+  background: #e7efe9;
+}
+
+.fav-turf-card__media::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40%;
+
+  background: linear-gradient(
+    to top,
+    rgba(6, 42, 26, 0.42),
+    transparent 100%
+  );
+
+  pointer-events: none;
+  z-index: 1;
+}
+
+.fav-turf-card__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.fav-turf-card:hover .fav-turf-card__media img {
+  transform: scale(1.04);
+}
+
+/* Placeholder */
+.fav-turf-card__placeholder {
+  position: absolute;
+  inset: 0;
+
+  display: grid;
+  place-items: center;
+
+  background: linear-gradient(135deg, #eef4f0, #e3ebe6);
+  color: var(--em-400);
+
+  font-size: 32px;
+}
+
+/* Sport chip */
+.fav-turf-card__sport {
+  position: absolute;
+  z-index: 2;
+  bottom: 12px;
+  left: 12px;
+
+  display: inline-flex;
+  align-items: center;
+
+  padding: 4px 10px;
+
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+
+  background: rgba(6, 42, 26, 0.55);
+  color: #ffffff;
+
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  white-space: nowrap;
+}
+
+/* ---------- Body ---------- */
+
+.fav-turf-card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  padding: 16px 18px 18px;
+}
+
+.fav-turf-card__name {
+  margin: 0 0 8px;
+
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+
+  color: var(--ink);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Location */
+.fav-turf-card__location {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+
+  margin-bottom: 12px;
+
+  font-size: 12.5px;
+  line-height: 1.5;
+
+  color: var(--muted);
+}
+
+.fav-turf-card__location i {
+  flex-shrink: 0;
+  margin-top: 2px;
+
+  font-size: 13px;
+  color: var(--em-500);
+}
+
+.fav-turf-card__location span {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+
+  overflow-wrap: anywhere;
+}
+
+/* Meta */
+.fav-turf-card__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  margin-bottom: 14px;
+}
+
+.fav-turf-card__meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 4px 10px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: transparent;
+
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--text);
+
+  white-space: nowrap;
+
+  font-variant-numeric: tabular-nums;
+}
+
+.fav-turf-card__meta i {
+  font-size: 11px;
+  color: var(--em-500);
+}
+
+/* ---------- CTA row ---------- */
+
+.fav-turf-card__cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  margin-top: auto;
+  padding-top: 14px;
+
+  border-top: 1px solid var(--line-soft);
+
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+
+  color: var(--em-700);
+}
+
+.fav-turf-card__cta i {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 26px;
+  height: 26px;
+
+  border-radius: 50%;
+
+  background: var(--em-50);
+  color: var(--em-600);
+
+  font-size: 12px;
+
+  transition:
+    transform 220ms ease,
+    background 220ms ease,
+    color 220ms ease;
+}
+
+.fav-turf-card:hover .fav-turf-card__cta i {
+  transform: translateX(3px);
+  background: var(--em-500);
+  color: #ffffff;
+}
+
+/* =========================================================
+   RESPONSIVE · TABLET (<= 800px)
+========================================================= */
+
+@media (max-width: 800px) {
+  .favorites-page {
+    padding: 22px 16px 92px;
+  }
+
+  .favorites-page__grid {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE · MOBILE (<= 560px)
+========================================================= */
+
+@media (max-width: 560px) {
+  .favorites-page {
+    padding: 20px 14px 88px;
+  }
+
+  .favorites-page__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+  }
+
+  .favorites-page__header h1 {
+    font-size: 24px;
+  }
+
+  .favorites-page__count {
+    align-self: flex-start;
+  }
+
+  .favorites-page__grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .fav-turf-card {
+    border-radius: 16px;
+  }
+
+  .fav-turf-card__body {
+    padding: 14px 16px 16px;
+  }
+
+  .fav-turf-card__name {
+    font-size: 15.5px;
+  }
+
+  .fav-turf-card__location {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .fav-turf-card__meta span {
+    padding: 3px 9px;
+    font-size: 11px;
+  }
+
+  .fav-turf-card__cta {
+    padding-top: 12px;
+    font-size: 12px;
+  }
+
+  .favorites-page__empty-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    font-size: 24px;
+  }
+
+  .favorites-page__empty h3 {
+    font-size: 18px;
+  }
+
+  .favorites-page__empty button {
+    font-size: 12.5px;
+    padding: 9px 20px;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE · EXTRA NARROW (<= 400px)
+========================================================= */
+
+@media (max-width: 400px) {
+  .favorites-page {
+    padding: 16px 12px 84px;
+  }
+
+  .favorites-page__header h1 {
+    font-size: 22px;
+  }
+
+  .fav-turf-card__name {
+    font-size: 14.5px;
+  }
+
+  .fav-turf-card__sport {
+    font-size: 9px;
+    padding: 3px 8px;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .favorites-page *,
+  .favorites-page *::before,
+  .favorites-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

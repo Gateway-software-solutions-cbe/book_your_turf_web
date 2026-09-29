@@ -1,0 +1,301 @@
+.pt-slot-page {
+  padding: 20px 24px 140px;
+  background: #f6f8f7;
+  min-height: 100%;
+}
+
+.pt-slot-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.pt-slot-header h1 {
+  font-size: 22px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0 0 4px;
+}
+
+.pt-slot-header p {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.pt-slot-refresh {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #16a34a;
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.pt-slot-refresh:hover {
+  background: #f0fdf4;
+}
+
+/* Sport badge */
+.pt-slot-sport-badge {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+  margin-bottom: 14px;
+}
+
+.pt-slot-sport-icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.pt-slot-sport-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pt-slot-sport-label {
+  font-size: 11px;
+  color: #7c3aed;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pt-slot-sport-value {
+  font-size: 16px;
+  font-weight: 800;
+  color: #4c1d95;
+}
+
+.pt-slot-sport-tag {
+  background: #7c3aed;
+  color: #fff;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* Mode toggle */
+.pt-slot-mode-toggle {
+  display: flex;
+  gap: 4px;
+  padding: 5px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 14px;
+}
+
+.pt-slot-mode-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #4b5563;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.12s ease;
+}
+
+.pt-slot-mode-btn:hover {
+  background: #f0fdf4;
+}
+
+.pt-slot-mode-btn.pt-active {
+  background: #22c55e;
+  color: #fff;
+}
+
+.pt-slot-mode-btn span:first-child {
+  font-size: 15px;
+}
+
+/* Loading */
+.pt-slot-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* Sticky action bar */
+.pt-slot-action-bar {
+  position: fixed;
+  left: 240px;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  padding: 14px 24px;
+  border-top: 1px solid #e5e7eb;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pt-slot-action-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  background: #f0fdf4;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #14532d;
+  font-weight: 600;
+}
+
+.pt-slot-action-amount {
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.pt-slot-action-btn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  background: #22c55e;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.pt-slot-action-btn:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.pt-slot-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .pt-slot-action-bar {
+    left: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  .pt-slot-page {
+    padding: 16px 14px 140px;
+  }
+  .pt-slot-mode-btn {
+    font-size: 12px;
+    padding: 10px;
+  }
+}
+
+/* Success dialog */
+.pt-slot-success-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1100;
+  animation: pt-slot-fade 0.15s ease;
+}
+
+.pt-slot-success-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 24px 20px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  animation: pt-slot-pop 0.22s ease;
+}
+
+.pt-slot-success-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #22c55e;
+  color: #fff;
+  font-size: 26px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.pt-slot-success-title {
+  font-size: 16px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0 0 8px;
+}
+
+.pt-slot-success-message {
+  font-size: 13px;
+  color: #4b5563;
+  margin: 0 0 18px;
+  line-height: 1.5;
+}
+
+.pt-slot-success-ok {
+  background: transparent;
+  border: none;
+  color: #7c3aed;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 8px 20px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pt-slot-success-ok:hover {
+  color: #4c1d95;
+}
+
+@keyframes pt-slot-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pt-slot-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -8,9 +8,9 @@ import {
   createPartnerDiscount,
   updateAdminDiscount,
   updatePartnerDiscount,
-} from '../../api/discounts';
-import { listPartners } from '../../api/partners';
-import { listTurfs } from '../../api/turfs';
+} from '../../api/admin/discounts';
+import { listPartners } from '../../api/admin/partners';
+import { listTurfs } from '../../api/admin/turfs';
 import type { 
   Discount, 
   DiscountSource, 
@@ -19,13 +19,13 @@ import type {
   CreateAdminDiscountRequest, 
   CreatePartnerDiscountRequest,
   UpdateDiscountRequest, 
-} from '../../types/discount';
+} from '../../types/admin/discount';
 import {
   APPLICABLE_PAYMENT_TYPES,
   APPLICABLE_PAYMENT_TYPE_LABELS,
-} from '../../types/discount'
-import type { Partner } from '../../types/partner';
-import type { Turf } from '../../types/turf';
+} from '../../types/admin/discount'
+import type { Partner } from '../../types/admin/partner';
+import type { Turf } from '../../types/admin/turf';
 
 // ─── Constants ─────────────────────────────────────────────────────────────────
 

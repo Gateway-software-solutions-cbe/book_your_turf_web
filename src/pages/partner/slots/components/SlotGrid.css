@@ -1,0 +1,194 @@
+/* Legend */
+.pt-slot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  font-size: 12px;
+  color: #4b5563;
+}
+
+.pt-slot-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pt-slot-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.pt-dot-available {
+  background: #fff;
+  border: 1.5px solid #d1d5db;
+}
+.pt-dot-selected {
+  background: #22c55e;
+}
+.pt-dot-blocked {
+  background: #d1d5db;
+}
+.pt-dot-booked {
+  background: #dc2626;
+}
+
+/* Grid */
+.pt-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (min-width: 640px) {
+  .pt-slot-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 900px) {
+  .pt-slot-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+/* Slot tile */
+.pt-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 14px 8px;
+  border-radius: 12px;
+  border: 1.5px solid #e5e7eb;
+  background: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  color: #1f2937;
+  text-align: center;
+  transition: all 0.12s ease;
+  min-height: 68px;
+  position: relative;
+}
+
+.pt-slot:disabled {
+  cursor: not-allowed;
+}
+
+.pt-slot-time {
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.pt-slot-price {
+  color: #16a34a;
+  font-weight: 700;
+  font-size: 11px;
+}
+
+.pt-slot-nextday {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  font-size: 9px;
+  background: #eef2ff;
+  color: #4f46e5;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.pt-slot-hint {
+  font-size: 10px;
+  font-weight: 700;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* Available */
+.pt-slot-available:hover {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+/* Selected (Book) */
+.pt-slot-selected {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+.pt-slot-selected .pt-slot-price {
+  color: #ecfdf5;
+}
+.pt-slot-selected .pt-slot-nextday {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* Selected (Block) */
+.pt-slot-block-selected {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+}
+.pt-slot-block-selected .pt-slot-price {
+  color: #fffbeb;
+}
+.pt-slot-block-selected .pt-slot-nextday {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* Blocked */
+.pt-slot-blocked {
+  background: #e5e7eb;
+  border-color: #d1d5db;
+  color: #6b7280;
+}
+
+/* Blocked & selected (for unblock) */
+.pt-slot-blocked-selected {
+  background: #22c55e;
+  border-color: #22c55e;
+  color: #fff;
+}
+.pt-slot-blocked-selected .pt-slot-hint {
+  color: #ecfdf5;
+}
+
+/* Booked */
+.pt-slot-booked {
+  background: #dc2626;
+  border-color: #dc2626;
+  color: #fff;
+}
+.pt-slot-booked .pt-slot-price {
+  color: #fee2e2;
+}
+
+/* Empty */
+.pt-slot-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6b7280;
+}
+
+.pt-slot-empty-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.pt-slot-empty p {
+  margin: 0;
+  font-size: 13px;
+}

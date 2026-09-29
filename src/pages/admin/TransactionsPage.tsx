@@ -1,7 +1,7 @@
 // src/pages/admin/TransactionsPage.tsx
 import React, { useEffect, useState, useCallback } from 'react';
-import { listTransactions } from '../../api/transactions';
-import type { Transaction, TransactionType, ListTransactionsParams } from '../../types/transaction';
+import { listTransactions } from '../../api/admin/transactions';
+import type { Transaction, TransactionType, ListTransactionsParams } from '../../types/admin/transaction';
 
 const PAGE_SIZE = 20;
 

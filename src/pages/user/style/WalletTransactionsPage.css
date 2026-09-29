@@ -1,0 +1,659 @@
+/* =========================================================
+   BOOKYOURTURF · WALLET TRANSACTIONS
+   Editorial ledger · thin type · hairlines · emerald
+========================================================= */
+
+.wallet-txn-page {
+  --em-900: #062a1a;
+  --em-700: #0a4a2c;
+  --em-600: #0d7a45;
+  --em-500: #14a45c;
+  --em-400: #3ebd7a;
+  --em-300: #8ad9ab;
+  --em-200: #c9ebd6;
+  --em-100: #e6f5ec;
+  --em-50:  #f2f9f5;
+
+  --ink: #0b1a12;
+  --text: #4c5b53;
+  --muted: #6b7a71;
+  --soft: #8d9a91;
+  --faint: #b8c4bc;
+
+  --line: #e5ece8;
+  --line-soft: #eef4f0;
+
+  --surface: #ffffff;
+
+  --warn: #c9822d;
+  --warn-bg: #fdf6ea;
+  --warn-line: #efe1c3;
+
+  --danger: #c0392b;
+  --danger-bg: #fdf4f4;
+  --danger-line: #f0d2cf;
+
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px 96px;
+
+  color: var(--ink);
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  box-sizing: border-box;
+}
+
+.wallet-txn-page *,
+.wallet-txn-page *::before,
+.wallet-txn-page *::after {
+  box-sizing: border-box;
+}
+
+/* Thin type — nothing above 500 */
+.wallet-txn-page h1,
+.wallet-txn-page h3,
+.wallet-txn-page strong,
+.wallet-txn-page b {
+  font-weight: 400;
+}
+
+.wallet-txn-page h1 {
+  font-weight: 300;
+}
+
+.wallet-txn-page h3 {
+  font-weight: 500;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.wallet-txn-page__header {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+
+  border-bottom: 1px solid var(--line);
+}
+
+.wallet-txn-page__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  margin-bottom: 12px;
+  padding: 5px 12px 5px 9px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface);
+  color: var(--text);
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.wallet-txn-page__back i {
+  font-size: 12px;
+  line-height: 1;
+}
+
+.wallet-txn-page__back:hover {
+  transform: translateX(-2px);
+  border-color: var(--em-200);
+  color: var(--em-700);
+  box-shadow: 0 6px 16px -10px rgba(11, 26, 18, 0.18);
+}
+
+.wallet-txn-page__header h1 {
+  margin: 0 0 4px;
+
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 300;
+  line-height: 1.15;
+  letter-spacing: -0.032em;
+
+  color: var(--ink);
+}
+
+.wallet-txn-page__header p {
+  margin: 0;
+
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+.wallet-txn-page__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  padding: 14px 16px;
+  margin-bottom: 14px;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
+
+  background: var(--surface);
+}
+
+.wallet-txn-page__filter-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wallet-txn-page__filter-label {
+  flex-shrink: 0;
+  min-width: 48px;
+
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+
+  color: var(--soft);
+}
+
+.wallet-txn-page__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wallet-txn-page__chip {
+  padding: 6px 13px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface);
+  color: var(--text);
+
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.wallet-txn-page__chip:hover:not(.active) {
+  transform: translateY(-1px);
+  border-color: var(--em-300);
+  color: var(--em-700);
+  background: var(--em-50);
+}
+
+.wallet-txn-page__chip.active {
+  border-color: var(--em-700);
+  background: linear-gradient(135deg, var(--em-600), var(--em-700));
+  color: #ffffff;
+  box-shadow: 0 8px 18px -10px rgba(20, 164, 92, 0.6);
+}
+
+.wallet-txn-page__chip:focus-visible {
+  outline: 2px solid var(--em-500);
+  outline-offset: 2px;
+}
+
+/* =========================================================
+   STATES
+========================================================= */
+
+.wallet-txn-page__loading,
+.wallet-txn-page__error,
+.wallet-txn-page__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  padding: 60px 20px;
+
+  text-align: center;
+
+  color: var(--muted);
+}
+
+.wallet-txn-page__loading .spinner-border {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--em-100);
+  border-top-color: var(--em-500);
+  border-radius: 50%;
+  animation: wt-spin 0.8s linear infinite;
+}
+
+.wallet-txn-page__loading p {
+  margin: 14px 0 0;
+  font-size: 12.5px;
+}
+
+@keyframes wt-spin {
+  to { transform: rotate(360deg); }
+}
+
+.wallet-txn-page__error i,
+.wallet-txn-page__empty i {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 32px;
+}
+
+.wallet-txn-page__error i {
+  color: var(--danger);
+}
+
+.wallet-txn-page__empty i {
+  color: var(--faint);
+}
+
+.wallet-txn-page__empty h3 {
+  margin: 0 0 6px;
+
+  font-size: 18px;
+  font-weight: 300;
+  letter-spacing: -0.025em;
+
+  color: var(--ink);
+}
+
+.wallet-txn-page__empty p {
+  margin: 0;
+  font-size: 12.5px;
+}
+
+.wallet-txn-page__error p {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.wallet-txn-page__error button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 14px;
+  padding: 9px 20px;
+
+  border: 1px solid var(--em-600);
+  border-radius: 999px;
+
+  background: transparent;
+  color: var(--em-700);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.wallet-txn-page__error button:hover {
+  background: var(--em-600);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   LIST
+========================================================= */
+
+.wallet-txn-page__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wallet-txn-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  padding: 14px 16px;
+
+  border: 1px solid var(--line);
+  border-radius: 14px;
+
+  background: var(--surface);
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.wallet-txn-row:hover {
+  border-color: var(--em-200);
+  box-shadow: 0 10px 24px -20px rgba(11, 26, 18, 0.2);
+  transform: translateY(-1px);
+}
+
+.wallet-txn-row__icon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 11px;
+
+  font-size: 15px;
+}
+
+.wallet-txn-row__icon--credit {
+  background: var(--em-50);
+  color: var(--em-600);
+}
+
+.wallet-txn-row__icon--debit {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+.wallet-txn-row__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.wallet-txn-row__desc {
+  margin-bottom: 3px;
+
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+
+  color: var(--ink);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wallet-txn-row__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  font-size: 11px;
+  color: var(--soft);
+
+  font-variant-numeric: tabular-nums;
+}
+
+.wallet-txn-row__dot {
+  opacity: 0.5;
+}
+
+.wallet-txn-row__ref {
+  max-width: 180px;
+
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+
+  color: var(--faint);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wallet-txn-row__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+
+  flex-shrink: 0;
+}
+
+.wallet-txn-row__amount {
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+
+  font-variant-numeric: tabular-nums;
+}
+
+.wallet-txn-row__amount--credit {
+  color: var(--em-700);
+}
+
+.wallet-txn-row__amount--debit {
+  color: var(--danger);
+}
+
+/* Status pill */
+.wallet-txn-row__status {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 2px 8px;
+
+  border: 1px solid transparent;
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+
+  white-space: nowrap;
+}
+
+.wallet-txn-row__status--success {
+  border-color: var(--em-200);
+  background: var(--em-50);
+  color: var(--em-700);
+}
+
+.wallet-txn-row__status--pending {
+  border-color: var(--warn-line);
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.wallet-txn-row__status--failed {
+  border-color: var(--danger-line);
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* =========================================================
+   PAGINATION
+========================================================= */
+
+.wallet-txn-page__pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+
+  margin-top: 22px;
+}
+
+.wallet-txn-page__pagination button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 16px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: var(--surface);
+  color: var(--text);
+
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease;
+}
+
+.wallet-txn-page__pagination button:not(:disabled):hover {
+  transform: translateY(-1px);
+  border-color: var(--em-300);
+  background: var(--em-50);
+  color: var(--em-700);
+}
+
+.wallet-txn-page__pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   RESPONSIVE · MOBILE (<= 640px)
+========================================================= */
+
+@media (max-width: 640px) {
+  .wallet-txn-page {
+    padding: 20px 16px 92px;
+  }
+
+  .wallet-txn-page__header {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  .wallet-txn-page__header h1 {
+    font-size: 22px;
+  }
+
+  .wallet-txn-page__filters {
+    padding: 12px 14px;
+    gap: 10px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+  }
+
+  .wallet-txn-page__filter-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .wallet-txn-page__filter-label {
+    min-width: 0;
+  }
+
+  .wallet-txn-page__chip {
+    padding: 5px 11px;
+    font-size: 11.5px;
+  }
+
+  .wallet-txn-row {
+    padding: 12px 12px;
+    gap: 10px;
+    border-radius: 12px;
+  }
+
+  .wallet-txn-row__icon {
+    width: 34px;
+    height: 34px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  .wallet-txn-row__desc {
+    font-size: 12.5px;
+  }
+
+  .wallet-txn-row__meta {
+    font-size: 10.5px;
+    gap: 5px;
+  }
+
+  .wallet-txn-row__ref {
+    max-width: 120px;
+    font-size: 10px;
+  }
+
+  .wallet-txn-row__amount {
+    font-size: 12.5px;
+  }
+
+  .wallet-txn-row__status {
+    font-size: 8.5px;
+    padding: 2px 7px;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* =========================================================
+   RESPONSIVE · EXTRA NARROW (<= 400px)
+========================================================= */
+
+@media (max-width: 400px) {
+  .wallet-txn-page {
+    padding: 16px 12px 88px;
+  }
+
+  .wallet-txn-row__ref {
+    display: none;
+  }
+
+  .wallet-txn-row__dot {
+    display: none;
+  }
+}
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet-txn-page *,
+  .wallet-txn-page *::before,
+  .wallet-txn-page *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

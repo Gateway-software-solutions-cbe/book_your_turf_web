@@ -1,8 +1,8 @@
 // src/pages/admin/TurfDetailPage.tsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getTurf, updateTurf } from '../../api/turfs';
-import type { Turf, TurfStatus, DayKey } from '../../types/turf';
+import { getTurf, updateTurf } from '../../api/admin/turfs';
+import type { Turf, TurfStatus, DayKey } from '../../types/admin/turf';
 
 // ─── Helpers ───────────────────────────────────────────────────────────────────
 const DAY_LABELS: Record<DayKey, string> = {
@@ -72,23 +72,60 @@ const ImageCarousel: React.FC<{ images: { id: number; url: string }[]; name: str
   name,
 }) => {
   const [active, setActive] = useState(0);
+  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({});
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  // Log images for debugging
+  useEffect(() => {
+    console.log('📸 ImageCarousel received images:', images);
+    if (images && images.length > 0) {
+      images.forEach((img, index) => {
+        console.log(`📸 Image ${index + 1}:`, {
+          id: img.id,
+          url: img.url,
+          urlType: typeof img.url,
+          urlLength: img.url?.length,
+        });
+      });
+    }
+  }, [images]);
+
+  // Filter out invalid images
+  const validImages = images?.filter(img => {
+    if (!img || !img.url) {
+      console.warn('⚠️ Invalid image object:', img);
+      return false;
+    }
+    // Check if URL is valid
+    try {
+      new URL(img.url);
+      return true;
+    } catch {
+      console.warn(`⚠️ Invalid URL: ${img.url}`);
+      setImageErrors(prev => ({ ...prev, [img.id]: true }));
+      return false;
+    }
+  }) || [];
+
   const startTimer = () => {
-    if (images.length <= 1) return;
+    if (validImages.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setActive((prev) => (prev + 1) % images.length);
+      setActive((prev) => (prev + 1) % validImages.length);
     }, 3500);
   };
 
   const stopTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
   };
 
   useEffect(() => {
     startTimer();
     return () => stopTimer();
-  }, [images.length]);
+  }, [validImages.length]);
 
   const goTo = (i: number) => {
     setActive(i);
@@ -96,46 +133,108 @@ const ImageCarousel: React.FC<{ images: { id: number; url: string }[]; name: str
     startTimer();
   };
 
-  if (images.length === 0) {
+  const handleImageLoad = (imageId: number) => {
+    console.log(`✅ Image ${imageId} loaded successfully`);
+    setLoadedImages(prev => ({ ...prev, [imageId]: true }));
+  };
+
+  const handleImageError = (imageId: number, url: string) => {
+    console.error(`❌ Image ${imageId} failed to load:`, url);
+    setImageErrors(prev => ({ ...prev, [imageId]: true }));
+  };
+
+  // If no valid images, show placeholder
+  if (validImages.length === 0) {
+    console.log('📸 No valid images to display');
     return (
-      <div className="d-flex flex-column align-items-center justify-content-center bg-light rounded-3" style={{ height: '200px' }}>
+      <div className="d-flex flex-column align-items-center justify-content-center bg-light rounded-3" style={{ height: '250px' }}>
         <div className="text-center text-secondary">
           <i className="bi bi-image fs-1 d-block mb-2"></i>
-          <span className="fw-medium">No images uploaded</span>
+          <span className="fw-medium">No images available</span>
           <span className="d-block small text-secondary mt-1">Upload images to showcase this turf</span>
+          {images && images.length > 0 && (
+            <span className="d-block small text-danger mt-2">
+              Found {images.length} image(s) but they couldn't be loaded
+            </span>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="position-relative bg-dark rounded-3 overflow-hidden" style={{ height: '200px' }}>
+    <div className="position-relative bg-dark rounded-3 overflow-hidden" style={{ height: '250px' }}>
       <div className="position-relative w-100 h-100">
-        {images.map((img, i) => (
-          <img
-            key={img.id}
-            src={img.url}
-            alt={`${name} — photo ${i + 1}`}
-            className={`position-absolute top-0 start-0 w-100 h-100 object-fit-cover transition-opacity ${
-              i === active ? 'opacity-100' : 'opacity-0'
-            }`}
-            style={{ transition: 'opacity 0.5s ease' }}
-          />
-        ))}
+        {validImages.map((img, i) => {
+          const isActive = i === active;
+          const isLoaded = loadedImages[img.id];
+          const hasError = imageErrors[img.id];
 
-        {images.length > 1 && (
+          return (
+            <div
+              key={img.id}
+              className="position-absolute top-0 start-0 w-100 h-100"
+              style={{
+                opacity: isActive ? 1 : 0,
+                transition: 'opacity 0.5s ease',
+                backgroundColor: '#f8f9fa',
+                display: isActive ? 'block' : 'none',
+              }}
+            >
+              {!hasError ? (
+                <>
+                  <img
+                    src={img.url}
+                    alt={`${name} — photo ${i + 1}`}
+                    className="w-100 h-100"
+                    style={{
+                      objectFit: 'cover',
+                      display: isLoaded ? 'block' : 'none',
+                    }}
+                    onLoad={() => handleImageLoad(img.id)}
+                    onError={() => handleImageError(img.id, img.url)}
+                    loading="lazy"
+                  />
+                  {!isLoaded && (
+                    <div className="d-flex align-items-center justify-content-center w-100 h-100">
+                      <div className="spinner-border text-light" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="d-flex flex-column align-items-center justify-content-center w-100 h-100 text-white bg-secondary">
+                  <i className="bi bi-image fs-1 mb-2"></i>
+                  <span className="small">Failed to load image</span>
+                  <button 
+                    className="btn btn-sm btn-outline-light mt-2"
+                    onClick={() => {
+                      setImageErrors(prev => ({ ...prev, [img.id]: false }));
+                      setLoadedImages(prev => ({ ...prev, [img.id]: false }));
+                    }}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {validImages.length > 1 && (
           <>
             <button
               className="position-absolute top-50 start-0 translate-middle-y btn btn-dark btn-sm rounded-circle d-flex align-items-center justify-content-center"
               style={{ width: '32px', height: '32px', padding: 0, zIndex: 10, opacity: 0.7 }}
-              onClick={() => goTo((active - 1 + images.length) % images.length)}
+              onClick={() => goTo((active - 1 + validImages.length) % validImages.length)}
             >
               <i className="bi bi-chevron-left"></i>
             </button>
             <button
               className="position-absolute top-50 end-0 translate-middle-y btn btn-dark btn-sm rounded-circle d-flex align-items-center justify-content-center"
               style={{ width: '32px', height: '32px', padding: 0, zIndex: 10, opacity: 0.7 }}
-              onClick={() => goTo((active + 1) % images.length)}
+              onClick={() => goTo((active + 1) % validImages.length)}
             >
               <i className="bi bi-chevron-right"></i>
             </button>
@@ -143,9 +242,9 @@ const ImageCarousel: React.FC<{ images: { id: number; url: string }[]; name: str
         )}
       </div>
 
-      {images.length > 1 && (
+      {validImages.length > 1 && (
         <div className="position-absolute bottom-0 start-0 end-0 d-flex justify-content-center gap-1 pb-2">
-          {images.map((_, i) => (
+          {validImages.map((_, i) => (
             <button
               key={i}
               className={`rounded-circle border-0 p-0 ${
@@ -181,8 +280,20 @@ const TurfDetailPage: React.FC = () => {
     if (!id) return;
     setIsLoading(true);
     getTurf(Number(id))
-      .then(setTurf)
-      .catch(() => setError('Failed to load turf details.'))
+      .then((data) => {
+        console.log('📦 Turf data loaded:', data);
+        console.log('📸 Images in data:', data.images);
+        if (data.images && data.images.length > 0) {
+          console.log('📸 Image URLs:', data.images.map(img => img.url));
+        } else {
+          console.log('📸 No images found in response');
+        }
+        setTurf(data);
+      })
+      .catch((err) => {
+        console.error('❌ Failed to load turf:', err);
+        setError('Failed to load turf details.');
+      })
       .finally(() => setIsLoading(false));
   }, [id]);
 
@@ -403,7 +514,7 @@ const TurfDetailPage: React.FC = () => {
               </button>
             </div>
 
-            {/* Quick Stats - Enhanced with color backgrounds */}
+            {/* Quick Stats */}
             <div className="row g-2 mt-auto">
               <div className="col-4 col-md-2">
                 <div className="rounded-3 p-2 text-center" style={{ background: 'linear-gradient(135deg, #e8f5e9, #c8e6c9)' }}>
@@ -640,7 +751,7 @@ const TurfDetailPage: React.FC = () => {
           </div>
         )}
 
-        {/* Court Timings - Enhanced with better visual hierarchy */}
+        {/* Court Timings */}
         {courtKeys.length > 0 && (
           <div className="col-12">
             <div className="card border-0 shadow-sm">
@@ -734,6 +845,47 @@ const TurfDetailPage: React.FC = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        .object-fit-cover {
+          object-fit: cover;
+        }
+        .transition-opacity {
+          transition: opacity 0.5s ease;
+        }
+        .opacity-0 {
+          opacity: 0;
+        }
+        .opacity-100 {
+          opacity: 1;
+        }
+        .position-relative {
+          position: relative;
+        }
+        .position-absolute {
+          position: absolute;
+        }
+        .top-0 {
+          top: 0;
+        }
+        .start-0 {
+          left: 0;
+        }
+        .w-100 {
+          width: 100%;
+        }
+        .h-100 {
+          height: 100%;
+        }
+        .translate-middle-y {
+          transform: translateY(-50%);
+        }
+        .btn-dark {
+          --bs-btn-bg: rgba(0,0,0,0.5);
+          --bs-btn-border-color: rgba(0,0,0,0.5);
+          --bs-btn-hover-bg: rgba(0,0,0,0.7);
+        }
+      `}</style>
     </div>
   );
 };

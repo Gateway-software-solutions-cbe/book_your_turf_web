@@ -1,0 +1,141 @@
+.pt-ec-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #eef2f0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pt-ec-card.pt-ec-inactive {
+  opacity: 0.7;
+  background: #fafafa;
+}
+
+.pt-ec-top {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.pt-ec-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.pt-ec-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.pt-ec-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pt-ec-name {
+  font-size: 15px;
+  font-weight: 800;
+  color: #14532d;
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pt-ec-status {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.pt-ec-status-active {
+  background: #dcfce7;
+  color: #14532d;
+}
+.pt-ec-status-inactive {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.pt-ec-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+  color: #4b5563;
+  margin-bottom: 4px;
+}
+.pt-ec-role {
+  font-weight: 600;
+}
+.pt-ec-salary {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.pt-ec-joined {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.pt-ec-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px dashed #f3f4f6;
+}
+
+.pt-ec-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s ease;
+}
+
+.pt-ec-btn-salary {
+  background: #f0fdf4;
+  color: #14532d;
+  border-color: #bbf7d0;
+}
+.pt-ec-btn-salary:hover {
+  background: #dcfce7;
+}
+
+.pt-ec-btn-edit {
+  background: #eff6ff;
+  color: #1e40af;
+  border-color: #bfdbfe;
+}
+.pt-ec-btn-edit:hover {
+  background: #dbeafe;
+}
+
+.pt-ec-btn-delete {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+.pt-ec-btn-delete:hover {
+  background: #fee2e2;
+}

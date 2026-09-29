@@ -1,9 +1,9 @@
 // src/pages/admin/MockTurfsPage.tsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { listMockTurfs, deleteMockTurf, updateMockTurf } from '../../api/mockturfs';
-import { parseFacilities } from '../../types/mockturf';
-import type { MockTurf } from '../../types/mockturf';
+import { listMockTurfs, deleteMockTurf, updateMockTurf } from '../../api/admin/mockturfs';
+import { parseFacilities } from '../../types/admin/mockturf';
+import type { MockTurf } from '../../types/admin/mockturf';
 import { exportData, sanitizeForExport } from '../../utils/exportUtils';
 
 // ─── MockTurfsPage ─────────────────────────────────────────────────────────────

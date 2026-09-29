@@ -1,0 +1,47 @@
+.pt-dp-section {
+  /* inherits */
+}
+
+.pt-dp-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.pt-dp-field:hover {
+  border-color: #22c55e;
+}
+
+.pt-dp-icon {
+  font-size: 18px;
+  color: #16a34a;
+}
+
+.pt-dp-value {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 600;
+  color: #14532d;
+}
+
+.pt-dp-caret {
+  color: #16a34a;
+  font-size: 14px;
+}
+
+/* Invisible native input layered on top so the whole field is clickable */
+.pt-dp-input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
