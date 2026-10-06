@@ -233,10 +233,6 @@
   margin-bottom: 12px;
 }
 
-.pt-bf-date-text {
-  flex: 1;
-}
-
 .pt-bf-date-input {
   position: absolute;
   inset: 0;
@@ -289,4 +285,120 @@
 }
 .pt-bf-btn-apply:hover {
   background: #16a34a;
+}
+
+/* ---------- Date fields ---------- */
+
+.pt-bf-date-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.pt-bf-date-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 11px 14px;
+
+  border: 1px solid #e5ece8;
+  border-radius: 12px;
+
+  background: #ffffff;
+
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.pt-bf-date-field:hover {
+  border-color: #c9ebd6;
+}
+
+.pt-bf-date-field:focus-within {
+  border-color: #0d7a45;
+  box-shadow: 0 0 0 4px rgba(20, 164, 92, 0.1);
+}
+
+.pt-bf-date-label-inline {
+  flex-shrink: 0;
+
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  color: #8d9a91;
+}
+
+.pt-bf-date-input-native {
+  flex: 1;
+  min-width: 0;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  font: inherit;
+  font-size: 14px;
+  color: #0b1a12;
+
+  cursor: pointer;
+
+  /* Makes the calendar icon visible + clickable in Chrome/Edge/Safari */
+  color-scheme: light;
+}
+
+.pt-bf-date-input-native::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.pt-bf-date-input-native::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.9;
+}
+/* ---------- Clear all filters (tertiary action) ---------- */
+
+.pt-bf-btn-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+
+  border: 1px dashed #d4dfd7;
+  border-radius: 12px;
+
+  background: transparent;
+  color: #6b7a71;
+
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.pt-bf-btn-clear:hover {
+  border-color: #c9822d;
+  background: #fdf6ea;
+  color: #c9822d;
+}
+
+.pt-bf-btn-clear:focus-visible {
+  outline: 2px solid #0d7a45;
+  outline-offset: 2px;
 }

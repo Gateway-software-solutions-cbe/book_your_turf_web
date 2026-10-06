@@ -280,6 +280,14 @@
   color: #4c1d95;
 }
 
+.pt-slot-action-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc2626;
+  text-align: center;
+}
+
 @keyframes pt-slot-fade {
   from {
     opacity: 0;

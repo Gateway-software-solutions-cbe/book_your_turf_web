@@ -318,6 +318,29 @@
 .tbm-cancel-btn-hero:hover:not(:disabled) { transform: translateY(-1px); }
 .tbm-cancel-btn-hero:disabled { opacity: 0.6; cursor: not-allowed; }
 
+.tbm-filters-grid .tbm-date-range {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.tbm-filters-grid .tbm-date-range > div {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.tbm-filters-grid .tbm-date-range input[type='date'] {
+  flex: 1;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .tbm-filters-grid .tbm-date-range { grid-column: span 2; }
+}
+@media (max-width: 768px) {
+  .tbm-filters-grid .tbm-date-range { grid-column: span 1; }
+}
+
 @media (max-width: 1024px) {
   .tbm-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .tbm-filters-grid { grid-template-columns: repeat(2, 1fr); }

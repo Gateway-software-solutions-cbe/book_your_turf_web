@@ -226,6 +226,47 @@
   background: #fecaca;
 }
 
+/* =========================================================
+   CANCELLATION HINT
+========================================================= */
+
+.pt-bkc-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 12px;
+
+  border-radius: 999px;
+
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pt-bkc-hint-muted {
+  background: #f6f8f7;
+  border: 1px solid #e5ece8;
+  color: #6b7a71;
+}
+
+.pt-bkc-hint-warn {
+  background: #fdf6ea;
+  border: 1px solid #efe1c3;
+  color: #c9822d;
+}
+
+@media (max-width: 640px) {
+  .pt-bkc-hint {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 @media (max-width: 640px) {
   .pt-bkc-grid {
     grid-template-columns: 1fr;

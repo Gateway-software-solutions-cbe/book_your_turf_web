@@ -172,7 +172,7 @@ const SlotManagementPage: React.FC = () => {
   const slotCount = selectedSlots.length;
 
   // ─── Primary action ─────────────────────────────────────
-  const handlePrimaryAction = () => {
+    const handlePrimaryAction = () => {
     setError("");
     if (slotCount === 0) return;
 
@@ -185,9 +185,15 @@ const SlotManagementPage: React.FC = () => {
         setError("Please enter a valid 10-digit mobile number");
         return;
       }
+
       const paid = Number(customer.paidAmount);
+
       if (customer.paidAmount === "" || Number.isNaN(paid) || paid < 0) {
         setError("Please enter the paid amount (0 if not paid)");
+        return;
+      }
+      if (paid > 1000000) {
+        setError("Paid amount cannot exceed ₹10,00,000");
         return;
       }
       if (paid > totalAmount) {
@@ -362,7 +368,13 @@ const SlotManagementPage: React.FC = () => {
     }
   };
 
-  const actionEnabled = slotCount > 0 && !loading && !blockSubmitting;
+  const paidNum = Number(customer.paidAmount) || 0;
+  const paidInvalid =
+    customer.paidAmount !== "" &&
+    (!Number.isFinite(paidNum) || paidNum < 0 || paidNum > totalAmount);
+
+  const actionEnabled =
+    slotCount > 0 && !loading && !blockSubmitting && !paidInvalid;
 
   return (
     <div className="pt-slot-page">
@@ -504,6 +516,12 @@ const SlotManagementPage: React.FC = () => {
               ₹{totalAmount.toFixed(2)}
             </span>
           </div>
+        )}
+        {paidInvalid && (
+          <p className="pt-slot-action-hint">
+            Paid amount cannot exceed the total (₹
+            {totalAmount.toFixed(2)})
+          </p>
         )}
         <button
           className="pt-slot-action-btn"

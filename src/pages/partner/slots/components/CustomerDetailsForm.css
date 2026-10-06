@@ -87,3 +87,21 @@
 .pt-cdf-overpaid {
   color: #b91c1c;
 }
+
+.pt-cdf-field--error .pt-cdf-input {
+  border-color: #dc2626;
+  background: #fef2f2;
+}
+
+.pt-cdf-field--error .pt-cdf-icon {
+  color: #dc2626;
+}
+
+.pt-cdf-error {
+  grid-column: 1 / -1;
+  margin: -4px 0 4px;
+  padding-left: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #dc2626;
+}

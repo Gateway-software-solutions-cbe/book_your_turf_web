@@ -95,7 +95,8 @@ const BookingsPage: React.FC = () => {
 
   const [search, setSearch] = useState('');
   const [debSearch, setDebSearch] = useState('');
-  const [dateFilter, setDateFilter] = useState('');
+  const [dateFrom, setDateFrom] = useState('');
+const [dateTo, setDateTo] = useState('');
   const [bookingType, setBookingType] = useState<BookingType | ''>('');
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus | ''>('');
   const [isCancelled, setIsCancelled] = useState<'' | 'true' | 'false'>('');
@@ -138,8 +139,12 @@ const BookingsPage: React.FC = () => {
       if (bookingType) params.booking_type = bookingType;
       if (paymentStatus) params.payment_status = paymentStatus;
       if (isCancelled) params.is_cancelled = isCancelled === 'true';
-      if (activeTab === 'today') params.slot_date = TODAY;
-      else if (dateFilter) params.slot_date = dateFilter;
+      if (activeTab === 'today') {
+  params.slot_date = TODAY;
+} else {
+  if (dateFrom) params.date_from = dateFrom;
+  if (dateTo) params.date_to = dateTo;
+}
 
       const data = await listBookings(params);
       setBookings(data.results ?? []);
@@ -151,7 +156,7 @@ const BookingsPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [page, pageSize, debSearch, bookingType, paymentStatus, isCancelled, activeTab, dateFilter]);
+  }, [page, pageSize, debSearch, bookingType, paymentStatus, isCancelled, activeTab, dateFrom, dateTo]);
 
   // Independent of which tab is active — both badges always reflect the
   // real totals (with the shared filters applied), not just whatever the
@@ -177,7 +182,7 @@ const BookingsPage: React.FC = () => {
 
   useEffect(() => { fetchBookings(); }, [fetchBookings]);
   useEffect(() => { fetchCounts(); }, [fetchCounts]);
-  useEffect(() => { setPage(1); }, [activeTab, bookingType, paymentStatus, isCancelled, dateFilter]);
+  useEffect(() => { setPage(1); }, [activeTab, bookingType, paymentStatus, isCancelled, dateFrom, dateTo]);
 
   // ── Auto-refresh timer ──────────────────────────────────────────────────
   useEffect(() => {
@@ -202,12 +207,13 @@ const BookingsPage: React.FC = () => {
   };
 
   const switchTab = (tab: TabType) => {
-    setActiveTab(tab);
-    setSearch('');
-    setDebSearch('');
-    setDateFilter('');
-    pushToast(tab === 'today' ? "📅 Today's bookings" : '📋 All bookings', 'info');
-  };
+  setActiveTab(tab);
+  setSearch('');
+  setDebSearch('');
+  setDateFrom('');
+  setDateTo('');
+  pushToast(tab === 'today' ? "📅 Today's bookings" : '📋 All bookings', 'info');
+};
 
   const applyFilters = async () => {
     setDebSearch(search.trim());
@@ -216,16 +222,17 @@ const BookingsPage: React.FC = () => {
   };
 
   const resetFilters = () => {
-    setSearch('');
-    setDebSearch('');
-    setDateFilter('');
-    setBookingType('');
-    setPaymentStatus('');
-    setIsCancelled('');
-    setPageSize(20);
-    setPage(1);
-    pushToast('↩️ Filters reset', 'info');
-  };
+  setSearch('');
+  setDebSearch('');
+  setDateFrom('');
+  setDateTo('');
+  setBookingType('');
+  setPaymentStatus('');
+  setIsCancelled('');
+  setPageSize(20);
+  setPage(1);
+  pushToast('↩️ Filters reset', 'info');
+};
 
   // ── Export ───────────────────────────────────────────────────────────────
   const fetchAllForExport = useCallback(async (): Promise<Booking[]> => {
@@ -237,8 +244,12 @@ const BookingsPage: React.FC = () => {
     if (bookingType) baseParams.booking_type = bookingType;
     if (paymentStatus) baseParams.payment_status = paymentStatus;
     if (isCancelled) baseParams.is_cancelled = isCancelled === 'true';
-    if (activeTab === 'today') baseParams.slot_date = TODAY;
-    else if (dateFilter) baseParams.slot_date = dateFilter;
+    if (activeTab === 'today') {
+  baseParams.slot_date = TODAY;
+} else {
+  if (dateFrom) baseParams.date_from = dateFrom;
+  if (dateTo) baseParams.date_to = dateTo;
+}
 
     while (hasMore) {
       try {
@@ -252,7 +263,7 @@ const BookingsPage: React.FC = () => {
       }
     }
     return all;
-  }, [debSearch, bookingType, paymentStatus, isCancelled, activeTab, dateFilter]);
+  }, [debSearch, bookingType, paymentStatus, isCancelled, activeTab, dateFrom, dateTo]);
 
   const handleExport = async () => {
     if (bookings.length === 0) {
@@ -395,7 +406,7 @@ const BookingsPage: React.FC = () => {
           </button>
           <button className={`tbm-tab-btn ${activeTab === 'all' ? 'active' : ''}`} onClick={() => switchTab('all')}>
             <span>📋</span><span>All Bookings</span>
-            <span className="tbm-tab-count">{allCount}</span>
+            <span className="tbm-tab-count">{totalCount}</span>
           </button>
         </div>
 
@@ -419,11 +430,25 @@ const BookingsPage: React.FC = () => {
             </div>
 
             {activeTab === 'all' && (
-              <div className="tbm-filter-group">
-                <label className="tbm-filter-label">📆 Date Filter</label>
-                <input type="date" value={dateFilter} onChange={(e) => setDateFilter(e.target.value)} />
-              </div>
-            )}
+  <div className="tbm-filter-group tbm-date-range">
+    <label className="tbm-filter-label">📆 Date Range</label>
+    <div>
+      <input
+        type="date"
+        value={dateFrom}
+        onChange={(e) => setDateFrom(e.target.value)}
+        max={dateTo || undefined}
+      />
+      <span style={{ color: 'var(--text-muted)', fontSize: 11, fontWeight: 600 }}>to</span>
+      <input
+        type="date"
+        value={dateTo}
+        onChange={(e) => setDateTo(e.target.value)}
+        min={dateFrom || undefined}
+      />
+    </div>
+  </div>
+)}
 
             <div className="tbm-filter-group">
               <label className="tbm-filter-label">📄 Per Page</label>
