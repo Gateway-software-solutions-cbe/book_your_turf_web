@@ -208,7 +208,8 @@
 .tbm-app[data-theme='dark'] .tbm-badge-partial { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 .tbm-badge-unpaid { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.2); }
 .tbm-app[data-theme='dark'] .tbm-badge-unpaid { background: rgba(239, 68, 68, 0.2); color: #f87171; }
-.tbm-badge-cancelled { background: rgba(100, 116, 139, 0.12); color: var(--text-muted); text-decoration: line-through; opacity: 0.8; }
+.tbm-badge-cancelled { background: rgba(239, 68, 68, 0.14); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.35); text-decoration: none; opacity: 1; font-weight: 800; }
+.tbm-app[data-theme='dark'] .tbm-badge-cancelled { background: rgba(239, 68, 68, 0.22); color: #f87171; border-color: rgba(239, 68, 68, 0.4); }
 .tbm-badge-purple { background: rgba(139, 92, 246, 0.15); color: var(--purple); border: 1px solid rgba(139, 92, 246, 0.3); }
 
 .tbm-user-cell { display: flex; flex-direction: column; gap: 2px; }
@@ -274,6 +275,29 @@
 .tbm-detail-value { font-size: 12px; font-weight: 600; color: var(--text-primary); }
 
 /* ===== DETAIL PAGE ===== */
+.tbm-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 9px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--card-bg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.tbm-back-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary-light);
+  background: rgba(59, 130, 246, 0.08);
+  transform: translateX(-2px);
+}
 .tbm-breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
 .tbm-breadcrumb a { color: var(--primary-light); text-decoration: none; font-weight: 600; }
 .tbm-breadcrumb a:hover { text-decoration: underline; }
