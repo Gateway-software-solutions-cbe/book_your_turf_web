@@ -169,8 +169,11 @@ export interface BookingsPagination {
 }
 
 export interface BookingsListData {
-  summary: BookingsSummary;
-  bookings: BookingsPagination;
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: PartnerBooking[];
+  summary?: BookingsSummary;
 }
 
 export interface BookingsQuery {

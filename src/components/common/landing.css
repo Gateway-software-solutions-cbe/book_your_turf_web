@@ -36,7 +36,7 @@
   display: flex;
   gap: 40px;
   width: max-content;
-  animation: byt-ticker-scroll 22s linear infinite;
+  animation: byt-ticker-scroll 40s linear infinite;
 }
 
 .byt-ticker__item {
@@ -1220,4 +1220,350 @@
   .byt-hero__title { font-size: 37px; }
   .byt-store-badge { width: calc(50% - 5px); }
   .byt-turf-card__bottom { font-size: 10px; }
+}
+
+/* =========================================================
+   LEGAL PAGES (Privacy Policy / Terms & Conditions)
+========================================================= */
+
+.byt-legal {
+  --legal-ink: #0b1a12;
+  --legal-text: #4c5b53;
+  --legal-muted: #6b7a71;
+  --legal-soft: #8d9a91;
+  --legal-faint: #b8c4bc;
+  --legal-line: #e5ece8;
+  --legal-line-soft: #eef4f0;
+  --legal-accent: #0d7a45;
+  --legal-accent-soft: #f1f8f4;
+
+  min-height: 100vh;
+  padding: 88px 24px 64px;
+
+  background:
+    radial-gradient(ellipse 900px 700px at 82% -10%, rgba(20, 164, 92, 0.06), transparent 60%),
+    radial-gradient(ellipse 800px 600px at 15% 110%, rgba(20, 164, 92, 0.04), transparent 60%),
+    linear-gradient(180deg, #fbfdfc 0%, #f4f9f6 100%);
+
+  color: var(--legal-ink);
+  font-family: inherit;
+  font-weight: 400;
+  font-size: 14.5px;
+  line-height: 1.7;
+  letter-spacing: -0.005em;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.byt-legal__inner {
+  max-width: 780px;
+  margin: 0 auto;
+}
+
+/* ---------- Back button ---------- */
+
+.byt-legal__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 26px;
+  padding: 8px 16px 8px 12px;
+
+  border: 1px solid var(--legal-line);
+  border-radius: 999px;
+
+  background: #ffffff;
+  color: var(--legal-text);
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.byt-legal__back:hover {
+  transform: translateX(-2px);
+  border-color: #c9ebd6;
+  color: var(--legal-accent);
+  box-shadow: 0 6px 16px -10px rgba(11, 26, 18, 0.18);
+}
+
+.byt-legal__back span[aria-hidden="true"] {
+  font-size: 16px;
+  line-height: 1;
+}
+
+/* ---------- Head ---------- */
+
+.byt-legal__head {
+  margin-bottom: 36px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--legal-line);
+}
+
+.byt-legal__eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+
+  color: var(--legal-accent);
+}
+
+.byt-legal__title {
+  margin: 0 0 18px;
+
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 300;
+  line-height: 1.1;
+  letter-spacing: -0.035em;
+
+  color: var(--legal-ink);
+}
+
+.byt-legal__intro {
+  margin: 0 0 12px;
+
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.75;
+
+  color: var(--legal-text);
+}
+
+.byt-legal__intro strong {
+  font-weight: 500;
+  color: var(--legal-ink);
+}
+
+/* ---------- Body sections ---------- */
+
+.byt-legal__body {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.byt-legal__section {
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--legal-line-soft);
+}
+
+.byt-legal__section:last-child {
+  padding-bottom: 0;
+  border-bottom: 0;
+}
+
+.byt-legal__section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+
+  margin: 0 0 16px;
+
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+
+  color: var(--legal-ink);
+}
+
+.byt-legal__section-num {
+  flex-shrink: 0;
+
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+
+  color: var(--legal-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.byt-legal__paragraph {
+  margin: 0 0 12px;
+  font-size: 14.5px;
+  color: var(--legal-text);
+}
+
+.byt-legal__paragraph:last-child {
+  margin-bottom: 0;
+}
+
+.byt-legal__group {
+  margin-top: 16px;
+}
+
+.byt-legal__group-heading {
+  margin: 0 0 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+
+  color: var(--legal-ink);
+}
+
+.byt-legal__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.byt-legal__list li {
+  position: relative;
+
+  padding-left: 22px;
+
+  font-size: 14.5px;
+  line-height: 1.7;
+
+  color: var(--legal-text);
+}
+
+.byt-legal__list li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 10px;
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+  background: var(--legal-accent);
+  opacity: 0.55;
+}
+
+/* ---------- Foot ---------- */
+
+.byt-legal__foot {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  margin-top: 48px;
+  padding-top: 26px;
+  border-top: 1px solid var(--legal-line);
+
+  text-align: center;
+}
+
+.byt-legal__foot-brand {
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+
+  color: var(--legal-ink);
+}
+
+.byt-legal__foot-meta {
+  font-size: 11.5px;
+  color: var(--legal-soft);
+}
+
+.byt-legal__foot-link {
+  align-self: center;
+  margin-top: 14px;
+
+  padding: 8px 18px;
+
+  border: 1px solid var(--legal-accent);
+  border-radius: 999px;
+
+  color: var(--legal-accent);
+  text-decoration: none;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  transition:
+    background 180ms ease,
+    color 180ms ease;
+}
+
+.byt-legal__foot-link:hover {
+  background: var(--legal-accent);
+  color: #ffffff;
+}
+
+/* =========================================================
+   FOOTER BOTTOM LINKS (Landing)
+========================================================= */
+
+.byt-footer__bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  flex-wrap: wrap;
+}
+
+.byt-footer__bottom-links {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  font-size: 13px;
+}
+
+.byt-footer__bottom-links a {
+  color: inherit;
+  text-decoration: none;
+
+  transition: color 160ms ease;
+}
+
+.byt-footer__bottom-links a:hover {
+  color: #3ebd7a;
+  text-decoration: underline;
+}
+
+.byt-footer__bottom-sep {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 640px) {
+  .byt-legal {
+    padding: 72px 16px 48px;
+  }
+
+  .byt-legal__title {
+    font-size: 28px;
+  }
+
+  .byt-legal__section-title {
+    font-size: 16px;
+  }
+
+  .byt-legal__intro,
+  .byt-legal__paragraph,
+  .byt-legal__list li {
+    font-size: 14px;
+  }
+
+  .byt-footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }

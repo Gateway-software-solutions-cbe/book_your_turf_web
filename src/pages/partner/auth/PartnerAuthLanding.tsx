@@ -1,6 +1,7 @@
 
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import logo from '../../../asset/cp.jpeg';
 import "./style/partnerAuth.css";
 
 const PartnerAuthLanding: React.FC = () => {
@@ -37,7 +38,7 @@ const PartnerAuthLanding: React.FC = () => {
           {/* Actual BookYourTurf logo */}
           <div className="pt-choice-logo">
             <img
-              src="/src/asset/cp.jpeg"
+              src={logo}
               alt="BookYourTurf logo"
             />
           </div>

@@ -13,6 +13,9 @@ interface Props {
   totalAmount: number;
 }
 
+const MAX_PAID = 1000000;      // 10,00,000
+const MAX_INT_DIGITS = 7;      // hard input cap — 8th digit rejected
+
 const CustomerDetailsForm: React.FC<Props> = ({
   value,
   onChange,
@@ -21,6 +24,36 @@ const CustomerDetailsForm: React.FC<Props> = ({
   const paid = Number(value.paidAmount) || 0;
   const balance = Math.max(0, totalAmount - paid);
   const overpaid = paid > totalAmount;
+
+  // Error shown below the input for the >10,00,000 case.
+  const paidAmountError =
+    value.paidAmount !== "" && !Number.isNaN(paid) && paid > MAX_PAID
+      ? `Maximum ${MAX_PAID.toLocaleString("en-IN")} only`
+      : "";
+
+  const handlePaidChange = (raw: string) => {
+    // Strip everything except digits and one decimal point.
+    let cleaned = raw.replace(/[^\d.]/g, "");
+
+    const firstDot = cleaned.indexOf(".");
+    if (firstDot !== -1) {
+      cleaned =
+        cleaned.slice(0, firstDot + 1) +
+        cleaned.slice(firstDot + 1).replace(/\./g, "");
+    }
+
+    const [intPart = "", decPart] = cleaned.split(".");
+
+    // HARD cap: 7 integer digits. 8th digit is dropped, full stop.
+    const intCapped = intPart.slice(0, MAX_INT_DIGITS);
+    const decCapped =
+      decPart !== undefined ? decPart.slice(0, 2) : undefined;
+
+    const next =
+      decCapped !== undefined ? `${intCapped}.${decCapped}` : intCapped;
+
+    onChange({ paidAmount: next });
+  };
 
   return (
     <section className="pt-form-section pt-cdf-section">
@@ -62,22 +95,35 @@ const CustomerDetailsForm: React.FC<Props> = ({
           />
         </label>
 
-        <label className="pt-cdf-field">
+        <label
+          className={`pt-cdf-field ${
+            paidAmountError ? "pt-cdf-field--error" : ""
+          }`}
+        >
           <span className="pt-cdf-icon">₹</span>
           <input
             className="pt-cdf-input"
-            type="number"
+            type="text"
             inputMode="decimal"
-            min={0}
-            step="0.01"
             placeholder="Paid Amount (₹) *"
             value={value.paidAmount}
-            onChange={(e) => onChange({ paidAmount: e.target.value })}
+            onChange={(e) => handlePaidChange(e.target.value)}
+            maxLength={10} // 7 int + dot + 2 dec
+            aria-invalid={!!paidAmountError}
+            aria-describedby={
+              paidAmountError ? "pt-cdf-paid-error" : undefined
+            }
           />
         </label>
+
+        {paidAmountError && (
+          <p id="pt-cdf-paid-error" className="pt-cdf-error" role="alert">
+            {paidAmountError}
+          </p>
+        )}
       </div>
 
-      {totalAmount > 0 && (
+      {totalAmount > 0 && !paidAmountError && (
         <div className="pt-cdf-balance">
           <span className="pt-cdf-balance-label">
             {overpaid ? "Overpaid" : "Balance"}
@@ -87,8 +133,8 @@ const CustomerDetailsForm: React.FC<Props> = ({
               overpaid
                 ? "pt-cdf-overpaid"
                 : balance > 0
-                  ? "pt-cdf-due"
-                  : "pt-cdf-paid"
+                ? "pt-cdf-due"
+                : "pt-cdf-paid"
             }`}
           >
             ₹

@@ -35,6 +35,24 @@ const PAYMENT_STATUSES: (PaymentStatus | null)[] = [
   "Pending",
 ];
 
+/**
+ * The pristine filter state. Kept in sync with the page's `emptyFilters`
+ * constant. Used by the Clear button to reset every field at once.
+ */
+const emptyFilters: BookingsFilters = {
+  search: "",
+  turfId: null,
+  bookingType: null,
+  courtNumber: null,
+  paymentStatus: null,
+  singleDay: true,
+  date: null,
+  startDate: null,
+  endDate: null,
+  showActive: true,
+  showCancelled: false,
+};
+
 const BookingsFiltersModal: React.FC<Props> = ({
   turfs,
   initialFilters,
@@ -51,7 +69,22 @@ const BookingsFiltersModal: React.FC<Props> = ({
   const courtCount = selectedTurf?.courts ?? 0;
   const courts = Array.from({ length: courtCount }, (_, i) => i + 1);
 
-  const patch = (p: Partial<BookingsFilters>) => setF((prev) => ({ ...prev, ...p }));
+  const patch = (p: Partial<BookingsFilters>) =>
+    setF((prev) => ({ ...prev, ...p }));
+
+  /**
+   * Reset every filter to the pristine state, close any open dropdowns,
+   * and immediately apply the cleared state up to the parent. That way
+   * the user doesn't have to tap Apply after Clear.
+   */
+  const handleClear = () => {
+    setF(emptyFilters);
+    setTurfOpen(false);
+    setTypeOpen(false);
+    setCourtOpen(false);
+    setStatusOpen(false);
+    onApply(emptyFilters);
+  };
 
   return (
     <div className="pt-bf-overlay" onClick={onCancel}>
@@ -87,7 +120,9 @@ const BookingsFiltersModal: React.FC<Props> = ({
             <ul className="pt-bf-menu">
               <li>
                 <button
-                  className={`pt-bf-menu-item ${f.turfId == null ? "pt-active" : ""}`}
+                  className={`pt-bf-menu-item ${
+                    f.turfId == null ? "pt-active" : ""
+                  }`}
                   onClick={() => {
                     patch({ turfId: null, courtNumber: null });
                     setTurfOpen(false);
@@ -99,7 +134,9 @@ const BookingsFiltersModal: React.FC<Props> = ({
               {turfs.map((t) => (
                 <li key={t.id}>
                   <button
-                    className={`pt-bf-menu-item ${f.turfId === t.id ? "pt-active" : ""}`}
+                    className={`pt-bf-menu-item ${
+                      f.turfId === t.id ? "pt-active" : ""
+                    }`}
                     onClick={() => {
                       patch({ turfId: t.id, courtNumber: null });
                       setTurfOpen(false);
@@ -129,7 +166,9 @@ const BookingsFiltersModal: React.FC<Props> = ({
               {BOOKING_TYPES.map((t, i) => (
                 <li key={i}>
                   <button
-                    className={`pt-bf-menu-item ${f.bookingType === t ? "pt-active" : ""}`}
+                    className={`pt-bf-menu-item ${
+                      f.bookingType === t ? "pt-active" : ""
+                    }`}
                     onClick={() => {
                       patch({ bookingType: t });
                       setTypeOpen(false);
@@ -161,7 +200,9 @@ const BookingsFiltersModal: React.FC<Props> = ({
             <ul className="pt-bf-menu">
               <li>
                 <button
-                  className={`pt-bf-menu-item ${f.courtNumber == null ? "pt-active" : ""}`}
+                  className={`pt-bf-menu-item ${
+                    f.courtNumber == null ? "pt-active" : ""
+                  }`}
                   onClick={() => {
                     patch({ courtNumber: null });
                     setCourtOpen(false);
@@ -173,7 +214,9 @@ const BookingsFiltersModal: React.FC<Props> = ({
               {courts.map((n) => (
                 <li key={n}>
                   <button
-                    className={`pt-bf-menu-item ${f.courtNumber === n ? "pt-active" : ""}`}
+                    className={`pt-bf-menu-item ${
+                      f.courtNumber === n ? "pt-active" : ""
+                    }`}
                     onClick={() => {
                       patch({ courtNumber: n });
                       setCourtOpen(false);
@@ -203,7 +246,9 @@ const BookingsFiltersModal: React.FC<Props> = ({
               {PAYMENT_STATUSES.map((s, i) => (
                 <li key={i}>
                   <button
-                    className={`pt-bf-menu-item ${f.paymentStatus === s ? "pt-active" : ""}`}
+                    className={`pt-bf-menu-item ${
+                      f.paymentStatus === s ? "pt-active" : ""
+                    }`}
                     onClick={() => {
                       patch({ paymentStatus: s });
                       setStatusOpen(false);
@@ -219,28 +264,29 @@ const BookingsFiltersModal: React.FC<Props> = ({
 
         {/* Show toggle */}
         <div className="pt-bf-show-row">
-  <span className="pt-bf-show-icon">✕</span>
-  <span className="pt-bf-show-label">Show:</span>
-  <button
-    className={`pt-bf-show-btn ${f.showActive ? "pt-active" : ""}`}
-    onClick={() => {
-      // Prevent turning off both
-      if (f.showActive && !f.showCancelled) return;
-      patch({ showActive: !f.showActive });
-    }}
-  >
-    Active
-  </button>
-  <button
-    className={`pt-bf-show-btn ${f.showCancelled ? "pt-active" : ""}`}
-    onClick={() => {
-      if (f.showCancelled && !f.showActive) return;
-      patch({ showCancelled: !f.showCancelled });
-    }}
-  >
-    Cancelled
-  </button>
-</div>
+          <span className="pt-bf-show-icon">✕</span>
+          <span className="pt-bf-show-label">Show:</span>
+          <button
+            className={`pt-bf-show-btn ${f.showActive ? "pt-active" : ""}`}
+            onClick={() => {
+              if (f.showActive && !f.showCancelled) return;
+              patch({ showActive: !f.showActive });
+            }}
+          >
+            Active
+          </button>
+          <button
+            className={`pt-bf-show-btn ${
+              f.showCancelled ? "pt-active" : ""
+            }`}
+            onClick={() => {
+              if (f.showCancelled && !f.showActive) return;
+              patch({ showCancelled: !f.showCancelled });
+            }}
+          >
+            Cancelled
+          </button>
+        </div>
 
         {/* Date mode */}
         <div className="pt-bf-date-mode">
@@ -265,52 +311,57 @@ const BookingsFiltersModal: React.FC<Props> = ({
         </div>
 
         {f.singleDay ? (
-          <label className="pt-bf-date-field">
+          <div className="pt-bf-date-field">
             <span>📅</span>
-            <span className="pt-bf-date-text">
-              {f.date ? f.date : "Select Date"}
-            </span>
             <input
               type="date"
-              className="pt-bf-date-input"
+              className="pt-bf-date-input-native"
               value={f.date ?? ""}
               onChange={(e) => patch({ date: e.target.value || null })}
             />
-          </label>
+          </div>
         ) : (
           <div className="pt-bf-date-grid">
-            <label className="pt-bf-date-field">
-              <span>📅</span>
-              <span className="pt-bf-date-text">
-                {f.startDate ?? "Start Date"}
-              </span>
+            <div className="pt-bf-date-field">
+              <span className="pt-bf-date-label-inline">From</span>
               <input
                 type="date"
-                className="pt-bf-date-input"
+                className="pt-bf-date-input-native"
                 value={f.startDate ?? ""}
+                max={f.endDate ?? undefined}
                 onChange={(e) =>
                   patch({ startDate: e.target.value || null })
                 }
               />
-            </label>
-            <label className="pt-bf-date-field">
-              <span>📅</span>
-              <span className="pt-bf-date-text">
-                {f.endDate ?? "End Date"}
-              </span>
+            </div>
+            <div className="pt-bf-date-field">
+              <span className="pt-bf-date-label-inline">To</span>
               <input
                 type="date"
-                className="pt-bf-date-input"
+                className="pt-bf-date-input-native"
                 value={f.endDate ?? ""}
+                min={f.startDate ?? undefined}
                 onChange={(e) => patch({ endDate: e.target.value || null })}
               />
-            </label>
+            </div>
           </div>
         )}
 
+        {/* Clear all — small tertiary action */}
+        <button
+          type="button"
+          className="pt-bf-btn-clear"
+          onClick={handleClear}
+        >
+          ↺ Clear all filters
+        </button>
+
         {/* Actions */}
         <div className="pt-bf-actions">
-          <button className="pt-bf-btn pt-bf-btn-cancel" onClick={onCancel}>
+          <button
+            className="pt-bf-btn pt-bf-btn-cancel"
+            onClick={onCancel}
+          >
             ✕ Cancel
           </button>
           <button

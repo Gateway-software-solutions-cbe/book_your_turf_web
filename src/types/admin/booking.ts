@@ -3,7 +3,7 @@
 // GET /api/admin/bookings/ and GET /api/admin/bookings/{id}/
 
 export type BookingType    = 'Online' | 'Offline' | 'Walk-in';
-export type PaymentStatus  = 'Pending' | 'Advance Paid' | 'Fully Paid';
+export type PaymentStatus  = 'Pending' | 'Advance Paid' | 'Partially Paid' | 'Fully Paid';
 export type PaymentMethod  = 'Razorpay' | 'Wallet' | 'Cash' | string;
 
 export interface BookingCustomer {

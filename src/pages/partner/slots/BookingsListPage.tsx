@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { partnerTurfsApi } from "../../../api/partner/turfs";
 import { partnerSlotsApi } from "../../../api/partner/slots";
 import type { PartnerTurf } from "../../../types/partner/turf";
@@ -46,15 +47,34 @@ const hasSlotOnDate = (b: PartnerBooking, iso: string): boolean =>
   b.slots.some((s) => s.date === iso);
 
 const BookingsListPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const wantsAll = searchParams.get("range") === "all";
+  const urlType = searchParams.get("type"); // "online" | "offline" | null
+  const seededType: BookingsFilters["bookingType"] =
+    urlType === "online"
+      ? "Online"
+      : urlType === "offline"
+      ? "Offline"
+      : null;
+
   const [tab, setTab] = useState<TabKey>("bookings");
 
-  // Header toggle: today ⇄ all
-  const [headerToday, setHeaderToday] = useState<boolean>(true);
+  // Header toggle: today ⇄ all.
+  // Seeded from ?range=all so the dashboard's "All Bookings" card
+  // lands on the all-time view instead of the default "Today".
+  const [headerToday, setHeaderToday] = useState<boolean>(!wantsAll);
 
   // Chip filter (mutually exclusive): today | pending | all
-  const [chipFilter, setChipFilter] = useState<QuickFilter>("today");
+  const [chipFilter, setChipFilter] = useState<QuickFilter>(
+    wantsAll ? "all" : "today"
+  );
 
-  const [filters, setFilters] = useState<BookingsFilters>(emptyFilters);
+  // Seed bookingType from the URL so Online / Offline cards on the
+  // dashboard land pre-filtered.
+  const [filters, setFilters] = useState<BookingsFilters>({
+    ...emptyFilters,
+    bookingType: seededType,
+  });
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const [turfs, setTurfs] = useState<PartnerTurf[]>([]);
@@ -63,10 +83,14 @@ const BookingsListPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [paymentBooking, setPaymentBooking] = useState<PartnerBooking | null>(null);
+  const [paymentBooking, setPaymentBooking] = useState<PartnerBooking | null>(
+    null
+  );
   const [paySubmitting, setPaySubmitting] = useState(false);
 
-  const [cancelBooking, setCancelBooking] = useState<PartnerBooking | null>(null);
+  const [cancelBooking, setCancelBooking] = useState<PartnerBooking | null>(
+    null
+  );
   const [cancelSubmitting, setCancelSubmitting] = useState(false);
 
   // ─── Load turfs once ────────────────────────────────────
@@ -81,6 +105,23 @@ const BookingsListPage: React.FC = () => {
     })();
   }, []);
 
+  // ─── Re-sync from URL when landing on the page again ───
+  // These only push the value FROM the URL INTO state. They never
+  // reset state back to "today" or "no type", so a user manually
+  // toggling after landing won't be overridden.
+  useEffect(() => {
+    if (wantsAll) {
+      setHeaderToday(false);
+      setChipFilter("all");
+    }
+  }, [wantsAll]);
+
+  useEffect(() => {
+    if (seededType) {
+      setFilters((f) => ({ ...f, bookingType: seededType }));
+    }
+  }, [seededType]);
+
   // ─── Query for the API (no date unless modal sets one) ──
   const buildQuery = useCallback((): BookingsQuery => {
     const q: BookingsQuery = { page: 1, page_size: 100 };
@@ -90,17 +131,30 @@ const BookingsListPage: React.FC = () => {
     if (filters.bookingType) q.booking_type = filters.bookingType;
     if (filters.paymentStatus) q.payment_status = filters.paymentStatus;
 
-    // Only apply dates from the filters modal — the header/chip "today"
-    // is applied client-side so it matches the mobile app's semantics.
+    // ─── Date resolution priority ──────────────────────────────────
+    // 1. Filters modal explicitly set a single day → use it.
+    // 2. Filters modal explicitly set a range → use it.
+    // 3. Header/chip "Today" is on → use today's date.
+    // 4. Otherwise (All Bookings mode) → send a wide range so the
+    //    backend returns the full history instead of its future-only
+    //    default.
     if (filters.singleDay && filters.date) {
       q.date = filters.date;
-    } else if (!filters.singleDay) {
+    } else if (!filters.singleDay && (filters.startDate || filters.endDate)) {
       if (filters.startDate) q.start_date = filters.startDate;
       if (filters.endDate) q.end_date = filters.endDate;
+    } else if (headerToday || chipFilter === "today") {
+      q.date = todayIso();
+    } else {
+      // "All Bookings" — the backend defaults to future-only when no
+      // date is sent, which is not what the user means by "All".
+      // Send an explicit wide range to include everything.
+      q.start_date = "2000-01-01";
+      q.end_date = "2099-12-31";
     }
 
     return q;
-  }, [filters]);
+  }, [filters, headerToday, chipFilter]);
 
   // ─── Load bookings (raw, then filter client-side) ───────
   const loadBookings = useCallback(async () => {
@@ -108,26 +162,20 @@ const BookingsListPage: React.FC = () => {
     setError("");
     try {
       const res = await partnerSlotsApi.listBookings(buildQuery());
-      let list = res.data?.bookings?.results || [];
+      let list = res.data?.results || [];
 
       // Filter cancelled out unless explicitly included
       list = list.filter((b) => {
-  if (b.is_cancelled) return filters.showCancelled;
-  return filters.showActive;
-});
-
-      // Client-side date filter to match mobile semantics
-      if (headerToday || chipFilter === "today") {
-        const today = todayIso();
-        list = list.filter((b) => hasSlotOnDate(b, today));
-      }
+        if (b.is_cancelled) return filters.showCancelled;
+        return filters.showActive;
+      });
 
       // Pending payment filter
       if (chipFilter === "pending") {
         list = list.filter(
           (b) =>
             b.payment_status === "Pending" ||
-            b.payment_status === "Advance Paid",
+            b.payment_status === "Advance Paid"
         );
       }
 
@@ -138,7 +186,7 @@ const BookingsListPage: React.FC = () => {
           (b) =>
             b.customer.name.toLowerCase().includes(s) ||
             b.customer.mobile.includes(s) ||
-            b.booking_id.toLowerCase().includes(s),
+            b.booking_id.toLowerCase().includes(s)
         );
       }
 
@@ -149,7 +197,14 @@ const BookingsListPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [buildQuery, filters.search, filters.showActive, filters.showCancelled, headerToday, chipFilter]);
+  }, [
+    buildQuery,
+    filters.search,
+    filters.showActive,
+    filters.showCancelled,
+    headerToday,
+    chipFilter,
+  ]);
 
   // ─── Load blocks ────────────────────────────────────────
   const loadBlocks = useCallback(async () => {
@@ -220,40 +275,40 @@ const BookingsListPage: React.FC = () => {
   };
 
   const handleRemoveBlock = async (blockId: number) => {
-  // Capture the block details before removal — the pixel needs the
-  // turf/date/time context that's on the block record.
-  const block = blocks.find((b) => b.id === blockId);
+    // Capture the block details before removal — the pixel needs the
+    // turf/date/time context that's on the block record.
+    const block = blocks.find((b) => b.id === blockId);
 
-  try {
-    await partnerSlotsApi.unblock({ block_id: blockId });
-    await loadBlocks();
+    try {
+      await partnerSlotsApi.unblock({ block_id: blockId });
+      await loadBlocks();
 
-    // ─── Meta Pixel: slot_unblocked ─────────────────────────────
-    if (block) {
-      metaSlotUnblocked({
-        turf_id: block.turf,
-        court_number: block.court_number,
-        slot_datetime: `${block.date}T${block.start_time}`,
-        block_ids: [blockId],
-      });
+      // ─── Meta Pixel: slot_unblocked ─────────────────────────────
+      if (block) {
+        metaSlotUnblocked({
+          turf_id: block.turf,
+          court_number: block.court_number,
+          slot_datetime: `${block.date}T${block.start_time}`,
+          block_ids: [blockId],
+        });
+      }
+    } catch (err: any) {
+      setError(err?.response?.data?.message || "Failed to remove block");
     }
-  } catch (err: any) {
-    setError(err?.response?.data?.message || "Failed to remove block");
-  }
-};
+  };
 
   const activeFilterCount = useMemo(() => {
-  let n = 0;
-  if (filters.turfId != null) n++;
-  if (filters.courtNumber != null) n++;
-  if (filters.bookingType) n++;
-  if (filters.paymentStatus) n++;
-  if (filters.singleDay && filters.date) n++;
-  if (!filters.singleDay && (filters.startDate || filters.endDate)) n++;
-  // Count "Show" only when it differs from default
-  if (filters.showCancelled) n++;
-  return n;
-}, [filters]);
+    let n = 0;
+    if (filters.turfId != null) n++;
+    if (filters.courtNumber != null) n++;
+    if (filters.bookingType) n++;
+    if (filters.paymentStatus) n++;
+    if (filters.singleDay && filters.date) n++;
+    if (!filters.singleDay && (filters.startDate || filters.endDate)) n++;
+    // Count "Show" only when it differs from default
+    if (filters.showCancelled) n++;
+    return n;
+  }, [filters]);
 
   return (
     <div className="pt-bk-page">
@@ -320,7 +375,9 @@ const BookingsListPage: React.FC = () => {
       {tab === "bookings" && (
         <div className="pt-bk-chips">
           <button
-            className={`pt-bk-chip ${chipFilter === "today" ? "pt-active" : ""}`}
+            className={`pt-bk-chip ${
+              chipFilter === "today" ? "pt-active" : ""
+            }`}
             onClick={() =>
               setChipFilter((c) => (c === "today" ? "all" : "today"))
             }
@@ -328,7 +385,9 @@ const BookingsListPage: React.FC = () => {
             📅 Today
           </button>
           <button
-            className={`pt-bk-chip ${chipFilter === "pending" ? "pt-active" : ""}`}
+            className={`pt-bk-chip ${
+              chipFilter === "pending" ? "pt-active" : ""
+            }`}
             onClick={() =>
               setChipFilter((c) => (c === "pending" ? "all" : "pending"))
             }
@@ -410,77 +469,79 @@ const BookingsListPage: React.FC = () => {
       )}
 
       {/* Cancel confirmation */}
-{cancelBooking && (
-  <div
-    className="pt-cxl-overlay"
-    onClick={() => !cancelSubmitting && setCancelBooking(null)}
-  >
-    <div
-      className="pt-cxl-modal"
-      onClick={(e) => e.stopPropagation()}
-    >
-      <header className="pt-cxl-header">
-        <span className="pt-cxl-header-icon">🚫</span>
-        <h3>Cancel Booking</h3>
-      </header>
-
-      <div className="pt-cxl-details">
-        <div className="pt-cxl-row">
-          <span className="pt-cxl-icon">👤</span>
-          <span className="pt-cxl-value">
-            {cancelBooking.customer.name}
-          </span>
-        </div>
-        <div className="pt-cxl-row">
-          <span className="pt-cxl-icon">🏟</span>
-          <span className="pt-cxl-value">{cancelBooking.turf_name}</span>
-        </div>
-        <div className="pt-cxl-row">
-          <span className="pt-cxl-icon">🎯</span>
-          <span className="pt-cxl-value">
-            Court {cancelBooking.court_number}
-          </span>
-        </div>
-        <div className="pt-cxl-row">
-          <span className="pt-cxl-icon">📅</span>
-          <span className="pt-cxl-value">
-            {new Date(cancelBooking.slots[0]?.date ?? "").toLocaleDateString(
-              "en-IN",
-              { day: "2-digit", month: "2-digit", year: "numeric" },
-            )}
-          </span>
-        </div>
-        <div className="pt-cxl-row">
-          <span className="pt-cxl-icon">₹</span>
-          <span className="pt-cxl-value">
-            ₹{cancelBooking.total_amount}
-          </span>
-        </div>
-      </div>
-
-      <p className="pt-cxl-question">
-        Are you sure you want to cancel this booking?
-      </p>
-
-      <div className="pt-cxl-actions">
-        <button
-          className="pt-cxl-btn pt-cxl-btn-no"
-          onClick={() => setCancelBooking(null)}
-          disabled={cancelSubmitting}
+      {cancelBooking && (
+        <div
+          className="pt-cxl-overlay"
+          onClick={() => !cancelSubmitting && setCancelBooking(null)}
         >
-          No
-        </button>
-        <button
-          className="pt-cxl-btn pt-cxl-btn-yes"
-          onClick={handleCancelBooking}
-          disabled={cancelSubmitting}
-        >
-          {cancelSubmitting ? "Cancelling..." : "Yes, Cancel"}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+          <div className="pt-cxl-modal" onClick={(e) => e.stopPropagation()}>
+            <header className="pt-cxl-header">
+              <span className="pt-cxl-header-icon">🚫</span>
+              <h3>Cancel Booking</h3>
+            </header>
+
+            <div className="pt-cxl-details">
+              <div className="pt-cxl-row">
+                <span className="pt-cxl-icon">👤</span>
+                <span className="pt-cxl-value">
+                  {cancelBooking.customer.name}
+                </span>
+              </div>
+              <div className="pt-cxl-row">
+                <span className="pt-cxl-icon">🏟</span>
+                <span className="pt-cxl-value">
+                  {cancelBooking.turf_name}
+                </span>
+              </div>
+              <div className="pt-cxl-row">
+                <span className="pt-cxl-icon">🎯</span>
+                <span className="pt-cxl-value">
+                  Court {cancelBooking.court_number}
+                </span>
+              </div>
+              <div className="pt-cxl-row">
+                <span className="pt-cxl-icon">📅</span>
+                <span className="pt-cxl-value">
+                  {new Date(
+                    cancelBooking.slots[0]?.date ?? ""
+                  ).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                  })}
+                </span>
+              </div>
+              <div className="pt-cxl-row">
+                <span className="pt-cxl-icon">₹</span>
+                <span className="pt-cxl-value">
+                  ₹{cancelBooking.total_amount}
+                </span>
+              </div>
+            </div>
+
+            <p className="pt-cxl-question">
+              Are you sure you want to cancel this booking?
+            </p>
+
+            <div className="pt-cxl-actions">
+              <button
+                className="pt-cxl-btn pt-cxl-btn-no"
+                onClick={() => setCancelBooking(null)}
+                disabled={cancelSubmitting}
+              >
+                No
+              </button>
+              <button
+                className="pt-cxl-btn pt-cxl-btn-yes"
+                onClick={handleCancelBooking}
+                disabled={cancelSubmitting}
+              >
+                {cancelSubmitting ? "Cancelling..." : "Yes, Cancel"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -25,18 +25,23 @@ const NAV_LINKS = [
 ];
 
 const CITIES = [
-  "Chennai",
-  "Madurai",
-  "Coimbatore",
-  "Bengaluru",
-  "Hyderabad",
+  "Andhra Pradesh",
+  "Gujarat",
+  "Karnataka",
+  "Kerala",
+  "Keralam",
+  "Puducherry",
+  "Tamil Nadu",
+  "Telangana",
+  "Uttar Pradesh",
+  "West Bengal",
 ];
 
 const STEPS = [
   {
     number: "01",
     title: "Find your turf",
-    body: "Search by location, sport, or time.",
+    body: "Search by location, sport, or venue.",
   },
   {
     number: "02",
@@ -51,10 +56,11 @@ const STEPS = [
 ];
 
 const STATS = [
-  { label: "Turfs listed", value: 416, suffix: "+" },
-  { label: "Cities live in", value: 5, suffix: "" },
+  { label: "Registered Sports Venues", value: 562, suffix: "+" },
+  { label: "States live in", value: 10, suffix: "" },
+  { label: "Cities live in", value: 212, suffix: "+" },
   { label: "Matches booked", value: 15400, suffix: "+" },
-  { label: "Avg. booking time", value: 45, suffix: "s" },
+  { label: "Avg. booking time", value: 45, suffix: "sec" },
 ];
 
 const CARDS = [
@@ -392,14 +398,14 @@ const Landing = () => {
               </a>
 
               <a
-                href="https://apps.apple.com/app/in/app/bookyourturf/id6756934347"
+                href="https://apps.apple.com/in/app/bookyourturf/id6756934347"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="byt-store-badge"
               >
                 <div className="byt-qr">
                   <QRCodeSVG
-                    value="https://apps.apple.com/app/in/app/bookyourturf/id6756934347"
+                    value="https://apps.apple.com/in/app/bookyourturf/id6756934347"
                     size={120}
                     level="H"
                   />
@@ -578,8 +584,8 @@ const Landing = () => {
             <div className="byt-cta-banner__actions">
               <MagneticButton
                 as="a"
-                href="/register"
-                onClick={() => navigate("/register")}
+                href="/phone-auth"
+                onClick={() => navigate("/phone-auth")}
                 className="byt-btn byt-btn--accent byt-btn--lg"
               >
                 Create your account
@@ -681,8 +687,18 @@ const Landing = () => {
 
         <div className="byt-footer__bottom">
           <span>
+            Developed by Gateway Software Solutions
+          </span>
+          <span>
             &copy; {new Date().getFullYear()} BookYourTurf. All rights reserved.
           </span>
+          <div className="byt-footer__bottom-links">
+            <Link to="/privacy">Privacy Policy</Link>
+            <span className="byt-footer__bottom-sep" aria-hidden="true">
+              ·
+            </span>
+            <Link to="/terms">Terms &amp; Conditions</Link>
+          </div>
         </div>
       </footer>
     </div>

@@ -1,0 +1,427 @@
+/* ============================================================
+   Modal shell — shared with PendingBalanceModal
+   ============================================================ */
+
+.pt-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.pt-modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.22);
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: inherit;
+  color: #1f2937;
+}
+
+.pt-modal * {
+  box-sizing: border-box;
+}
+
+.pt-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.pt-modal-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: #14532d;
+  letter-spacing: 0.2px;
+}
+
+.pt-modal-close {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #64748b;
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+
+.pt-modal-close:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.pt-auth-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+/* ============================================================
+   Tabs
+   ============================================================ */
+
+.pt-rev-tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.pt-rev-tab {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid #e2e8e4;
+  background: #f8faf9;
+  color: #475569;
+  border-radius: 10px;
+  padding: 10px 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 120ms ease, border-color 120ms ease,
+    color 120ms ease;
+}
+
+.pt-rev-tab:hover {
+  background: #eef7ee;
+  border-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.pt-rev-tab--active {
+  background: #dcf1df;
+  border-color: #4caf50;
+  color: #1b5e20;
+  font-weight: 700;
+}
+
+/* ============================================================
+   Show Calendar button + panel
+   ============================================================ */
+
+.pt-rev-calendar-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 14px;
+}
+
+.pt-rev-calendar-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25);
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.pt-rev-calendar-btn:hover {
+  background: #43a047;
+}
+
+.pt-rev-calendar-btn:active {
+  transform: translateY(1px);
+}
+
+.pt-rev-calendar-panel {
+  background: #f6f9f6;
+  border: 1px solid #e2e8e4;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pt-rev-calendar-panel label {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  gap: 6px;
+}
+
+.pt-rev-calendar-panel input[type="date"] {
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid #d8dcd9;
+  font-size: 13px;
+  background: #fff;
+  color: #1f2937;
+  font-family: inherit;
+}
+
+.pt-rev-calendar-panel input[type="date"]:focus {
+  outline: none;
+  border-color: #4caf50;
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+}
+
+.pt-rev-calendar-apply {
+  grid-column: 1 / -1;
+  background: #2e7d32;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.pt-rev-calendar-apply:hover:not(:disabled) {
+  background: #1b5e20;
+}
+
+.pt-rev-calendar-apply:disabled {
+  background: #b8c4b9;
+  cursor: not-allowed;
+}
+
+/* ============================================================
+   Range label + note
+   ============================================================ */
+
+.pt-revenue-range {
+  background: #f4f6f8;
+  color: #334155;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.pt-rev-note {
+  background: #fff7e6;
+  color: #8a5a00;
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   Hero card — Total Revenue Collected
+   ============================================================ */
+
+.pt-revenue-hero {
+  background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+  color: #fff;
+  border-radius: 14px;
+  padding: 26px 18px;
+  text-align: center;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 20px rgba(46, 125, 50, 0.22);
+}
+
+.pt-revenue-hero-label {
+  font-size: 13px;
+  opacity: 0.92;
+  letter-spacing: 0.3px;
+  margin-bottom: 8px;
+}
+
+.pt-revenue-hero-value {
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  line-height: 1.1;
+}
+
+.pt-revenue-hero-sub {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-top: 8px;
+}
+
+/* ============================================================
+   Two-column tiles — Online / Offline, Advance / Fully Paid
+   ============================================================ */
+
+.pt-revenue-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.pt-revenue-tile {
+  background: #fff;
+  border: 1px solid #eef1f4;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+
+.pt-revenue-tile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: #eef7ee;
+  margin-bottom: 2px;
+}
+
+.pt-revenue-tile-icon--online {
+  background: #e3f0fb;
+}
+.pt-revenue-tile-icon--offline {
+  background: #fdeede;
+}
+.pt-revenue-tile-icon--advance {
+  background: #f3e8fb;
+}
+.pt-revenue-tile-icon--paid {
+  background: #e2f6ee;
+}
+
+.pt-revenue-tile-label {
+  font-size: 13px;
+  color: #556;
+}
+
+.pt-revenue-tile-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.2px;
+}
+
+.pt-revenue-tile-pct {
+  font-size: 12px;
+  color: #889;
+}
+
+/* ============================================================
+   Detailed Breakdown section
+   ============================================================ */
+
+.pt-revenue-breakdown {
+  margin-top: 10px;
+  padding-top: 16px;
+  border-top: 1px solid #eef1f4;
+}
+
+.pt-revenue-breakdown h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 16px;
+  color: #0f172a;
+}
+
+.pt-breakdown-row {
+  margin-bottom: 16px;
+}
+
+.pt-breakdown-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.pt-breakdown-label {
+  color: #475569;
+}
+
+.pt-breakdown-value {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pt-breakdown-bar {
+  height: 6px;
+  background: #eef1f4;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.pt-breakdown-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 240ms ease;
+}
+
+.pt-breakdown-fill--green {
+  background: #4caf50;
+}
+.pt-breakdown-fill--blue {
+  background: #2196f3;
+}
+.pt-breakdown-fill--orange {
+  background: #ff9800;
+}
+.pt-breakdown-fill--purple {
+  background: #9c27b0;
+}
+.pt-breakdown-fill--teal {
+  background: #009688;
+}
+
+.pt-breakdown-pct {
+  text-align: right;
+  font-size: 11px;
+  color: #889;
+  margin-top: 4px;
+}
+
+/* ============================================================
+   Small screens
+   ============================================================ */
+
+@media (max-width: 480px) {
+  .pt-modal {
+    padding: 16px;
+    border-radius: 14px;
+  }
+
+  .pt-rev-tabs {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .pt-revenue-hero-value {
+    font-size: 30px;
+  }
+
+  .pt-revenue-pair {
+    grid-template-columns: 1fr;
+  }
+}
