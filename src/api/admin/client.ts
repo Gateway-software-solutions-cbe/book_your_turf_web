@@ -56,7 +56,7 @@ export const partnerTokenStorage = {
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
-  timeout: 15_000,
+  timeout: 30_000,
 });
 
 // ─── Request Interceptor — Attach Bearer Token ─────────────────────────────────

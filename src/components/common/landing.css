@@ -36,7 +36,7 @@
   display: flex;
   gap: 40px;
   width: max-content;
-  animation: byt-ticker-scroll 22s linear infinite;
+  animation: byt-ticker-scroll 40s linear infinite;
 }
 
 .byt-ticker__item {
