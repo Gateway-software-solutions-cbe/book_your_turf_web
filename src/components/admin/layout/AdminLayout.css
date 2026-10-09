@@ -1,0 +1,123 @@
+/* =====================================================
+   ADMIN LAYOUT — RESPONSIVE SHELL
+   ===================================================== */
+
+.admin-layout,
+.admin-layout *,
+.admin-layout *::before,
+.admin-layout *::after {
+  box-sizing: border-box;
+}
+
+.admin-layout {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  overflow-x: clip;
+  background: #f5f8f7;
+}
+
+/* Main content occupies the remaining viewport width */
+.admin-main {
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin-left: 0;
+  overflow-x: clip;
+  transition: margin-left 0.3s ease-in-out;
+}
+
+/* Sidebar is fixed in the existing Sidebar component.
+   Reserve its width only on desktop when it is open. */
+@media (min-width: 992px) {
+  .admin-main-sidebar-open {
+    margin-left: 260px;
+    width: calc(100% - 260px);
+    max-width: calc(100% - 260px);
+  }
+}
+
+/* Navbar */
+.admin-navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  flex-shrink: 0;
+  background: #ffffff;
+}
+
+.admin-menu-button {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  background: transparent;
+}
+
+/* Page viewport */
+.admin-page-content {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  background: #f5f8f7;
+}
+
+/* Prevent child pages from expanding the parent */
+.admin-page-inner {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0;
+}
+
+/* Ensure nested Bootstrap flex/grid items can shrink */
+.admin-page-inner > *,
+.admin-page-inner .container,
+.admin-page-inner .container-fluid,
+.admin-page-inner .row,
+.admin-page-inner [class*="col-"] {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Tablet and mobile: sidebar becomes an overlay drawer.
+   Do not reserve 260px beside the page. */
+@media (max-width: 991.98px) {
+  .admin-main,
+  .admin-main-sidebar-open {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+  }
+
+  .admin-page-inner {
+    padding: 0;
+  }
+
+  .admin-navbar {
+    padding-right: 12px !important;
+    padding-left: 12px !important;
+  }
+}
+
+/* Small phones */
+@media (max-width: 575.98px) {
+  .admin-navbar {
+    min-height: 52px;
+  }
+
+  .admin-page-content {
+    width: 100%;
+  }
+}
