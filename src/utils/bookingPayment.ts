@@ -1,7 +1,6 @@
 import type {
   Booking,
   BookingPayment,
-  PaymentStatus,
 } from '../types/admin/booking';
 
 export type DisplayPaymentStatus =
@@ -10,18 +9,31 @@ export type DisplayPaymentStatus =
   | 'Partially Paid'
   | 'Fully Paid';
 
-const normalize = (value: string | undefined | null): string =>
-  String(value ?? '').trim().toLowerCase();
+export type PaymentStage =
+  | 'advance'
+  | 'balance'
+  | 'full';
 
-const amount = (value: string | number | undefined | null): number =>
-  Number.parseFloat(String(value ?? '0')) || 0;
+const normalize = (
+  value: string | undefined | null,
+): string => String(value ?? '').trim().toLowerCase();
+
+const amount = (
+  value: string | number | undefined | null,
+): number => Number.parseFloat(String(value ?? '0')) || 0;
+
+const EPSILON = 0.01;
 
 /**
  * Uses discounted total when available.
  * Falls back to normal total amount.
  */
-export const getEffectiveBookingTotal = (booking: Booking): number => {
-  const discountedTotal = amount(booking.discounted_total_amount);
+export const getEffectiveBookingTotal = (
+  booking: Booking,
+): number => {
+  const discountedTotal = amount(
+    booking.discounted_total_amount,
+  );
 
   return discountedTotal > 0
     ? discountedTotal
@@ -34,36 +46,178 @@ export const getEffectiveBookingTotal = (booking: Booking): number => {
 export const getBookingPayments = (
   booking: Booking,
 ): BookingPayment[] => {
-  return Array.isArray(booking.payments) ? booking.payments : [];
+  return Array.isArray(booking.payments)
+    ? booking.payments
+    : [];
 };
 
 /**
- * Advance amount = payments explicitly recorded as advance.
+ * Identifies the payment method.
  *
- * If backend does not send payment.type as "advance", we fall back
- * to paid_amount when the booking is still only advance-paid.
+ * Payment method and payment stage are separate concepts.
+ */
+const isCashMethod = (
+  payment: BookingPayment,
+): boolean => {
+  const method = normalize(payment.method);
+
+  return (
+    method === 'cash' ||
+    method.includes('cash') ||
+    method.includes('venue') ||
+    method.includes('@ venue')
+  );
+};
+
+const isAppMethod = (
+  payment: BookingPayment,
+): boolean => {
+  const method = normalize(payment.method);
+
+  return (
+    method.includes('razorpay') ||
+    method.includes('wallet')
+  );
+};
+
+/**
+ * Reads an explicit advance/balance stage if the API happens
+ * to provide one. Otherwise, the stage is derived from amounts.
+ *
+ * IMPORTANT:
+ * payment.type values such as "online", "wallet", and "cash"
+ * identify payment categories, NOT advance/balance stages.
+ */
+const getExplicitPaymentStage = (
+  payment: BookingPayment,
+): PaymentStage | null => {
+  const type = normalize(payment.type);
+
+  if (
+    type.includes('advance') ||
+    type === 'advance_paid'
+  ) {
+    return 'advance';
+  }
+
+  if (
+    type.includes('balance') ||
+    type === 'balance_paid'
+  ) {
+    return 'balance';
+  }
+
+  if (
+    type.includes('full payment') ||
+    type === 'full' ||
+    type === 'fully_paid'
+  ) {
+    return 'full';
+  }
+
+  return null;
+};
+
+/**
+ * Determines the purpose of a payment for display in the timeline.
+ *
+ * Rules:
+ * - A single payment covering the entire booking is Full Payment.
+ * - The first payment below the booking total is Advance.
+ * - A subsequent payment that completes the total is Balance.
+ * - A subsequent payment that does not complete the total is
+ *   also treated as a balance/installment collection.
+ * - Explicit advance/balance information takes precedence.
+ *
+ * This function changes UI labels only; it does not modify API data.
+ */
+export const getPaymentStage = (
+  payment: BookingPayment,
+  index: number,
+  booking: Booking,
+): PaymentStage => {
+  const explicitStage = getExplicitPaymentStage(payment);
+
+  if (explicitStage) {
+    return explicitStage;
+  }
+
+  const payments = getBookingPayments(booking);
+  const total = getEffectiveBookingTotal(booking);
+  const currentAmount = amount(payment.amount);
+
+  if (total <= 0) {
+    return index === 0 ? 'advance' : 'balance';
+  }
+
+  // A single transaction that covers the total is a full payment.
+  if (
+    payments.length === 1 &&
+    currentAmount >= total - EPSILON
+  ) {
+    return 'full';
+  }
+
+  // A first transaction covering the total is also full payment,
+  // even if the API happens to contain other non-payment records.
+  if (
+    index === 0 &&
+    currentAmount >= total - EPSILON
+  ) {
+    return 'full';
+  }
+
+  // For subsequent transactions, calculate the cumulative amount
+  // recorded through the current payment.
+  const cumulativePaid = payments
+    .slice(0, index + 1)
+    .reduce(
+      (sum, item) => sum + amount(item.amount),
+      0,
+    );
+
+  if (index === 0) {
+    return 'advance';
+  }
+
+  // A subsequent transaction is a balance/installment payment.
+  // It completes the booking if the cumulative amount reaches total.
+  if (cumulativePaid >= total - EPSILON) {
+    return 'balance';
+  }
+
+  return 'balance';
+};
+
+/**
+ * Advance amount collected.
+ *
+ * Uses explicit advance-stage payments when available.
+ * Otherwise, for a booking that has only received an advance,
+ * falls back to the backend's paid_amount.
  */
 export const getAdvancePaidAmount = (
   booking: Booking,
 ): number => {
   const payments = getBookingPayments(booking);
 
-  const advanceAmount = payments
-    .filter((payment) => {
-      const type = normalize(payment.type);
+  const explicitAdvanceAmount = payments
+    .filter(
+      (payment) =>
+        getExplicitPaymentStage(payment) === 'advance',
+    )
+    .reduce(
+      (sum, payment) => sum + amount(payment.amount),
+      0,
+    );
 
-      return (
-        type.includes('advance') ||
-        type === 'advance_paid'
-      );
-    })
-    .reduce((sum, payment) => sum + amount(payment.amount), 0);
-
-  if (advanceAmount > 0) {
-    return advanceAmount;
+  if (explicitAdvanceAmount > 0) {
+    return explicitAdvanceAmount;
   }
 
-  const backendStatus = normalize(booking.payment_status);
+  const backendStatus = normalize(
+    booking.payment_status,
+  );
 
   if (
     backendStatus === 'advance paid' &&
@@ -72,70 +226,52 @@ export const getAdvancePaidAmount = (
     return amount(booking.paid_amount);
   }
 
+  // For the standard API response, the first partial payment
+  // is the advance when there are multiple recorded payments.
+  if (
+    payments.length > 0 &&
+    getPaymentStage(payments[0], 0, booking) === 'advance'
+  ) {
+    return amount(payments[0].amount);
+  }
+
   return 0;
 };
 
 /**
- * Determines whether a balance payment exists.
- *
- * If payment.type is available, we use it.
- * Otherwise, any payment after the first is considered a balance payment.
+ * Checks whether the booking contains a balance transaction.
  */
 export const hasBalancePayment = (
   booking: Booking,
 ): boolean => {
-  const payments = getBookingPayments(booking);
-
-  return payments.some((payment, index) => {
-    const type = normalize(payment.type);
-
-    return (
-      type.includes('balance') ||
-      type === 'balance_paid' ||
-      index > 0
-    );
-  });
+  return getBookingPayments(booking).some(
+    (payment, index) =>
+      getPaymentStage(payment, index, booking) === 'balance',
+  );
 };
 
 /**
- * Cash / venue balance means:
- *
- * Advance paid online first
- * +
- * remaining balance collected through Cash / @ Venue.
+ * Checks whether a balance/installment was collected in cash
+ * or at the venue.
  */
 export const hasCashBalancePayment = (
   booking: Booking,
 ): boolean => {
-  const payments = getBookingPayments(booking);
-
-  return payments.some((payment, index) => {
-    const method = normalize(payment.method);
-    const type = normalize(payment.type);
-
-    const isCash =
-      method === 'cash' ||
-      method.includes('cash') ||
-      method.includes('venue');
-
-    const isBalance =
-      type.includes('balance') ||
-      type === 'balance_paid' ||
-      index > 0;
-
-    return isCash && isBalance;
-  });
+  return getBookingPayments(booking).some(
+    (payment, index) =>
+      getPaymentStage(payment, index, booking) === 'balance' &&
+      isCashMethod(payment),
+  );
 };
 
 /**
- * Determines the UI status.
+ * Booking-level payment status.
  *
- * Rules:
- * 1. No payment -> Pending
- * 2. Balance through Razorpay / Wallet -> Fully Paid
- * 3. Balance through Cash / Venue -> Partially Paid
- * 4. Paid amount reaches total -> Fully Paid
- * 5. Only advance -> Advance Paid
+ * Existing business rule retained:
+ * - No payment -> Pending
+ * - Cash/venue balance -> Partially Paid
+ * - Fully settled through app payments -> Fully Paid
+ * - Only advance -> Advance Paid
  */
 export const getDisplayPaymentStatus = (
   booking: Booking,
@@ -148,33 +284,14 @@ export const getDisplayPaymentStatus = (
     return 'Pending';
   }
 
-  const cashBalance = hasCashBalancePayment(booking);
-
-  if (cashBalance) {
+  if (hasCashBalancePayment(booking)) {
     return 'Partially Paid';
   }
 
-  const appBalance = payments.some((payment, index) => {
-    const method = normalize(payment.method);
-    const type = normalize(payment.type);
-
-    const isAppPayment =
-      method.includes('razorpay') ||
-      method.includes('wallet');
-
-    const isBalance =
-      type.includes('balance') ||
-      type === 'balance_paid' ||
-      index > 0;
-
-    return isAppPayment && isBalance;
-  });
-
-  if (appBalance) {
-    return 'Fully Paid';
-  }
-
-  if (paid >= total && total > 0) {
+  if (
+    total > 0 &&
+    paid >= total - EPSILON
+  ) {
     return 'Fully Paid';
   }
 
@@ -186,9 +303,7 @@ export const getDisplayPaymentStatus = (
 };
 
 /**
- * Amount to show under "Fully Paid".
- *
- * Only a genuinely app-fully-paid booking gets the full total here.
+ * Amount displayed in the Fully Paid table column.
  */
 export const getFullyPaidAmount = (
   booking: Booking,
@@ -199,7 +314,10 @@ export const getFullyPaidAmount = (
 };
 
 /**
- * Amount to show under "Advance Paid".
+ * Amount displayed in the Advance Paid table column.
+ *
+ * Retains the existing convention:
+ * fully paid bookings show 0 in this column.
  */
 export const getAdvanceColumnAmount = (
   booking: Booking,
@@ -217,86 +335,85 @@ export const getAdvanceColumnAmount = (
 };
 
 /**
- * Returns a human-readable payment timeline title.
+ * Payment Timeline title.
  *
  * Examples:
  * Razorpay - Advance
+ * Razorpay - Fully Paid
  * Razorpay - Balance
  * Wallet - Advance
+ * Wallet - Fully Paid
  * Wallet - Balance
- * Balance - Cash / @ Venue
+ * Cash - Balance at Venue
  */
 export const getPaymentTimelineTitle = (
   payment: BookingPayment,
   index: number,
   booking: Booking,
 ): string => {
-  const method = String(payment.method || 'Payment');
-  const normalizedMethod = normalize(payment.method);
-  const type = normalize(payment.type);
+  const method = String(
+    payment.method || 'Payment',
+  ).trim();
 
-  const isCash =
-    normalizedMethod === 'cash' ||
-    normalizedMethod.includes('cash') ||
-    normalizedMethod.includes('venue');
+  const stage = getPaymentStage(
+    payment,
+    index,
+    booking,
+  );
 
-  const isAdvance =
-    type.includes('advance') ||
-    type === 'advance_paid' ||
-    (index === 0 && !hasBalancePayment(booking));
-
-  const isBalance =
-    type.includes('balance') ||
-    type === 'balance_paid' ||
-    index > 0;
-
-  if (isBalance) {
-    if (isCash) {
-      return 'Balance - Cash / @ Venue';
-    }
-
-    return `${method} - Balance`;
+  if (stage === 'balance') {
+    return isCashMethod(payment)
+      ? 'Cash - Balance at Venue'
+      : `${method} - Balance`;
   }
 
-  if (isAdvance) {
-    return `${method} - Advance`;
+  if (stage === 'full') {
+    return `${method} - Fully Paid`;
   }
 
-  return method;
+  return `${method} - Advance`;
 };
 
 /**
- * Status shown beside each timeline payment.
+ * Status badge displayed beside each timeline payment.
+ *
+ * A cash/venue balance retains the existing partially-paid
+ * booking business rule. Other balance transactions are fully
+ * settled when the cumulative payment reaches the booking total.
  */
 export const getPaymentTimelineStatus = (
   payment: BookingPayment,
   index: number,
   booking: Booking,
 ): DisplayPaymentStatus => {
-  const method = normalize(payment.method);
-  const type = normalize(payment.type);
+  const stage = getPaymentStage(
+    payment,
+    index,
+    booking,
+  );
 
-  const isCash =
-    method === 'cash' ||
-    method.includes('cash') ||
-    method.includes('venue');
+  if (stage === 'advance') {
+    return 'Advance Paid';
+  }
 
-  const isBalance =
-    type.includes('balance') ||
-    type === 'balance_paid' ||
-    index > 0;
+  if (stage === 'full') {
+    return 'Fully Paid';
+  }
 
-  if (isBalance && isCash) {
+  if (isCashMethod(payment)) {
     return 'Partially Paid';
   }
 
-  if (isBalance) {
-    return 'Fully Paid';
-  }
+  const cumulativePaid = getBookingPayments(booking)
+    .slice(0, index + 1)
+    .reduce(
+      (sum, item) => sum + amount(item.amount),
+      0,
+    );
 
-  if (getDisplayPaymentStatus(booking) === 'Fully Paid') {
-    return 'Fully Paid';
-  }
+  const total = getEffectiveBookingTotal(booking);
 
-  return 'Advance Paid';
+  return total > 0 && cumulativePaid >= total - EPSILON
+    ? 'Fully Paid'
+    : 'Partially Paid';
 };
