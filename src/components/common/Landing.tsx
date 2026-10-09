@@ -56,9 +56,10 @@ const STEPS = [
 ];
 
 const STATS = [
-  { label: "Registered Sports Venues", value: 562, suffix: "+" },
-  { label: "States live in", value: 10, suffix: "" },
-  { label: "Cities live in", value: 212, suffix: "+" },
+  { label: "Registered Sports Venues", value: 577, suffix: "+" },
+  { label: "States live in", value: 5, suffix: "" },
+  { label: "Upcoming States live in", value: 5, suffix: "+" },
+  { label: "Cities live in", value: 217, suffix: "+" },
   { label: "Matches booked", value: 15400, suffix: "+" },
   { label: "Avg. booking time", value: 45, suffix: "sec" },
 ];
