@@ -55,10 +55,8 @@ import {
 
 
 import {
-
-  getFullyPaidAmount,
-
-  getAdvanceColumnAmount,
+  getEffectiveBookingTotal,
+  getTotalCollectedAmount,
 
 } from "../../utils/bookingPayment";
 
@@ -68,7 +66,7 @@ import "./tbm-theme.css";
 
 
 
-type DisplayBookingStatus = "Fully Paid" | "Partially Paid" | "Cancelled";
+type DisplayBookingStatus = "Fully Paid" | "Advance Paid" | "Cancelled";
 
 
 
@@ -108,7 +106,7 @@ const getToday = (): string => {
 
 
 
-const REFRESH_SECONDS = 600; // 10 minutes
+const REFRESH_SECONDS = 3600; // 60 minutes
 
 
 
@@ -142,22 +140,6 @@ const formatSlotDate = (iso: string) =>
 
 
 
-const formatTimer = (seconds: number) => {
-
-  const m = Math.floor(seconds / 60);
-
-
-
-  const s = seconds % 60;
-
-
-
-  return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-
-};
-
-
-
 const formatBookedOn = (iso: string) => {
 
   if (!iso) return "—";
@@ -187,92 +169,6 @@ const formatBookedOn = (iso: string) => {
   });
 
 };
-
-
-
-const timeToMinutes = (time: string): number => {
-
-  const match = time
-
-
-
-    ?.trim()
-
-
-
-    .match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
-
-
-
-  if (!match) return 0;
-
-
-
-  let hours = Number(match[1]);
-
-
-
-  const minutes = Number(match[2]);
-
-
-
-  const period = match[3].toUpperCase();
-
-
-
-  if (hours === 12) {
-
-    hours = 0;
-
-  }
-
-
-
-  if (period === "PM") {
-
-    hours += 12;
-
-  }
-
-
-
-  return hours * 60 + minutes;
-
-};
-
-
-
-const getFirstBookingSlot = (booking: Booking) => {
-
-  if (!booking.slots?.length) {
-
-    return null;
-
-  }
-
-
-
-  return [...booking.slots].sort((a, b) => {
-
-    const dateCompare = a.date.localeCompare(b.date);
-
-
-
-    if (dateCompare !== 0) {
-
-      return dateCompare;
-
-    }
-
-
-
-    return timeToMinutes(a.start_time) - timeToMinutes(b.start_time);
-
-  })[0];
-
-};
-
-
 
 const sortBookingsAscending = (
 
@@ -496,38 +392,119 @@ const PaymentBadge: React.FC<{
 
 
 
-const getBookingDisplayStatus = (booking: Booking): DisplayBookingStatus => {
+const normalizePaymentValue = (value: unknown): string =>
+  String(value ?? "").trim().toLowerCase();
 
-  if (booking.is_cancelled) {
+const isAppPayment = (payment: Booking["payments"][number]): boolean => {
+  const method = normalizePaymentValue(payment.method);
+  const type = normalizePaymentValue(payment.type);
 
-    return "Cancelled";
-
-  }
-
-
-
-  const total = Number(
-
-    booking.discounted_total_amount || booking.total_amount || 0,
-
+  return (
+    method.includes("razorpay") ||
+    method.includes("wallet") ||
+    type === "online" ||
+    type === "wallet"
   );
+};
 
+const isCashPayment = (payment: Booking["payments"][number]): boolean => {
+  const method = normalizePaymentValue(payment.method);
+  const type = normalizePaymentValue(payment.type);
 
+  return (
+    method.includes("cash") ||
+    method.includes("venue") ||
+    type === "cash"
+  );
+};
 
-  const paid = Number(booking.paid_amount || 0);
+const getAppCollectedAmount = (booking: Booking): number => {
+  return (booking.payments ?? [])
+    .filter(isAppPayment)
+    .reduce(
+      (sum, payment) =>
+        sum + (Number.parseFloat(String(payment.amount ?? 0)) || 0),
+      0,
+    );
+};
 
-
-
-  if (total > 0 && paid >= total) {
-
-    return "Fully Paid";
-
+const getBookingDisplayStatus = (
+  booking: Booking,
+): DisplayBookingStatus => {
+  if (booking.is_cancelled) {
+    return "Cancelled";
   }
 
+  const total = getEffectiveBookingTotal(booking);
+  const collected = getTotalCollectedAmount(booking);
+  const payments = booking.payments ?? [];
 
+  const hasAppPayment = payments.some(isAppPayment);
+  const hasCashPayment = payments.some(isCashPayment);
 
-  return "Partially Paid";
+  // Fully settled exclusively through Razorpay / Wallet.
+  if (
+    total > 0 &&
+    collected >= total - 0.01 &&
+    hasAppPayment &&
+    !hasCashPayment
+  ) {
+    return "Fully Paid";
+  }
 
+  // Includes mixed app + cash collections and app advances
+  // that have not yet settled the entire booking.
+  return "Advance Paid";
+};
+
+const getPaymentBreakdown = (booking: Booking) => {
+  const payments = booking.payments ?? [];
+
+  const amountOf = (payment: Booking["payments"][number]) =>
+    Number.parseFloat(String(payment.amount ?? 0)) || 0;
+
+  const isAppPayment = (payment: Booking["payments"][number]) => {
+    const method = String(payment.method ?? "").toLowerCase();
+    const type = String(payment.type ?? "").toLowerCase();
+
+    return (
+      method.includes("razorpay") ||
+      method.includes("wallet") ||
+      type === "online" ||
+      type === "wallet"
+    );
+  };
+
+  const isCashPayment = (payment: Booking["payments"][number]) => {
+    const method = String(payment.method ?? "").toLowerCase();
+    const type = String(payment.type ?? "").toLowerCase();
+
+    return (
+      method.includes("cash") ||
+      method.includes("venue") ||
+      type === "cash"
+    );
+  };
+
+  const appPaid = payments
+    .filter(isAppPayment)
+    .reduce((sum, payment) => sum + amountOf(payment), 0);
+
+  const cashPaid = payments
+    .filter(isCashPayment)
+    .reduce((sum, payment) => sum + amountOf(payment), 0);
+
+  const total = getEffectiveBookingTotal(booking);
+
+  // Do not erase the payment history for cancelled bookings.
+  const outstanding = Math.max(0, total - appPaid - cashPaid);
+
+  return {
+    total,
+    appPaid,
+    cashPaid,
+    outstanding,
+  };
 };
 
 
@@ -2438,22 +2415,11 @@ setBookings(
 
 
 
-                    <th>Total</th>
-
-
-
-                    <th>Fully Paid</th>
-
-
-
-                    <th>Advance Paid</th>
-
-
-
-                    <th>Status</th>
-
-
-
+<th>Total</th>
+<th>App Paid</th>
+<th>Cash at Venue</th>
+<th>Balance Due</th>
+<th>Status</th>
                     <th>Action</th>
 
                   </tr>
@@ -2467,10 +2433,8 @@ setBookings(
                   {bookings.map((b, idx) => {
 
                     const discount = parseFloat(b.total_discount_amount || "0");
-
-
-
-                    const displayStatus = getBookingDisplayStatus(b);
+                    const breakdown = getPaymentBreakdown(b);
+const displayStatus = getBookingDisplayStatus(b);
 
 
 
@@ -2674,7 +2638,7 @@ setBookings(
 
                         <td className="tbm-amount-cell tbm-amount-total">
 
-                          {formatCurrency(b.total_amount)}
+                          {formatCurrency(breakdown.total)}
 
 
 
@@ -2706,15 +2670,18 @@ setBookings(
 
                         <td className="tbm-amount-cell tbm-amount-paid">
 
-                          {formatCurrency(getFullyPaidAmount(b))}
+                         {formatCurrency(breakdown.appPaid)}
 
                         </td>
+                        <td className="tbm-amount-cell">
+  {formatCurrency(breakdown.cashPaid)}
+</td>
 
 
 
                         <td className="tbm-amount-cell tbm-amount-pending">
 
-                          {formatCurrency(getAdvanceColumnAmount(b))}
+                          {formatCurrency(breakdown.outstanding)}
 
                         </td>
 

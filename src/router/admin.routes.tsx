@@ -44,6 +44,7 @@ const EnquiryDetailPage = lazy(
 );
 const AdminRegistrationPage = lazy(() => import("../pages/admin/AdminRegistrationPage"));
 const WelcomePage = lazy(() => import("../pages/admin/WelcomePage"));
+const AnalyticsPage = lazy(() => import("../pages/admin/AnalyticsPage"));
 
 // ─── Coming Soon Component ──────────────────────────────────────────────
 const ComingSoon: React.FC<{ title: string }> = ({ title }) => (
@@ -121,10 +122,7 @@ export const adminRoutes: RouteObject[] = [
           { path: "/admin/bookings", element: <BookingsPage /> },
           { path: "/admin/bookings/:id", element: <BookingDetailPage /> },
           { path: "/admin/transactions", element: <TransactionsPage /> },
-          {
-            path: "/admin/analytics",
-            element: <ComingSoon title="Analytics" />,
-          },
+          { path: "/admin/analytics", element: <AnalyticsPage /> },
           {
             path: "/admin/deleted-summary",
             element: <ComingSoon title="Deleted Summary" />,
