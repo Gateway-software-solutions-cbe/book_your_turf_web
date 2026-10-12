@@ -407,7 +407,7 @@ const isCancellable =
         <button
           type="button"
           className="tbm-back-btn"
-          onClick={() => navigate(-1)}
+          onClick={() => navigate("/admin/bookings")}
         >
           ← Back to Bookings
         </button>
@@ -417,7 +417,7 @@ const isCancellable =
             to="/admin/bookings"
             onClick={(e) => {
               e.preventDefault();
-              navigate(-1);
+              navigate("/admin/bookings");
             }}
           >
             📅 Bookings
