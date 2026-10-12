@@ -106,7 +106,7 @@ const getToday = (): string => {
 
 
 
-const REFRESH_SECONDS = 3600; // 60 minutes
+const REFRESH_SECONDS = 60; // 60 seconds
 
 
 
@@ -763,6 +763,38 @@ const BookingsPage: React.FC = () => {
 
 
 
+  // Browser Back from the bookings manager ends the session so users cannot
+  // navigate into stale Welcome/Landing pages while retaining authentication.
+  useEffect(() => {
+    const handleBrowserBack = () => {
+      [
+        "admin_token",
+        "admin_user",
+        "admin_sidenav",
+        "user_access_token",
+        "access_token",
+        "auth_token",
+        "user_role",
+      ].forEach((key) => localStorage.removeItem(key));
+
+      try {
+        sessionStorage.removeItem(BOOKINGS_VIEW_STATE_KEY);
+      } catch {
+        // Ignore storage failures during logout.
+      }
+
+      window.location.replace("/admin/login");
+    };
+
+    window.addEventListener("popstate", handleBrowserBack);
+
+    return () => {
+      window.removeEventListener("popstate", handleBrowserBack);
+    };
+  }, []);
+
+
+
   useEffect(() => {
 
     saveBookingsViewState({
@@ -883,7 +915,7 @@ const BookingsPage: React.FC = () => {
 
 
 
-  const fetchBookings = useCallback(async () => {
+  const fetchBookings = useCallback(async (): Promise<boolean> => {
 
     const requestId = ++requestIdRef.current;
 
@@ -981,7 +1013,7 @@ const BookingsPage: React.FC = () => {
 
       if (requestId !== requestIdRef.current) {
 
-        return;
+        return false;
 
       }
 
@@ -1012,6 +1044,8 @@ setBookings(
 
 
       hasLoadedOnceRef.current = true;
+
+      return true;
 
     } catch (err) {
 
@@ -1044,6 +1078,8 @@ setBookings(
         setError("Unable to refresh bookings. Showing the last loaded data.");
 
       }
+
+      return false;
 
     } finally {
 
@@ -1107,7 +1143,7 @@ setBookings(
 
 
 
-  const fetchCounts = useCallback(async () => {
+  const fetchCounts = useCallback(async (): Promise<boolean> => {
 
     try {
 
@@ -1175,9 +1211,13 @@ setBookings(
 
       setAllCount(allData.count ?? 0);
 
+      return true;
+
     } catch {
 
       // Keep the last known counts if a background count request fails.
+
+      return false;
 
     }
 
@@ -1201,11 +1241,11 @@ setBookings(
 
 
 
-  const refreshAllData = useCallback(async () => {
+  const refreshAllData = useCallback(async (): Promise<boolean> => {
 
     if (refreshInFlightRef.current) {
 
-      return;
+      return false;
 
     }
 
@@ -1217,7 +1257,41 @@ setBookings(
 
     try {
 
-      await Promise.all([fetchBookings(), fetchCounts()]);
+      const [bookingsRefreshed, countsRefreshed] = await Promise.all([
+
+        fetchBookings(),
+
+        fetchCounts(),
+
+      ]);
+
+
+
+      const succeeded = bookingsRefreshed && countsRefreshed;
+
+
+
+      if (succeeded) {
+
+        pushToast("Data Refreshed", "success");
+
+      } else {
+
+        pushToast("Unable to refresh all data. Please try again.", "error");
+
+      }
+
+
+
+      return succeeded;
+
+    } catch (error) {
+
+      console.error("Refresh failed:", error);
+
+      pushToast("Unable to refresh data. Please try again.", "error");
+
+      return false;
 
     } finally {
 
@@ -1225,7 +1299,26 @@ setBookings(
 
     }
 
-  }, [fetchBookings, fetchCounts]);
+  }, [fetchBookings, fetchCounts, pushToast]);
+
+
+
+  // Re-fetch if the browser restores this page from its back/forward cache.
+  // Keep this effect after refreshAllData to avoid a block-scoped use-before-declaration error.
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setCountdown(REFRESH_SECONDS);
+        void refreshAllData();
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
+  }, [refreshAllData]);
 
 
 
@@ -1243,12 +1336,6 @@ setBookings(
 
           void refreshAllData();
 
-
-
-          pushToast("⏰ Auto-refreshed (10 min)", "info");
-
-
-
           return REFRESH_SECONDS;
 
         }
@@ -1265,7 +1352,7 @@ setBookings(
 
     return () => clearInterval(timer);
 
-  }, [fetchBookings, fetchCounts, pushToast]);
+  }, [refreshAllData]);
 
 
 
@@ -1273,13 +1360,7 @@ setBookings(
 
     setCountdown(REFRESH_SECONDS);
 
-
-
     await refreshAllData();
-
-
-
-    pushToast("🔄 Data refreshed", "success");
 
   };
 
