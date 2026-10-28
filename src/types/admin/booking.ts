@@ -43,6 +43,14 @@ export interface Booking {
   partner_business: string;
   turf_name:        string;
   turf_code:        string;
+  turf_location?: {
+    address?: string;
+    district?: string;
+    state?: string;
+    pincode?: string;
+    latitude?: string;
+    longitude?: string;
+  } | string | null;
   slots:            BookingSlot[];
   total_amount:     string;
   paid_amount:      string;

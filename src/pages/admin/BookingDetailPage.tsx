@@ -669,6 +669,26 @@ const isCancellable =
                 </div>
 
                 <div className="tbm-detail-row">
+                  <span className="tbm-detail-row-label">District</span>
+                  <span className="tbm-detail-row-value">
+                    {booking.turf_location &&
+                    typeof booking.turf_location !== "string"
+                      ? booking.turf_location.district || "—"
+                      : "—"}
+                  </span>
+                </div>
+
+                <div className="tbm-detail-row">
+                  <span className="tbm-detail-row-label">State</span>
+                  <span className="tbm-detail-row-value">
+                    {booking.turf_location &&
+                    typeof booking.turf_location !== "string"
+                      ? booking.turf_location.state || "—"
+                      : "—"}
+                  </span>
+                </div>
+
+                <div className="tbm-detail-row">
                   <span className="tbm-detail-row-label">Court</span>
                   <span className="tbm-detail-row-value">
                     Court {booking.court_number}
